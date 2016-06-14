@@ -1,0 +1,10 @@
+(module info setup/infotab
+  (define name "Refactor")
+  (define blurb `("A simple refactoring tool"))
+  (define categories `(devtools))
+  (define drracket-tools '(("refactor-tool.rkt")))
+  (define drracket-tool-names (list "Simple Refactoring Tool"))
+  ;(define compile-omit-paths '("private/test.rkt"))
+  ;(define scribblings '(("no-brainer.scrbl" ())))
+  (define version "20160613")
+  )
