@@ -23,7 +23,7 @@
             (class super%
               (inherit begin-edit-sequence end-edit-sequence
                        insert delete)
-              
+
               (field [context-table #f]
                      [refactor-table #f]
                      [source #f])
@@ -35,7 +35,6 @@
               (define/private (update-source! [src #f])
                 (set! source src))
 
-              
               (define/public (refactor-callback expanded-info)
                 (printf "updating fields ...\n")
                 (cond
@@ -76,60 +75,66 @@
                         (find-surrounding-context context-table loc))
                       (when outer-context
                         (printf "found outer context ...\n")
-                        (match-define (syntax-info _ position span) outer-context)
+                        
+                        (do-edit-if outer-context
+                                    if-loc
+                                    test-loc
+                                    then-loc
+                                    else-loc))))))
 
-                        (define full-context
-                          (send this get-text (sub1 position) (sub1 (+ position span))))
-                        (define replacement
-                          (lift-if-string full-context
-                                          if-loc
-                                          test-loc
-                                          then-loc
-                                          else-loc
-                                          position))
-             
-                        (printf "full-context: ~a\n" full-context)
-                        (begin-edit-sequence)
-                        (printf "in edit sequence ...\n")
-                        (send this delete (sub1 position) (sub1 (+ position span)))
-                        (send this insert replacement (sub1 position))
-                        (end-edit-sequence))))))
+              (define/private (do-edit-if ctx-loc if-loc test-loc then-loc else-loc)
+                (match-define (list ctx-start ctx-span) (shift ctx-loc))
+                (match-define (list if-start if-span) (shift if-loc))
+                (match-define (list test-start test-span) (shift test-loc))
+                (match-define (list then-start then-span) (shift then-loc))
+                (match-define (list else-start else-span) (shift else-loc))
+                (printf "STARTING EDIT ...\n")
+                (begin-edit-sequence)
+                (define ctx-pre (copy-to-temp-text ctx-start if-start))
+                (define ctx-post (copy-to-temp-text (+ if-start if-span) (+ ctx-start ctx-span)))
+                ;; delete the post context
+                (send this delete (+ if-start if-span) (+ ctx-start ctx-span))
+                ;; put the post context after the else ....
+                (send ctx-post move/copy-to-edit
+                      this
+                      0
+                      (- (+ ctx-start ctx-span) (+ if-start if-span))
+                      (+ else-start else-span)
+                      #:try-to-move? #f)
+                ;; put the pre context before the else
+                (send ctx-pre move/copy-to-edit
+                      this
+                      0
+                      (- if-start ctx-start)
+                      else-start
+                      #:try-to-move? #f)
+                ;; put the post context after the then
+                (send ctx-post move/copy-to-edit
+                      this
+                      0
+                      (- (+ ctx-start ctx-span) (+ if-start if-span))
+                      (+ then-start then-span)
+                      #:try-to-move? #f)
+                ;; put the pre context before the then
+                (send ctx-pre move/copy-to-edit
+                      this
+                      0
+                      (- if-start ctx-start)
+                      then-start
+                      #:try-to-move? #f)
+                ;; delete the pre context
+                (send this delete ctx-start if-start)
+                (end-edit-sequence))
 
-              (define/private (lift-if-string str if-loc test-loc then-loc else-loc offset)
-                (printf "str: ~a\nif-loc: ~a\ntest: ~a\nthen: ~a\nelse:~a\noffset:~a\n"
-                         str if-loc test-loc then-loc else-loc offset)
-                (match-define (list if-start if-span) (shift if-loc offset))
-                (match-define (list test-start test-span) (shift test-loc offset))
-                (match-define (list then-start then-span) (shift then-loc offset))
-                (match-define (list else-start else-span) (shift else-loc offset))
+              (define/private (copy-to-temp-text start end)
+                (define temp (new (text:basic-mixin (editor:basic-mixin text%))))
+                (send this move/copy-to-edit temp start end 0 #:try-to-move? #f)
+                temp)
 
-                (define (fill-context s)
-                  (define pre (substring str 0 if-start))
-                  (define post (substring str (+ if-start if-span)))
-                  (string-append pre s post))
-
-                (string-append
-                 (substring str if-start then-start)
-                 (fill-context (substring str then-start (+ then-start then-span)))
-                 (substring str (+ then-start then-span) else-start)
-                 (fill-context (substring str else-start (+ else-start else-span)))
-                 (substring str (+ else-start else-span) (+ if-start if-span))))
-
-#|
-"(+ 1 (if x 2 3))"
-5 10
-9 1
-11 1
-13 1
-
-|#
-                
-                
-              (define/private (shift loc offset)
+              (define/private (shift loc)
                 (match-define (syntax-info _ pos span) loc)
-                (list (- pos offset) span))
+                (list (sub1 pos) span))
 
-                      
               (super-new))))
         
         
