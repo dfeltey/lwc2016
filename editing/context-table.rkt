@@ -132,6 +132,7 @@
       [(let-values ([(id ...) expr] ...) body ...)
        (add-sub-exprs #'(expr ...) loc)
        (for ([body (in-syntax #'(body ...))])
+         (update-context-map (syntax-loc body))
          (loop body))]
       [(begin top-level-form ...)
        (add-sub-exprs #'(top-level-form ...) loc)]
