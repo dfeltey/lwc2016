@@ -24,9 +24,9 @@
               (inherit begin-edit-sequence end-edit-sequence
                        insert delete)
 
-              (field [context-table #f]
-                     [refactor-table #f]
-                     [source #f])
+              (define context-table #f)
+              (define refactor-table #f)
+              (define source #f)
 
               (define/private (update-context-table! [table #f])
                 (set! context-table table))
@@ -50,11 +50,19 @@
                    (update-source!)]))
 
               (define/public (refactor-build-popup-menu menu pos text)
-                (when (and context-table refactor-table)
+                (define refactor-menu-item
                   (make-object menu-item%
-                    "Lift if expression" menu
-                    (λ (item evt) (do-lift-if pos)))
-                  (void)))
+                        "Lift if expression" menu
+                        (λ (item evt) (do-lift-if pos))))
+                (send refactor-menu-item enable #f)
+                (when (and context-table refactor-table)
+                  (printf "build menu pos is ~a\n" pos)
+                  (when (and pos source refactor-table )
+                    (define partial-info (syntax-info source pos #f))
+                    (define refactor-info (hash-ref refactor-table partial-info #f))
+                    (when (and refactor-info (cdr refactor-info))
+                      (send refactor-menu-item enable #t)
+                      (void)))))
 
               (define/private (do-lift-if pos)
                 (printf "lifting if ...\n")
