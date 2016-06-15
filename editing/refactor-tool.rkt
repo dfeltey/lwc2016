@@ -70,6 +70,7 @@
                 (when (and context-table refactor-table)
                   (printf "tables non-false ...\n")
                   (printf "refactor-table: ~a\n" refactor-table)
+                  (printf "\ncontect-table: ~a\n" context-table)
                   (define partial-info (syntax-info source pos #f))
                   (printf "partial-info is ~a\n" partial-info)
                   (define refactor-info (hash-ref refactor-table partial-info #f))
@@ -160,6 +161,4 @@
          'handle-expansion
          (λ (text expanded-info)
            (printf "calling refactor-callback after expansion returns ...\n")
-           (send text refactor-callback expanded-info)))
-        
-        ))
+           (send text refactor-callback expanded-info)))))
