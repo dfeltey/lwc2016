@@ -12,7 +12,8 @@
      (add-refactor-property
       (quasisyntax/loc stx
         (if test then else))
-      (list (syntax-loc stx)
+      (list 'racket
+            (syntax-loc stx)
             (syntax-loc #'test)
             (syntax-loc #'then)
             (syntax-loc #'else)))]))

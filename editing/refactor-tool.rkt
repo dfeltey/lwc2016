@@ -36,11 +36,9 @@
                 (set! source src))
 
               (define/public (refactor-callback expanded-info)
-                (printf "updating fields ...\n")
                 (cond
                   [expanded-info
                    (match-define (list source context-table refactor-table) expanded-info)
-                   (printf "source is ~a\n" source)
                    (update-context-table! context-table)
                    (update-refactor-table! refactor-table)
                    (update-source! source)]
@@ -54,46 +52,90 @@
                   (make-object menu%
                     "Refactor"
                     menu))
-                (new menu-item%
-                     [label "Lift if expression"]
-                     [parent refactor-menu]
-                     [callback (λ (item evt) (do-lift-if pos))])
                 (send refactor-menu enable #f)
-                (when (and context-table refactor-table)
-                  (printf "build menu pos is ~a\n" pos)
-                  (when (and pos source refactor-table )
-                    (define partial-info (syntax-info source pos #f))
-                    (define refactor-info (hash-ref refactor-table partial-info #f))
-                    (when (and refactor-info (cdr refactor-info))
-                      (send refactor-menu enable #t)
-                      (void)))))
+                (when (lift-refactoring-available? pos)
+                  (new menu-item%
+                       [label "Lift if expression"]
+                       [parent refactor-menu]
+                       [callback (λ (item evt) (do-lift-if pos))])
+                  (send refactor-menu enable #t))
+                (when (swap-then-else-refactoring-available? pos)
+                  (new menu-item%
+                       [label "Swap then/else branches"]
+                       [parent refactor-menu]
+                       [callback (λ (item evt) (do-swap-then-else pos))])
+                  (send refactor-menu enable #t)))
+
+              (define/private (get-raw-refactor-info pos)
+                (and source
+                     refactor-table
+                     (hash-ref refactor-table (syntax-info source pos #f) #f)))
+
+              (define/private (lift-refactoring-available? pos)
+                (cond
+                  [(get-raw-refactor-info pos)
+                   =>
+                   (λ (refactor-info)
+                     (match-define (cons span refactor-prop) refactor-info)
+                     (and refactor-prop context-table
+                          (find-surrounding-context context-table (syntax-info source pos span))))]
+                  [else #f]))
+
+              (define/private (swap-then-else-refactoring-available? pos)
+                (cond
+                  [(get-raw-refactor-info pos) => cdr]
+                  [else #f]))
 
               (define/private (do-lift-if pos)
-                (printf "lifting if ...\n")
-                (printf "pos is ~a\n" pos)
-                (when (and context-table refactor-table)
-                  (printf "tables non-false ...\n")
-                  (printf "refactor-table: ~a\n" refactor-table)
-                  (printf "\ncontect-table: ~a\n" context-table)
-                  (define partial-info (syntax-info source pos #f))
-                  (printf "partial-info is ~a\n" partial-info)
-                  (define refactor-info (hash-ref refactor-table partial-info #f))
+                (when context-table
+                  (define refactor-info (get-raw-refactor-info pos))
                   (when refactor-info
-                    (printf "found refactor info ...\n")
                     (match-define (cons span refactor-prop) refactor-info)
                     (when refactor-prop
-                      (match-define (list if-loc test-loc then-loc else-loc) refactor-prop)
+                      (match-define (list lang if-loc test-loc then-loc else-loc) refactor-prop)
                       (define loc (syntax-info source pos span))
                       (define outer-context
                         (find-surrounding-context context-table loc))
                       (when outer-context
-                        (printf "found outer context ...\n")
-                        
                         (do-edit-if outer-context
                                     if-loc
                                     test-loc
                                     then-loc
                                     else-loc))))))
+
+              (define/private (do-swap-then-else pos)
+                (define refactor-info (get-raw-refactor-info pos))
+                (when refactor-info
+                  (match-define (cons span refactor-prop) refactor-info)
+                  (when refactor-prop
+                    (match-define (list lang if-loc test-loc then-loc else-loc) refactor-prop)
+                    (define negate-id (get-negate-id lang))
+                    (match-define (list test-start test-span) (shift test-loc))
+                    (match-define (list then-start then-span) (shift then-loc))
+                    (match-define (list else-start else-span) (shift else-loc))
+                    (begin-edit-sequence)
+                    (define then-text (copy-to-temp-text then-start (+ then-start then-span)))
+                    (define else-text (copy-to-temp-text else-start (+ else-start else-span)))
+                    (send this delete else-start (+ else-start else-span))
+                    (send then-text move/copy-to-edit
+                          this
+                          0
+                          then-span
+                          else-start
+                          #:try-to-move? #f)
+                    (send this delete then-start (+ then-start then-span))
+                    (send else-text move/copy-to-edit
+                          this
+                          0
+                          else-span
+                          then-start
+                          #:try-to-move? #f)
+                    ;; SHOULD FIX THE CONDITION HERE!!!
+                    (end-edit-sequence)
+                    (void))))
+
+              (define/private (get-negate-id lang)
+                "not")
 
               (define/private (do-edit-if ctx-loc if-loc test-loc then-loc else-loc)
                 (match-define (list ctx-start ctx-span) (shift ctx-loc))
@@ -101,7 +143,7 @@
                 (match-define (list test-start test-span) (shift test-loc))
                 (match-define (list then-start then-span) (shift then-loc))
                 (match-define (list else-start else-span) (shift else-loc))
-                (printf "STARTING EDIT ...\n")
+
                 (begin-edit-sequence)
                 (define ctx-pre (copy-to-temp-text ctx-start if-start))
                 (define ctx-post (copy-to-temp-text (+ if-start if-span) (+ ctx-start ctx-span)))
@@ -177,5 +219,4 @@
          context-table.rkt
          'handle-expansion
          (λ (text expanded-info)
-           (printf "calling refactor-callback after expansion returns ...\n")
            (send text refactor-callback expanded-info)))))

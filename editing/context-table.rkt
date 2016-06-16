@@ -62,10 +62,20 @@
       (value? expr)))
   
   (define (loop [stx stx])
-    (hash-set! refactor-info
-               (partial-syntax-loc stx)
-               (cons (syntax-span stx) (get-refactor-property stx)))
+    (hash-update! refactor-info
+                  (partial-syntax-loc stx)
+                  (λ (old)
+                    (define new-prop (get-refactor-property stx))
+                    (define new-span (syntax-span stx))
+                    (cond
+                      [old
+                       (match-define (cons old-span old-prop) old)
+                       ;; TODO: handle span differences here ...
+                       (cons old-span (and (equal? old-prop new-prop) old-prop))]
+                      [else (cons new-span new-prop)]))
+                  #f)
     (define loc (and (not (current-context-quoted?)) (syntax-loc stx)))
+    (printf "START stx: ~a\n" stx)
     (syntax-parse stx
       #:literal-sets (kernel-literals)
       [(#%expression expr)
@@ -117,10 +127,11 @@
        (update-context-map (syntax-loc #'expr) loc)
        (loop #'expr)]
       [(quote datum)
+       (printf "datum: ~a\n" #'datum)
        (update-context-map (syntax-loc #'datum))
        (parameterize ([current-context-quoted? #t])
          (loop #'datum))]
-      [(quote-synax datum)
+      [(quote-syntax datum)
        (update-context-map (syntax-loc #'datum))
        (parameterize ([current-context-quoted? #t])
          (loop #'datum))]
@@ -146,7 +157,8 @@
        (add-sub-exprs #'(expr ...) loc)]
       [(any ...)
        (for ([any (in-syntax #'(any ...))])
-         (update-context-map (syntax-loc any) loc))]
+         (update-context-map (syntax-loc any) loc)
+         (loop any))]
       [_ (void)]))
   (loop)
   (values
@@ -158,11 +170,12 @@
 ;; encompassing context
 ;; assumes that loc has the original source
 (define (find-surrounding-context ctx-map loc)
-  (printf "in find surrounding, loc is ~a\n" loc)
   (match-define (syntax-info source pos span) loc)
-  (printf "match define here was ok ...\n")
   (let loop ([maybe-parent (hash-ref ctx-map loc #f)]
-             [current loc])
+             ;; initialize current to #f so that when there is no
+             ;; containing context, the option for lifting an if expression
+             ;; will be unavailable
+             [current #f])
     (define parent (and maybe-parent (set->list maybe-parent)))
     (cond
       [(and parent (= 1 (length parent)))
@@ -186,12 +199,10 @@
 
 
 (define (handle-expansion stx path source cust)
-  (printf "expansion handler called ...\n")
   (cond
     [(syntax? stx)
      (define-values (ctx-table rf-table)
        (build-context-table stx))
-     (printf "returning non-false data ...\n")
      (list source ctx-table rf-table)]
     [else #f]))
 
