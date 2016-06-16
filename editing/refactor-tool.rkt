@@ -50,18 +50,22 @@
                    (update-source!)]))
 
               (define/public (refactor-build-popup-menu menu pos text)
-                (define refactor-menu-item
-                  (make-object menu-item%
-                        "Lift if expression" menu
-                        (λ (item evt) (do-lift-if pos))))
-                (send refactor-menu-item enable #f)
+                (define refactor-menu
+                  (make-object menu%
+                    "Refactor"
+                    menu))
+                (new menu-item%
+                     [label "Lift if expression"]
+                     [parent refactor-menu]
+                     [callback (λ (item evt) (do-lift-if pos))])
+                (send refactor-menu enable #f)
                 (when (and context-table refactor-table)
                   (printf "build menu pos is ~a\n" pos)
                   (when (and pos source refactor-table )
                     (define partial-info (syntax-info source pos #f))
                     (define refactor-info (hash-ref refactor-table partial-info #f))
                     (when (and refactor-info (cdr refactor-info))
-                      (send refactor-menu-item enable #t)
+                      (send refactor-menu enable #t)
                       (void)))))
 
               (define/private (do-lift-if pos)
