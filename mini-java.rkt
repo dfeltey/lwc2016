@@ -1,6 +1,8 @@
 #lang racket
 
-(require (for-syntax (except-in syntax/parse boolean))
+(require (for-syntax (except-in syntax/parse boolean)
+                     "editing/property.rkt"
+                     "editing/syntax-info.rkt")
          (prefix-in r: racket))
 
 (provide (all-defined-out)
@@ -64,7 +66,13 @@
   (pattern {s:statement ...}
     #:with compiled #`(begin s.compiled ...))
   (pattern (if (tst:expression) thn:statement else els:statement)
-    #:with compiled #`(r:if tst.compiled thn.compiled els.compiled))
+    #:with compiled (add-refactor-property
+                     (syntax/loc this-syntax (r:if tst.compiled thn.compiled els.compiled))
+                     (list 'mini-java
+                            (syntax-loc this-syntax)
+                            (syntax-loc #'tst)
+                            (syntax-loc #'thn)
+                            (syntax-loc #'els))))
   (pattern (while (tst:expression) body:statement)
     #:with compiled #`(let loop ()
                         (when tst.compiled

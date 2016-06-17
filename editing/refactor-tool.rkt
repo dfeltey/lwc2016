@@ -131,11 +131,15 @@
                           then-start
                           #:try-to-move? #f)
                     ;; SHOULD FIX THE CONDITION HERE!!!
+                    (send this insert ")" (+ test-start test-span))
+                    (send this insert (string-append "(" negate-id " ") test-start)
                     (end-edit-sequence)
                     (void))))
 
               (define/private (get-negate-id lang)
-                "not")
+                (case lang
+                  [(racket) "not"]
+                  [(mini-java) "!"]))
 
               (define/private (do-edit-if ctx-loc if-loc test-loc then-loc else-loc)
                 (match-define (list ctx-start ctx-span) (shift ctx-loc))

@@ -62,6 +62,7 @@
       (value? expr)))
   
   (define (loop [stx stx])
+    ;; TODO: this may be too conservative in some cases
     (hash-update! refactor-info
                   (partial-syntax-loc stx)
                   (λ (old)
@@ -75,7 +76,6 @@
                       [else (cons new-span new-prop)]))
                   #f)
     (define loc (and (not (current-context-quoted?)) (syntax-loc stx)))
-    (printf "START stx: ~a\n" stx)
     (syntax-parse stx
       #:literal-sets (kernel-literals)
       [(#%expression expr)
@@ -127,7 +127,6 @@
        (update-context-map (syntax-loc #'expr) loc)
        (loop #'expr)]
       [(quote datum)
-       (printf "datum: ~a\n" #'datum)
        (update-context-map (syntax-loc #'datum))
        (parameterize ([current-context-quoted? #t])
          (loop #'datum))]
@@ -184,8 +183,9 @@
            (loop (hash-ref ctx-map (first parent) #f) (first parent))
            (loop (hash-ref ctx-map (first parent) #f) current))]
       [parent
-       ;(printf "ctx-map:\n~a\n" ctx-map)
-       ;(error "TODO: what happens when it's in multiple contexts ...")
+       ;; TODO: This may be overly conservarive, but I'm not sure what
+       ;; the best thing to do is right now, so just disallow any refactorings
+       ;; in this situation.
        #f]
       [else current])))
 
