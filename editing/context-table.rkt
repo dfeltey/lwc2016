@@ -186,7 +186,8 @@
        ;; TODO: This may be overly conservarive, but I'm not sure what
        ;; the best thing to do is right now, so just disallow any refactorings
        ;; in this situation.
-       #f]
+       ;; Returning current, returns the last largest containing context
+       current]
       [else current])))
 
 (define (contains p-loc loc)

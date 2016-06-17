@@ -32,3 +32,53 @@
       1
       2))
 
+(define-syntax-rule (foo x) x)
+(let ([x 3]) (+ (if (foo x) (+ x 3) 4) 1))
+
+;; can't refactor because the if is duplicated
+;; and one of the positions is not an E
+(define-syntax-rule (double e)
+  (+ e e))
+(let ([x #t])
+  (+
+   (double (if x (begin (set! x #f) 1) 2))
+   3))
+
+
+
+(define-syntax-rule (L x)
+  (λ () (+ x 1)))
+(define-syntax-rule (B2 y)
+  (begin (L y) (L y)))
+
+(let ([z #t])
+  (B2 (+ 4 (if z 2 3) 5)))
+
+(define-syntax-rule (weird2 x)
+  (begin (λ () (+ x 1)) (+ x 1)))
+(let ([x #f])
+  (weird2 (+ 2 (if x 1 2))))
+
+(define-syntax-rule (weird3 x)
+  (λ () (+ x 1)))
+(let ([x #f])
+  (weird3 (+ 2 (if x 1 2))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

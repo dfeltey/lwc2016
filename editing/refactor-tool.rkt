@@ -130,7 +130,6 @@
                           else-span
                           then-start
                           #:try-to-move? #f)
-                    ;; SHOULD FIX THE CONDITION HERE!!!
                     (send this insert ")" (+ test-start test-span))
                     (send this insert (string-append "(" negate-id " ") test-start)
                     (end-edit-sequence)
