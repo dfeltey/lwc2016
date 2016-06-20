@@ -116,13 +116,6 @@
        (loop #'test)
        (loop #'then)
        (loop #'else)]   
-      [(letrec-values ([(id ...) expr] ...) body ...)
-       (for ([expr (in-syntax #'(expr ...))])
-         (update-context-map (syntax-loc expr))
-         (loop expr))
-       (for ([body (in-syntax #'(body ...))])
-         (update-context-map (syntax-loc body))
-         (loop body))]
       [(set! id expr)
        (update-context-map (syntax-loc #'expr) loc)
        (loop #'expr)]
@@ -140,6 +133,11 @@
       ;; All of the following forms must be treated specially as at most one subexpression
       ;; within them is in an evaluation context
       [(let-values ([(id ...) expr] ...) body ...)
+       (add-sub-exprs #'(expr ...) loc)
+       (for ([body (in-syntax #'(body ...))])
+         (update-context-map (syntax-loc body))
+         (loop body))]
+      [(letrec-values ([(id ...) expr] ...) body ...)
        (add-sub-exprs #'(expr ...) loc)
        (for ([body (in-syntax #'(body ...))])
          (update-context-map (syntax-loc body))
