@@ -19,9 +19,8 @@
         (define (phase2) (void))
 
         (define make-refactor-text%
-          (λ (super%)
-            (class super%
-              (inherit begin-edit-sequence end-edit-sequence
+          (mixin (text:basic<%> racket:text<%>) ()
+            (inherit begin-edit-sequence end-edit-sequence
                        insert delete)
 
               (define context-table #f)
@@ -199,7 +198,7 @@
                 (define pos (unbox pos-box))
                 (do-lift-if pos))
 
-              (super-new))))
+              (super-new)))
 
         (define (add-refactor-keybindings keymap)
           (send keymap add-function
