@@ -5,6 +5,9 @@
 (let ([x #t])
   (+ 1 (if x 2 3)))
 
+
+;; The tool should probably look at disappeared bindings
+;; to decide when lets are safe to lift out of
 (+ (let-syntax ([x (λ (stx) #'#t)])
      (if x
          1
@@ -63,6 +66,24 @@
   (λ () (+ x 1)))
 (let ([x #f])
   (weird3 (+ 2 (if x 1 2))))
+
+(let ([x #t])
+  (with-continuation-mark (if x 1 2) 3 4))
+(let ([x #t])
+  (with-continuation-mark 1 (if x 2 3) 4))
+(let ([x #t])
+  (with-continuation-mark 1 2 (if x 3 4)))
+
+(let ([x #t])
+  (with-continuation-mark 3 (+ 2 2) (if x 1 2)))
+
+
+(let ([x #t])
+  (let ([y (if x 1 2)]
+        [z 3])
+    (+ y z)))
+
+  
 
 
 
