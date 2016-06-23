@@ -1,4 +1,4 @@
-#lang racket
+#lang 2d racket
 
 (require (for-syntax (except-in syntax/parse boolean)
                      racket/stxparam-exptime
@@ -9,6 +9,7 @@
 
 (provide (all-defined-out)
          (rename-out [module-begin #%module-begin])
+         (rename-out [require extend])
          #%datum)
 
 (define-syntax-rule (define-literals (lit ...))
@@ -49,11 +50,14 @@
   #:attributes (compiled name)
   (pattern (public ret-t:type name:id (param:param-group ...)
                    {var:var-declaration ...
-                    body:statement ...
-                    return ret:expression})
-    #:with compiled #`(define-method (name param.name ...)
-                        var.compiled ...
-                        body.compiled ... ret.compiled)))
+                                        body:statement ...
+                                        return ret:expression})
+           #:with compiled #`(define-method (name param.name ...)
+                               var.compiled ...
+                               body.compiled ...
+                               #,@(if #'ret
+                                      #'(ret.compiled)
+                                      #'()))))
 (define-splicing-syntax-class param-group
   #:attributes (name)
   (pattern (~seq t:type name:id)))
@@ -67,7 +71,10 @@
 (define-syntax-class statement
   #:literals (if else while System.out.println =)
   (pattern {s:statement ...}
-    #:with compiled #`(begin s.compiled ...))
+           #:with compiled
+           (if (null? (syntax->list #'(s ...)))
+               #'(r:void)
+               #`(begin s.compiled ...)))
   (pattern (if (tst:expression) thn:statement else els:statement)
     #:with compiled (add-refactor-property
                      (syntax/loc this-syntax (r:if tst.compiled thn.compiled els.compiled))
@@ -101,6 +108,7 @@
 ;; (! <arg:expression>)
 ;; <var:identifier>
 ;; <n:exact-integer>
+;; <str:str>
 (define-syntax-class expression
   #:literals (length true false new int ! this super)
   (pattern (lhs:expression op:binop rhs:expression)
@@ -128,7 +136,9 @@
   (pattern var:id
     #:with compiled #'var)
   (pattern n:exact-integer
-    #:with compiled #'n))
+           #:with compiled #'n)
+  (pattern v:str
+    #:with compiled #'v))
 
 (define-syntax-class binop
   #:literals (&& < + - *)
@@ -192,3 +202,5 @@
                    var.compiled ...
                    meth.compiled ...
                    (super-new))))]))
+
+
