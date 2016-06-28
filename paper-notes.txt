@@ -1,0 +1,132 @@
+Problems Solved:
+
+1. Notation: Tabular Notation (2d syntax for state machines in mini-java)
+2. Evolution and Reuse: Beyond-Grammar Restrictions (adding super to mini-jave with syntax parameters)
+3. Editing: Restructuring (swap if branches refactoring)
+
+
+Assumptions:
+	Are there any assumptions or prerequisites relevant to the implementation of the solution?
+	
+	1. Use of Racket's 2d-syntax ???
+	
+	2. Syntax parameters supported by Racket ???
+	
+	3. The object language must provide the information needed to support the restructuring or refactoring.
+	   This is fine for racket, and our implementation of MiniJava because we have control over the language
+	   implementations.
+
+Implementation:
+	What are the important building blocks for defining the solution?
+	What does it take to implement the solution to the problem?
+	
+	1. 2d syntax
+	
+	2. syntax parameters
+	
+	3. The refactoring tool is implemented as a DrRacket tool that plugs in to the the DrRacket expansion handler.
+	   Must be able to extract all necessary information from fully expanded code whether the object language
+	   is Racket or MiniJava.
+
+Variants:
+	Are there any interesting and insightful variants of the implementation?
+	What small change(s) to the challenge would make a big difference in the implementation strategy or effort?
+	
+	1. ???
+	
+	2. ???
+	
+	3. We have only implemented a refactoring that swaps the branches of an if statement, which works because MiniJava
+	   only has if statements that must be paired with an else, if MiniJava also had stand-alone if statements the
+	   tool would have to change to accommodate this. Also it is straightforward to implement a similar refactoring
+	   for other MiniJava or Racket expressions.
+
+Usability:
+	What is the resulting user experience?
+	Is it convenient to use? Is it similar to other kinds of notations?
+	Does it feel ’foreign’ to experienced users of the particular editor?
+	
+	1. Users can easily write 2d state machines in the s-expression based MiniJava implementation.
+	   DrRacket keybindings can help with the construction of the state machines.
+
+	2. Calls to super methods are allowed in non-static methods which are present in the superclass.
+	   Otherwise their use is disallowed by this solution to  the benchmark problem.
+	
+	3. The refactoring appears as a right-click menu option offering the refactoring option when it is
+	   available depending upon the location of the mouse-click.
+	
+Impact:
+	Which artifacts have to be changed to make the solution work?
+	Are changes required to (conceptually) unrelated artifacts?
+	How modular is the solution?
+	
+	1. The 2d state machine implementation is somewhat independent of the MiniJava language implementation, but is
+	   somewhat coupled with the syntax of s-expression based MiniJava.
+	
+	2. Requires changes to the MiniJava implementation to extend the language with a new keyword.
+	
+	3. The refactoring is implemented (on parenthesized MiniJava and Racket) by adding a syntax property
+	   to if expressions/statements that provide information about the shape of if in the language. In MiniJava
+	   this is part of the language implementation, whereas in Racket we supply a special definition of if that
+	   attaches the syntax property.
+	
+Composability:
+	To what degree does the solution support composition with solutions to other benchmark problems,
+	or with other instances of the same problem (e.g., same challenge problem, but different language feature)?
+	
+	1. 2d-syntax should compose easily with other solutions in s-expression syntax, some work is required to
+	   compose it with a non s-expression based language.
+
+	2. For languages compiling down to Racket as our implementation of MiniJava does, syntax-parameters should
+	   easily compose with other restrictions implemented this way as well as solutions to other benchmark problems
+	   that extend or restrict MiniJava in various ways.
+	   
+	3. The refactoring tool is completely independent of the solution to the other benchmark problems and works
+	   alongside them without change. Because it is implemented as a tool for DrRacket it is relatively straightforward
+	   to compose it with other such tools.
+
+Limitations:
+	What are the limitations of this implementation?
+	
+	1. ???
+	
+	2. ???
+	
+	3. The refactoring tool relies on the presence of a syntax property on `if`, in Racket macros and other
+	   code that mangles expanded code can easily interfere with this causing a loss of refactoring opportunities.	
+
+Uses and Examples:
+        Are there examples of this problem in real-world systems?
+        Where can the reader learn more?
+	
+	1. Uses of 2d-syntax can be found in the redex implementation, Rackets 2d metalanguage provides support
+	   for 2-dimensional syntax for `cond` and `match` expressions.
+	   
+	2. Syntax parameters are used in many places in racket for example to prohibit use of class keywords
+	   such as define/public or super outside the body of a class. This is similar to their use in this
+	   project to prevent calls to super on methods that are not present in a super class.
+	   
+	3. DrRacket's check-syntax tool is implemented in a roughly similar way to the refactoring tool.
+     
+Effort (best-effort):
+        How much effort has been spent to build the solution, assuming an experienced user of the technology?
+Note: in the examples from the preprint this is a small number (like 15 minutes), we should probably say a little more than
+      that since our numbers are presumably larger.
+	1. ???
+	2. ???
+	3. Approximately 1 work day to implement the refactoring tool integration, approximately 15 minutes or less to
+	   make the refactoring work for MiniJava once it worked in Racket.
+
+Other Comments:
+        Anything that does not fit within the other categories.
+	1. ???
+	
+	2. ???
+	
+	3. ???
+
+Artifact:
+	A publicly accessible URL to the source code of the submission.
+	TODO: Clean up the github repository and make public
+	      - test suite
+	      - package
