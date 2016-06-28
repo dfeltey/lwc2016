@@ -1,4 +1,5 @@
-#lang racket 
+#lang racket
+
 (provide (all-defined-out))
 
 ;Stores the classpath for the current run
@@ -51,6 +52,3 @@
 
 ;Stores whether or not we're in MrEd and therefore images can appear in the text
 (define mred? (make-parameter #f))
-
-;Stores whether it is permitted to use Scheme functions and other values
-(define scheme-ok? (make-parameter #f)) 

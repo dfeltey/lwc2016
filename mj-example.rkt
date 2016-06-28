@@ -1,5 +1,7 @@
 #lang mini-java
 
+/* example mini-java program */
+
 class Factorial{
     public static void main(String[] a){
         System.out.println(new Fac().ComputeFac(10));
@@ -15,4 +17,4 @@ class Fac {
             num_aux = num * (this.ComputeFac(num-1)) ;
         return num_aux ;
     }
-}
+           }

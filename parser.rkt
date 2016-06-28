@@ -2,7 +2,7 @@
 
 (require "lexer.rkt"
          "ast.rkt"
-         "parameter.ss")           
+         "parameter.rkt")           
 
 (require parser-tools/yacc
          (except-in parser-tools/lex input-port)
@@ -30,7 +30,6 @@
 (define (parse is filename)
     (let* ((lexed (lex-port is filename))
            (my-get (getter lexed)))
-      (displayln lexed)
       (parse-mini-java my-get)))
 
 (define (construct-method-header mods ret-type declarator)

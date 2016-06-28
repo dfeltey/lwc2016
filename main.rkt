@@ -1,6 +1,5 @@
 #lang racket
 
-(require "parser.rkt")
 (module reader syntax/module-reader
   mini-java/
   #:read-syntax
