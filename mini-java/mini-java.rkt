@@ -2,8 +2,8 @@
 
 (require (for-syntax (except-in syntax/parse boolean)
                      racket/stxparam-exptime
-                     "editing/property.rkt"
-                     "editing/syntax-info.rkt")
+                     "../editing/property.rkt"
+                     "../editing/syntax-info.rkt")
          racket/stxparam
          (prefix-in r: racket))
 
