@@ -4,6 +4,14 @@ Problems Solved:
 2. Evolution and Reuse: Beyond-Grammar Restrictions (adding super to mini-jave with syntax parameters)
 3. Editing: Restructuring (swap if branches refactoring)
 
+What we did:
+     High level overview.
+     Examples
+     0. (MiniJava)
+     1.
+     2.
+     3.
+
 
 Assumptions:
 	Are there any assumptions or prerequisites relevant to the implementation of the solution?
