@@ -8,14 +8,17 @@ What we did:
      High level overview.
      Examples
      0. (MiniJava)
-     1.
-     2.
-     3.
+     	- Possibly discuss limitiations of MiniJava as an object language in this overview
+     1. State Machine Notation (Alternating Bit Protocol Example)
+     2. Super restriction via syntax parameters (NEED EXAMPLE)
+     3. If Refactoring (NEED EXAMPLE)
 
 
 Assumptions:
 	Are there any assumptions or prerequisites relevant to the implementation of the solution?
-	
+
+	- Generally, the need of Racket, macros, syntax-parse to implement the various pieces ...
+
 	1. Use of Racket's 2d-syntax ???
 	
 	2. Syntax parameters supported by Racket ???
@@ -40,7 +43,7 @@ Variants:
 	Are there any interesting and insightful variants of the implementation?
 	What small change(s) to the challenge would make a big difference in the implementation strategy or effort?
 	
-	1. ???
+	1. Having enumerations and real constructors in MiniJava would have simplified the implementation.
 	
 	2. ???
 	
@@ -96,9 +99,11 @@ Composability:
 Limitations:
 	What are the limitations of this implementation?
 	
-	1. ???
+	1. Top-level only in the current implementation (compiles to a class), no class fields or other methods.
 	
-	2. ???
+	2. Hard to implement Java's restriction that the super initializes the super class before uses of fields
+	   or super methods with syntax parameters. (TODO: Better understand Java's super restriction to talk about
+	   this)
 	
 	3. The refactoring tool relies on the presence of a syntax property on `if`, in Racket macros and other
 	   code that mangles expanded code can easily interfere with this causing a loss of refactoring opportunities.	
