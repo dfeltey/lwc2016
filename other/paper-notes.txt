@@ -143,3 +143,8 @@ Artifact:
 	TODO: Clean up the github repository and make public
 	      - test suite
 	      - package
+
+Conclusion Notes:
+Discuss the limitations of an impoverished language like MiniJava as a compilation
+target, and starting point for extension. How is the situation better in Racket: macros,
+more features in the core language, etc.. 
