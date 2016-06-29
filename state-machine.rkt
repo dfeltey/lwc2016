@@ -12,10 +12,10 @@
            [(a:nat b:nat)
             (values (list (syntax-e #'a) (syntax-e #'b))
                     (rest (syntax->list o)))])))
-     (define rows (apply max (map first (hash-keys mapping))))
-     (define columns (apply max (map second (hash-keys mapping))))
+     (define rows (apply max (map second (hash-keys mapping))))
+     (define columns (apply max (map first (hash-keys mapping))))
      (define/with-syntax (transitions ...)
-       (for/list ([i (in-range 1 (add1 columns))])
+       (for/list ([i (in-range 1 (add1 rows))])
          (first
           (hash-ref mapping (list 0 i)))))
      (define/with-syntax (state ...)
