@@ -159,7 +159,7 @@
    [(special-comment) (read-block-comment input-port)]
    ))
 
-(define-empty-tokens err (STRING_END STRING_EOF STRING_NEWLINE))
+(define-empty-tokens err (STRING_EOF))
 
 (define get-str-tok
   (lexer-src-pos

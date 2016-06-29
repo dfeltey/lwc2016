@@ -8,8 +8,9 @@
   #:read
   (λ (in)
     (map syntax->datum (read-syntax 'prog in)))
+  #:whole-body-readers?
+  #t
 
   (require "parser.rkt")
   
-  (define (read-syntax name in)
-    (displayln (parse in name))))
+  (define (read-syntax name in)(parse in name)))

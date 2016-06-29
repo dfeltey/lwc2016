@@ -84,11 +84,12 @@
    (grammar
     
     (Program
-     [(MainClass) (datum->syntax #f
+     [(MainClass) (list $1)
+                  #;(datum->syntax #f
                      `(,$1)
                      (src->list (build-src 1)))]
-     [(MainClass ClassDeclarations) 
-      (datum->syntax #f
+     [(MainClass ClassDeclarations) (cons $1 (reverse $2)) 
+      #;(datum->syntax #f
                      `(,$1 ,@(reverse $2))
                      (src->list (build-src 2)))])
 
