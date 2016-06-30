@@ -37,6 +37,7 @@
 
 (define-syntax-rule (foo x) x)
 (let ([x 3]) (+ (if (foo x) (+ x 3) 4) 1))
+(let ([x 3]) (+ (if (foo x) (foo (+ x 3)) 4) 1))
 
 ;; can't refactor because the if is duplicated
 ;; and one of the positions is not an E

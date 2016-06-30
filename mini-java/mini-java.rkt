@@ -91,9 +91,10 @@
                  #'(r:void)
                  #`(begin s.compiled ...)))
     (pattern (if (tst:expression) thn:statement else els:statement)
+             #:attr non-sexp? (syntax-property this-syntax 'mini-java)
              #:with compiled (add-refactor-property
                               (syntax/loc this-syntax (r:if tst.compiled thn.compiled els.compiled))
-                              (list 'mini-java
+                              (list (if (attribute non-sexp?) 'mini-java'sexp-mini-java)
                                     (syntax-loc this-syntax)
                                     (syntax-loc #'tst)
                                     (syntax-loc #'thn)
