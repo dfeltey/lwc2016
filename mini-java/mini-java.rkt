@@ -34,15 +34,23 @@
   ;; <t:id>
   (define-splicing-syntax-class type
     #:literals (int boolean)
-    (pattern (~seq int []))
-    (pattern boolean)
-    (pattern int)
-    (pattern t:id))
+    (pattern (~seq int [])
+             #:with id #'int)
+    (pattern boolean
+             #:with id #'boolean)
+    (pattern int
+             #:with id #'int)
+    (pattern t:id
+             #:with id #'t))
   
   ;; (<t:type> <name:id>)
   (define-syntax-class var-declaration
     (pattern (t:type name:id)
-             #:with compiled #'(define name #f))) ; syntax has no init value for vars
+             #:with compiled
+             (syntax-property
+              #'(define name #f) ; syntax has no init value for vars
+              'disappeared-use
+              (list (syntax-local-introduce #'t.id)))))
   
   ;; (public <ret-t:type> <name:id> (<param-t:type> <param:id> ... ...) {<var:var-declaration> ... <body:statement> ... return <ret:expression>})
   (define-syntax-class method-declaration
