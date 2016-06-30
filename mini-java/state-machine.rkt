@@ -2,9 +2,15 @@
 (provide 2dstate-machine)
 (require (for-syntax syntax/parse racket/list racket/syntax racket/sequence) "mini-java.rkt")
 
+(begin-for-syntax
+  (define-syntax-class cell-mapping
+    (pattern
+     (((a:nat b:nat))
+      c:expr ... state:id))))
+
 (define-syntax 2dstate-machine
   (syntax-parser
-    [(_ _ _ obj ...)
+    [(_ _ _ obj:cell-mapping ...)
      (define mapping
        (for*/hash ([o (in-syntax #'(obj ...))]
                    [coord (in-syntax (first (syntax->list o)))])
