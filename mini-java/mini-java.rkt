@@ -60,15 +60,22 @@
                      {var:var-declaration ...
                       body:statement ...
                       return ret:expression})
-             #:with compiled #`(define-method (name param.name ...)
-                                 var.compiled ...
-                                 body.compiled ...
-                                 #,@(if #'ret
-                                        #'(ret.compiled)
-                                        #'()))))
+             #:with compiled
+             (syntax-property
+              #`(define-method (name param.name ...)
+                  var.compiled ...
+                  body.compiled ...
+                  #,@(if #'ret
+                         #'(ret.compiled)
+                         #'()))
+              'disappeared-use
+              (map
+               syntax-local-introduce
+               (syntax->list #`(ret-t.id param.type ...))))))
   (define-splicing-syntax-class param-group
-    #:attributes (name)
-    (pattern (~seq t:type name:id)))
+    #:attributes (name type)
+    (pattern (~seq t:type name:id)
+             #:with type #'t.id))
   
   ;; {<s:statement> ...}
   ;; (if (<tst:expression>) <thn:statement> else <els:statement>)
