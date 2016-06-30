@@ -6,7 +6,8 @@
   (define-syntax-class cell-mapping
     (pattern
      (((a:nat b:nat))
-      c:expr ... state:id))))
+      c:expr ... state:id)
+     #:with uses #'state)))
 
 (define-syntax 2dstate-machine
   (syntax-parser
@@ -55,29 +56,40 @@
        (first
         (hash-ref mapping '(0 0))))
 
-     #`(class name
-         {
-         (int st)
-         #,@(for/list
-             ([transition (in-syntax #'(transitions ...))]
-              [body (in-syntax #'((body ...) ...))]
-              [new-state (in-syntax #'((new-state ...) ...))])
-             #`(public int #,transition ()
-                       {
-                        (if ((! st))
-                            {(st = 0)}
-                            else
-                            {})
-                        #,(for/fold ([stx #'{}])
-                                    ([state-int (in-naturals)]
-                                     [body (in-syntax body)]
-                                     [new-state (in-syntax new-state)])
-                            #`(if (((st < (#,state-int + 1)) && ((#,state-int - 1) < st)))
-                                  {#,body
-                                  (st = #,new-state)}
-                                  else
-                                  #,stx))
-                        return 0
-                        }))
-         })])
-    )
+     (define cls
+       #`(class name
+           {
+            (int st)
+            #,@(for/list
+                   ([transition (in-syntax #'(transitions ...))]
+                    [body (in-syntax #'((body ...) ...))]
+                    [new-state (in-syntax #'((new-state ...) ...))])
+                 #`(public int #,transition ()
+                           {
+                            (if ((! st))
+                                {(st = 0)}
+                                else
+                                {})
+                            #,(for/fold ([stx #'{}])
+                                        ([state-int (in-naturals)]
+                                         [body (in-syntax body)]
+                                         [new-state (in-syntax new-state)])
+                                #`(if (((st < (#,state-int + 1)) && ((#,state-int - 1) < st)))
+                                      {#,body
+                                       (st = #,new-state)}
+                                      else
+                                      #,stx))
+                            return 0
+                            }))
+            }))
+     (syntax-property
+      (syntax-property
+       cls
+       'disappeared-use
+       (map
+        syntax-local-introduce
+        (syntax->list #'(obj.uses ...))))
+      'disappeared-binding
+      (map
+       syntax-local-introduce
+       (syntax->list #'(transitions ... state ...))))]))
