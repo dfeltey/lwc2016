@@ -13,4 +13,4 @@
 
   (require "parser.rkt")
   
-  (define (read-syntax name in)(parse in name)))
+  (define (read-syntax name in) (parse in name)))

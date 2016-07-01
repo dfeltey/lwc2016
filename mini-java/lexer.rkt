@@ -24,7 +24,7 @@
 (define-empty-tokens EmptyLiterals (NULL_LIT TRUE_LIT FALSE_LIT EOF))
 
 (define-empty-tokens Keywords 
-  (if while else this new int boolean public static void main String class extends return System.out.println length))
+  (if while else this new int boolean public static void main String class extends return System.out.println length super))
 
 (define-empty-tokens ExtraKeywords (dynamic check inspect expect within except oneOf by errorMsg test tests testcase))
 
@@ -104,7 +104,7 @@
                   "char"        "finally"    "long"          "strictfp"     "volatile"
                   "class"       "float"      "native"        "super"        "while"
                   "const"       "for"        "new"           "switch"       "length"
-                  "continue"    "goto"       "package"       "synchronized" "System.out.println" "main" "String"))
+                  "continue"    "goto"       "package"       "synchronized" "System.out.println" "main" "String" "super"))
   
   ;; 3.10.1
   (Digits (re:+ (re:/ "09")))

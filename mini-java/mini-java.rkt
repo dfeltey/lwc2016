@@ -92,7 +92,7 @@
              #:with compiled #`(displayln arg.compiled))
     (pattern (lhs:id = rhs:expression)
              #:with compiled #`(set! lhs rhs.compiled))
-    (pattern (lhd:id [idx:expression] = rhs:expression)
+    (pattern (lhs:id [idx:expression] = rhs:expression)
              #:with compiled #`(vector-set! lhs idx.compiled rhs.compiled)))
   
   ;; (<lhs:expression> <op:binop> <rhs:expression>)

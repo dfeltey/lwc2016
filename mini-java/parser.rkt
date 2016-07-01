@@ -110,18 +110,18 @@
       (to-syntax `(class ,$2 { ,@$3 })
                  (src->list (build-src 3)))]
      [(class Identifier extends Identifier ClassBody)
-      (to-syntax `(class ,$2 extends ,$4{ ,$5 })
+      (to-syntax `(class ,$2 extends ,$4{ ,@$5 })
                  (src->list (build-src 5)))])
     
     (ClassBody
      [(O_BRACE VariableDeclarations MethodDeclarations C_BRACE)
-      (to-syntax `(,@$2 ,@$3)
+      (to-syntax `(,@(reverse $2) ,@(reverse $3))
                  (src->list (build-src 4)))]
      [(O_BRACE VariableDeclarations C_BRACE)
-      (to-syntax `(,@$2)
+      (to-syntax `(,@(reverse $2))
                  (src->list (build-src 3)))]
      [(O_BRACE MethodDeclarations C_BRACE)
-      (to-syntax `(,@$2)
+      (to-syntax `(,@(reverse $2))
                  (src->list (build-src 3)))]
      [(O_BRACE C_BRACE) 
       (to-syntax `()
@@ -141,19 +141,19 @@
 
     (MethodDeclarator
      [(Identifier O_PAREN FormalParameterList C_PAREN)
-      `(,$1 ,@$3)]
+      `(,$1 ,@(reverse $3))]
      [(Identifier O_PAREN C_PAREN)
       `(,$1 ())])
     
     (MethodBody
      [(O_BRACE VariableDeclarations BlockStatements return Expression SEMI_COLON C_BRACE)
-      (to-syntax `( ,@$2 ,@$3 return ,$5)
+      (to-syntax `( ,@(reverse $2) ,@(reverse $3) return ,$5)
                  (src->list (build-src 7)))]
      [(O_BRACE VariableDeclarations return Expression SEMI_COLON C_BRACE)
-      (to-syntax `( ,@$2 return ,$4)
+      (to-syntax `( ,@(reverse $2) return ,$4)
                  (src->list (build-src 6)))]
      [(O_BRACE BlockStatements return Expression SEMI_COLON C_BRACE)
-      (to-syntax `( ,@$2 return ,$4)
+      (to-syntax `( ,@(reverse $2) return ,$4)
                  (src->list (build-src 6)))]
      [(O_BRACE return Expression SEMI_COLON C_BRACE)
       (to-syntax `( return ,$3)
@@ -190,13 +190,13 @@
      [(Println) $1]
      [(Assignment) $1])
     
-    (BlockStatements
+    (BlockStatements 
      [(Statement) (list $1)]
      [(BlockStatements Statement) (cons $2 $1)])
     
     (Block
      [(O_BRACE BlockStatements C_BRACE)
-      (to-syntax `(,@$2)
+      (to-syntax `(,@(reverse $2))
                  (src->list (build-src 3)))]
      [(O_BRACE C_BRACE)
       (to-syntax `()
@@ -219,11 +219,11 @@
     
     (Assignment
      [(LeftHandSide AssignmentOperator Expression SEMI_COLON)
-      (to-syntax `(,$1 = ,$3)
+      (to-syntax `(,@$1 = ,$3)
                  (src->list (build-src 4)))])      
     
     (LeftHandSide
-     [(Identifier) $1]
+     [(Identifier) `(,$1)]
      [(ArrayAccess) $1])
     
     (AssignmentOperator
@@ -274,14 +274,24 @@
      [(ClassInstanceCreationExpression) $1]
      [(FieldAccess) $1]
      [(MethodInvocation) $1]
-     [(ArrayCreationExpression) $1])
+     [(ArrayCreationExpression) $1]
+     [(Super) $1])
+
+    (Super
+     [(super PERIOD Identifier O_PAREN ArgumentList C_PAREN)
+      (to-syntax `(super ,$3(,@(reverse $5)))
+                 (src->list (build-src 6)))]
+      [(super PERIOD Identifier O_PAREN C_PAREN)
+      (to-syntax `(super ,$3())
+                 (src->list (build-src 5)))])
+      
     
     (Literal
      [(INTEGER_LIT) (to-syntax $1
                                (src->list (build-src 1)))]
-     [(TRUE_LIT) (to-syntax #t
+     [(TRUE_LIT) (to-syntax 'true
                             (src->list (build-src 1)))]
-     [(FALSE_LIT) (to-syntax #f
+     [(FALSE_LIT) (to-syntax 'false
                              (src->list (build-src 1)))])
 
     (Identifier
@@ -290,8 +300,7 @@
     
     (ArrayAccess 
      [(Primary O_BRACKET Expression C_BRACKET)
-      (to-syntax `(,$1 [ ,$3])
-                 (src->list (build-src 4)))])
+      `(,$1 [,$3])])
     
     (ClassInstanceCreationExpression
      [(new Identifier O_PAREN C_PAREN)
@@ -305,7 +314,7 @@
     
     (MethodInvocation
      [(Primary PERIOD Identifier O_PAREN ArgumentList C_PAREN)
-      (to-syntax `(,$1 ,$3(,@$5))
+      (to-syntax `(,$1 ,$3(,@(reverse $5)))
                  (src->list (build-src 6)))]
      [(Primary PERIOD Identifier O_PAREN C_PAREN)
       (to-syntax `(,$1 ,$3())
