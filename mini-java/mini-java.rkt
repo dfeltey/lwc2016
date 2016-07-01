@@ -34,15 +34,23 @@
   ;; <t:id>
   (define-splicing-syntax-class type
     #:literals (int boolean)
-    (pattern (~seq int []))
-    (pattern boolean)
-    (pattern int)
-    (pattern t:id))
+    (pattern (~seq int [])
+             #:with id #'int)
+    (pattern boolean
+             #:with id #'boolean)
+    (pattern int
+             #:with id #'int)
+    (pattern t:id
+             #:with id #'t))
   
   ;; (<t:type> <name:id>)
   (define-syntax-class var-declaration
     (pattern (t:type name:id)
-             #:with compiled #'(define name #f))) ; syntax has no init value for vars
+             #:with compiled
+             (syntax-property
+              #'(define name #f) ; syntax has no init value for vars
+              'disappeared-use
+              (list (syntax-local-introduce #'t.id)))))
   
   ;; (public <ret-t:type> <name:id> (<param-t:type> <param:id> ... ...) {<var:var-declaration> ... <body:statement> ... return <ret:expression>})
   (define-syntax-class method-declaration
@@ -52,15 +60,22 @@
                      {var:var-declaration ...
                       body:statement ...
                       return ret:expression})
-             #:with compiled #`(define-method (name param.name ...)
-                                 var.compiled ...
-                                 body.compiled ...
-                                 #,@(if #'ret
-                                        #'(ret.compiled)
-                                        #'()))))
+             #:with compiled
+             (syntax-property
+              #`(define-method (name param.name ...)
+                  var.compiled ...
+                  body.compiled ...
+                  #,@(if #'ret
+                         #'(ret.compiled)
+                         #'()))
+              'disappeared-use
+              (map
+               syntax-local-introduce
+               (syntax->list #`(ret-t.id param.type ...))))))
   (define-splicing-syntax-class param-group
-    #:attributes (name)
-    (pattern (~seq t:type name:id)))
+    #:attributes (name type)
+    (pattern (~seq t:type name:id)
+             #:with type #'t.id))
   
   ;; {<s:statement> ...}
   ;; (if (<tst:expression>) <thn:statement> else <els:statement>)
@@ -76,9 +91,10 @@
                  #'(r:void)
                  #`(begin s.compiled ...)))
     (pattern (if (tst:expression) thn:statement else els:statement)
+             #:attr non-sexp? (syntax-property this-syntax 'mini-java)
              #:with compiled (add-refactor-property
                               (syntax/loc this-syntax (r:if tst.compiled thn.compiled els.compiled))
-                              (list 'mini-java
+                              (list (if (attribute non-sexp?) 'mini-java'sexp-mini-java)
                                     (syntax-loc this-syntax)
                                     (syntax-loc #'tst)
                                     (syntax-loc #'thn)

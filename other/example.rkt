@@ -1,4 +1,4 @@
-#lang s-exp "mini-java.rkt"
+#lang s-exp "../mini-java/mini-java.rkt"
 
 ;; example from the MiniJava Reference
 
