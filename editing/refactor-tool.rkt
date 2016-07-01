@@ -29,6 +29,9 @@
             (define/private (update-refactor-info! [info #f])
               (set! refactor-info (and info (make-interval-map info))))
 
+            (define/private (invalidate-refactor-info!)
+              (update-refactor-info!))
+
             (define/public (refactor-callback expanded-info)
               (update-refactor-info! expanded-info))
 
@@ -74,6 +77,7 @@
                       then-start
                       #:try-to-move? #f)
                 (do-negate-test-edit test-start test-span lang)
+                (invalidate-refactor-info!)
                 (end-edit-sequence)
                 (void)))
 
@@ -102,20 +106,20 @@
               (match-define (syntax-info _ pos span) loc)
               (list (sub1 pos) span))
 
-            #;(define/public (refactor-key-callback)
+            (define/public (refactor-key-callback)
               (define pos-box (box #f))
               (send this get-position pos-box)
               (define pos (unbox pos-box))
-              (void))
+              (do-swap-then-else pos))
 
             (super-new)))
 
-        #;(define (add-refactor-keybindings keymap)
+        (define (add-refactor-keybindings keymap)
           (send keymap add-function
-                "lift if expression"
+                "swap if branches"
                 (λ (obj evt)
                   (send obj refactor-key-callback)))
-          (send keymap map-function "c:x;l" "lift if expression"))
+          (send keymap map-function "c:x;r" "swap if branches"))
 
         (keymap:add-to-right-button-menu/before
          (let ([old (keymap:add-to-right-button-menu/before)])
@@ -125,7 +129,7 @@
              (when (and pos (is-a? text text%))
                (send editor refactor-build-popup-menu menu pos text)))))
 
-        ;(add-refactor-keybindings (drracket:rep:get-drs-bindings-keymap))
+        (add-refactor-keybindings (drracket:rep:get-drs-bindings-keymap))
         (drracket:get/extend:extend-definitions-text make-refactor-text%)
         (drracket:module-language-tools:add-online-expansion-handler
          context-table.rkt
