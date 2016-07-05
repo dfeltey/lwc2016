@@ -89,7 +89,8 @@
     
     (Program
      [(MainClass) (list $1)]
-     [(MainClass ClassDeclarations) (cons $1 (reverse $2)) ])
+     [(MainClass ClassDeclarations) (cons $1 (reverse $2)) ]
+     [(ClassDeclarations) (reverse $1)])
 
     (MainClass
      [(class Identifier O_BRACE MainMethod C_BRACE)
