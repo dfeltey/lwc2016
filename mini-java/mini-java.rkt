@@ -19,12 +19,16 @@
                          extends return if else while
                          System.out.println = new
                          length true false this))
-(define (&& x y) (and x y))
+(define (&& x y) (error 'ack) (and x y)) ;; WRONG!!!
+(define-syntax-rule (|| x y)
+  (let ([v x])
+    (r:if v v y)))
 (define (! x) (not x))
 (define < r:<)
 (define + r:+)
 (define - r:-)
 (define * r:*)
+(define == r:eqv?)
 
 (begin-for-syntax
   
@@ -34,23 +38,15 @@
   ;; <t:id>
   (define-splicing-syntax-class type
     #:literals (int boolean)
-    (pattern (~seq int [])
-             #:with id #'int)
-    (pattern boolean
-             #:with id #'boolean)
-    (pattern int
-             #:with id #'int)
-    (pattern t:id
-             #:with id #'t))
+    (pattern (~seq int []))
+    (pattern boolean)
+    (pattern int)
+    (pattern t:id))
   
   ;; (<t:type> <name:id>)
   (define-syntax-class var-declaration
     (pattern (t:type name:id)
-             #:with compiled
-             (syntax-property
-              #'(define name #f) ; syntax has no init value for vars
-              'disappeared-use
-              (list (syntax-local-introduce #'t.id)))))
+             #:with compiled #'(define name #f))) ; syntax has no init value for vars
   
   ;; (public <ret-t:type> <name:id> (<param-t:type> <param:id> ... ...) {<var:var-declaration> ... <body:statement> ... return <ret:expression>})
   (define-syntax-class method-declaration
@@ -60,22 +56,15 @@
                      {var:var-declaration ...
                       body:statement ...
                       return ret:expression})
-             #:with compiled
-             (syntax-property
-              #`(define-method (name param.name ...)
-                  var.compiled ...
-                  body.compiled ...
-                  #,@(if #'ret
-                         #'(ret.compiled)
-                         #'()))
-              'disappeared-use
-              (map
-               syntax-local-introduce
-               (syntax->list #`(ret-t.id param.type ...))))))
+             #:with compiled #`(define-method (name param.name ...)
+                                 var.compiled ...
+                                 body.compiled ...
+                                 #,@(if #'ret
+                                        #'(ret.compiled)
+                                        #'()))))
   (define-splicing-syntax-class param-group
-    #:attributes (name type)
-    (pattern (~seq t:type name:id)
-             #:with type #'t.id))
+    #:attributes (name)
+    (pattern (~seq t:type name:id)))
   
   ;; {<s:statement> ...}
   ;; (if (<tst:expression>) <thn:statement> else <els:statement>)
@@ -108,7 +97,7 @@
              #:with compiled #`(displayln arg.compiled))
     (pattern (lhs:id = rhs:expression)
              #:with compiled #`(set! lhs rhs.compiled))
-    (pattern (lhs:id [idx:expression] = rhs:expression)
+    (pattern (lhd:id [idx:expression] = rhs:expression)
              #:with compiled #`(vector-set! lhs idx.compiled rhs.compiled)))
   
   ;; (<lhs:expression> <op:binop> <rhs:expression>)
@@ -157,8 +146,10 @@
              #:with compiled #'v))
   
   (define-syntax-class binop
-    #:literals (&& < + - *)
+    #:literals (== && || < + - *)
+    (pattern ==)
     (pattern &&)
+    (pattern ||)
     (pattern <)
     (pattern +)
     (pattern -)
@@ -218,5 +209,3 @@
                    var.compiled ...
                    meth.compiled ...
                    (super-new))))]))
-
-

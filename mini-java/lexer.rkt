@@ -16,7 +16,10 @@
 (define-struct class-case (box))
 
 (define-empty-tokens Operators
-  (&& < + - * ! =))
+  (&& == < + - * ! =))
+
+(define-empty-tokens OR_TOK
+  (OR_OP))
 
 (define-empty-tokens Separators
   (O_PAREN C_PAREN O_BRACE C_BRACE O_BRACKET C_BRACKET SEMI_COLON PERIOD COMMA))
@@ -136,7 +139,8 @@
                          (re:: #\\ (re:/ "07"))))
   
   ;; 3.12
-  (Operator (re:or "&&"   "<"     "+"     "-"     "*"      	"!"	"=")))
+  (Operator (re:or "&&" "=="   "<"     "+"     "-"     "*"      	"!"	"="))
+  (OR "||"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Comment lexers
@@ -184,6 +188,7 @@
    ;; 3.12
    (Operator (let ((l lexeme))
                (string->symbol l)))
+   (OR (token-OR_OP))
    
    ;; 3.11
    ("(" (token-O_PAREN))

@@ -72,7 +72,7 @@
 (define parse-mini-java
   (parser
    (start Program)
-   (tokens java-vals Keywords ExtraKeywords Separators EmptyLiterals Operators)
+   (tokens java-vals Keywords ExtraKeywords Separators EmptyLiterals Operators OR_TOK)
    (error (lambda (tok-ok name val start-pos end-pos)
             (raise-read-error (format "Parse error near <~a:~a>" name val)
                               (file-path)
@@ -234,12 +234,24 @@
      [(=) '=])    
     
     (Expression
-     [(ConditionalAndExpression) $1])
+     [(ConditionalOrExpression) $1])
+
+    (ConditionalOrExpression
+     [(ConditionalAndExpression) $1]
+     [(ConditionalOrExpression OR_OP ConditionalAndExpression)
+      (to-syntax `(,$1 || ,$3)
+                 (src->list (build-src 3)))])
     
     (ConditionalAndExpression
-     [(RelationalExpression) $1]
-     [(ConditionalAndExpression && RelationalExpression)
+     [(EqualityExpression) $1]
+     [(ConditionalAndExpression && EqualityExpression)
       (to-syntax `(,$1 && ,$3)
+                 (src->list (build-src 3)))])
+
+    (EqualityExpression
+     [(RelationalExpression) $1]
+     [(EqualityExpression == RelationalExpression)
+      (to-syntax `(,$1 == ,$3)
                  (src->list (build-src 3)))])
     
     (RelationalExpression
