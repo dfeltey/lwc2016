@@ -7,7 +7,9 @@
                      syntax/id-table
                      racket/stxparam-exptime
                      racket/dict
-                     (prefix-in r: racket)))
+                     (prefix-in r: racket)
+                     "../editing/syntax-info.rkt"
+                     "../editing/property.rkt"))
 
 (provide (all-defined-out)
          #%module-begin #%app
@@ -98,8 +100,16 @@
 
 ;; statements (rest are just re-exported from Racket, linguistic-reuse-style)
 
-(define-simple-macro (if test then else)
-  (r:if test then else)) ; TODO add refactoring prop
+(define-syntax (if stx)
+  (syntax-parse stx
+    [(_ test then else)
+     (add-refactor-property
+      (syntax/loc this-syntax (r:if test then else))
+      (list (if (syntax-property stx 'mini-java) 'mini-java 'sexp-mini-java)
+            (syntax-loc stx)
+            (syntax-loc #'test)
+            (syntax-loc #'then)
+            (syntax-loc #'else)))]))
 
 (define-simple-macro (while test body ...)
   (let loop ()
