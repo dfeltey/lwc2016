@@ -11,7 +11,18 @@
 
 (provide (all-defined-out)
          #%module-begin #%app
-         #%datum true false < + - *)
+         #%datum true false < + - *
+         (rename-out [begin         compound]
+                     [begin         main]
+                     [displayln     System.out.println]
+                     [set!          =]
+                     [vector-set!   array=]
+                     [and           &&]
+                     [vector-ref    index]
+                     [vector-length length]
+                     [not           !]
+                     [make-vector   new-int-array]))
+
 
 (define-syntax-rule (define-literals (lit ...))
   (begin (define-syntax lit (syntax-rules ())) ...))
@@ -67,9 +78,6 @@
             #'run-time-method-table
             #'constructor)))]))
 
-(define-simple-macro (main body ...)
-  (begin body ...))
-
 ;; for post-processing
 ;; `define-method` (and `define-field`) is fixed syntax in `define-class`
 (define-simple-macro (method meth:meth-decl)
@@ -81,11 +89,7 @@
 (define-simple-macro (define-local type x)
   (define x #f))
 
-
-;; statements
-
-(define-simple-macro (compound body ...)
-  (r:begin body ...))
+;; statements (rest are just re-exported from Racket, linguistic-reuse-style)
 
 (define-simple-macro (if test then else)
   (r:if test then else)) ; TODO add refactoring prop
@@ -95,20 +99,7 @@
     (when test
       body ...)))
 
-(define System.out.println r:displayln) ;; TODO use rename-out for all of those (and whatever else is possible)
-
-(define-simple-macro (= var val)
-  (r:set! var val))
-
-(define array-= r:vector-set!)
-
-
-;; expressions
-
-(define-syntax-rule (&& x y) (r:and x y))
-(define index   r:vector-ref)
-(define length  r:vector-length)
-(define !       r:not)
+;; expressions (except Racket re-exports)
 
 (define-syntax (send stx)
   (syntax-parse stx
@@ -120,10 +111,6 @@
               [method-index    #,(dict-ref ct-method-table #'method-name)]
               [method          (vector-ref rt-method-table method-index)])
          (method receiver arg ...))]))
-
-;; integers, `true`, and `false` are reused directly from Racket. as are variable references
-
-(define (new-int-array len) (make-vector len 0))
 
 (define-syntax (new stx)
   (syntax-parse stx
