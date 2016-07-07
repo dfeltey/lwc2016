@@ -196,6 +196,24 @@ is a syntax object that corresponds to the identifier bound as the runtime metho
 object for an identifier bound, at runtime, as a function of no arguments which constructs new instances of the
 @racket[Even] class.
 
+All of the preceeding details of Racket's macro system are used in @figure-ref{mj-send-macro} in
+the implementation of the @racket[send] macro which implements method calls in MiniJava programs.
+Just as in the example of the @racket[or] macro, the @racket[send] macro expects syntax that matches
+the pattern for a parenthesized MiniJava method call:
+@racketblock[
+(send the-class receiver
+  method-name arg ...)]
+This pattern expects the @racket[send] keyword followed by the name of the class to which the
+method belongs, the object on which the method is called, and finally a sequence of zero or
+more arguments being passed to the method. The body of the @racket[send] macro acesses the static
+information associated with the class name using @racket[syntax-local-value] and extracts the
+compile-time method table that maps method names to their indices in the run-time method table.
+
+
+@;; NOTE: overarching message of trying to use Racket/the macro expansion process
+@;; as a source of modularity. Many small, independent extensions that cooperate
+@;; to implement MiniJava rather than a monolithic compiler into Racket code
+
 
 
 @;; FIXME: Adjust the method table example to show the provide of the runtime class as well
