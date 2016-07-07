@@ -62,22 +62,22 @@ class Even {
    ))
 
 
-(define mj-statement-syntax-class
+(define mj-send-macro
   (codeblock-pict
    #:keep-lang-line? #f
    #<<>>
 #lang racket
-(define-syntax-class statement
-  #:literals (if else while System.out.println =)
-  (pattern (if (tst:expression) thn:statement else els:statement)
-           #:with compiled #'(r:if tst.compiled thn.compiled els.compiled))
-  (pattern (System.out.println (arg:expression))
-           #:with compiled #`(displayln arg.compiled))
-  (pattern (lhs:id = rhs:expression)
-           #:with compiled #`(set! lhs rhs.compiled))
-  (pattern (lhd:id [idx:expression] = rhs:expression)
-           #:with compiled #`(vector-set! lhs idx.compiled rhs.compiled))
-  ...)
+(define-syntax (send stx)
+  (syntax-parse stx
+    [(send the-class
+        receiver method-name arg ...)
+     (define ct-method-table
+       (static-class-info-compile-time-method-table
+        (syntax-local-value #'the-class)))
+     #`(let* ([rt-method-table (vector-ref receiver 0)]
+              [method-index    #,(dict-ref ct-method-table #'method-name)]
+              [method          (vector-ref rt-method-table method-index)])
+         (method receiver arg ...))]))
 >>
   ))
 

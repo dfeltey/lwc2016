@@ -3,7 +3,8 @@
 @(require pict/code
           "mj-examples.rkt"
           scriblib/figure
-          (only-in scribble/manual racket racketblock))
+          (only-in scribble/manual racket racketblock)
+          (only-in racket/format ~a))
 
 @; NOTES:
 @;; Is there anything interesting to discuss about the lexer/parser?
@@ -177,16 +178,25 @@ the @racket[send] expression, and that static information about methods is bound
 @Figure-ref{mj-even-static-info} shows the static information bound to the @racket[Even] class using Racket's
 @racket[define-syntax] form.
 
+The previous example defining the @racket[or] macro shows one use of the @racket[define-syntax] form to define
+a macro. In general, however, the @racket[define-syntax] form creates a @emph{transformer binding}. Transformer
+bindings include macros as in the example defining the @racket[or] macro, but in the general case @racket[define-syntax]
+creates bindings whoses values are available at expansion time. This allows the use of the @racket[define-syntax] form
+to store static information that can be accessed at compile time using the @racket[syntax-local-value] procedure.
+
+Our implementation of MiniJava expands class forms to bind static information about class types using
+@racket[define-syntax]. In @figure-ref{mj-even-static-info}, the class name @racket[Even] is bound to a
+record, created with a call to the procedure @racket[static-class-info], containing three elements necessary
+@;; FIXME: Even:static-method-info is possibly too wide
+@;; Do we need an example of the constructor definition for instances of the even class???
+to compile MiniJava classes. The first element in the record, @racket[Even:static-method-info], is a compile-time
+table that maps method identifiers to their indices in the method table. The second element, @racket[#'Even:method-table],
+is a syntax object that corresponds to the identifier bound as the runtime method table for the @racket[Even] class in
+@figure-ref{mj-compiled-vector}. The last element in the record, @racket[#'Even:constructor], is similarly the syntax
+object for an identifier bound, at runtime, as a function of no arguments which constructs new instances of the
+@racket[Even] class.
 
 
-@;{
-To support this compilation, the implementation of the MiniJava @racket[class] form must compute information
-about the order of the methods in the class before expanding the methods in order to generate the correct
-offsets. This compile-time information is necessary, more generally, to any class which may instantiate the
-@racket[Even] class and call its methods. In order to convey the information about the indices of methods,
-the compilation of the @racket[Even] class must produce and provide compile-time data that can be used in
-the compilation of other classes to resolve method calls and field accesses.
-}
 
 @;; FIXME: Adjust the method table example to show the provide of the runtime class as well
 @;;        as compile time information
@@ -199,31 +209,6 @@ the compilation of other classes to resolve method calls and field accesses.
 @;; Other communication channels are possible, ie syntax properties
 @;; TODO: need an example of syntax-properties somehow ...
 
-
-
-
-@;; Some of this may still be relevant, but need to build up to it
-@;{
-The lexer and parser are a standard Lex/Yacc style lexer and parser, so we will focus on the compilation
-from the parenthesized MiniJava into Racket. The macro that implements the MiniJava class form is reproduced
-in @figure-ref{mj-class-macro}. This syntax extension uses @emph{syntax-parse}, one of many useful utilities
-for performing pattern matching over syntax objects in Racket. This macro expects syntax that matches the
-shape of a parenthesized MiniJava class, the keyword @emph{class} followed by a name for class and optionally
-the name of a superclass followed by a bracketed list of variable and method declarations. The colon syntax used
-in syntax-parse, as in @racket[var:var-declaration], specifies that the pattern variable, @emph{var},
-should only match syntax belonging to the syntax class @emph{var-declaration}.
-
-Syntax classes give programmers a general way of specifying complex syntax patterns. Additionally,
-syntax classes allow programmers to attach arbitrary data to the syntax matched by a syntax class using
-attributes. In @figure-ref{mj-class-macro}, the "dot" notation used, as in @racket[var.compiled], accesses
-the @emph{compiled} attribute that has been associated with @emph{var} by @racket[syntax-parse].
-
-@Figure-ref{mj-syntax-class} shows a portion the syntax class that corresponds to MiniJava statements.
-A piece of syntax matches the statement syntax class when it matches any of the declared patterns.
-The @racket[#:with] declaration within each pattern associates data with any syntax that matches the
-syntax class. In this example, the @emph{compiled} attribute is the 
-}
-
 @(figure*
   "mj-compiled-vector"
   "The Compiled Represenation of MiniJava"
@@ -235,9 +220,9 @@ syntax class. In this example, the @emph{compiled} attribute is the
   @mj-even-static-info)
 
 @(figure*
-  "mj-syntax-class"
-  "Syntax Class for MiniJava Statements"
-  @mj-statement-syntax-class)
+  "mj-send-macro"
+  "Definition of the MiniJava send form"
+  @mj-send-macro)
 
 @(figure*
   "2d-state-machine"
