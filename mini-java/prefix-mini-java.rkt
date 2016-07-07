@@ -13,7 +13,6 @@
          #%module-begin #%app
          #%datum true false < + - *
          (rename-out [begin         compound]
-                     [begin         main]
                      [displayln     System.out.println]
                      [set!          =]
                      [vector-set!   array=]
@@ -47,6 +46,14 @@
  (struct static-class-info (compile-time-method-table run-time-method-table-id constructor-id))
 
  )
+
+;; can't just expand to `begin`; needs to be run after everything else
+(define-syntax (main stx)
+  (syntax-parse stx
+    [(_ body ...)
+     (syntax-local-lift-module #`(module* main #f (main-method)))
+     #'(define (main-method)
+         body ...)]))
 
 ;; TODO add inheritance, and super. and whatever else old version had
 (define-syntax (define-class stx)
