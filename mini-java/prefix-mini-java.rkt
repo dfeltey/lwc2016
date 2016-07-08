@@ -7,6 +7,9 @@
                      syntax/id-table
                      racket/stxparam-exptime
                      racket/dict
+                     racket/match
+                     racket/syntax
+                     (only-in racket/sequence in-syntax)
                      (prefix-in r: racket)
                      "../editing/syntax-info.rkt"
                      "../editing/property.rkt"))
@@ -45,7 +48,11 @@
               ;; can have `define-local`s here, but we just consider them part of the body
               body ...)))
 
- (struct static-class-info (compile-time-method-table run-time-method-table-id constructor-id))
+ ;; might also need the field names ...
+ (struct static-class-info (super-class
+                            compile-time-method-table
+                            run-time-method-table-id
+                            constructor-id))
 
  )
 
@@ -60,9 +67,41 @@
 ;; TODO add inheritance, and super. and whatever else old version had
 (define-syntax (define-class stx)
   (syntax-parse stx
-    [(_ name var:var-decl ... meth:meth-decl ...)
+    [(_ name (~optional (~seq #:extends super-class) #:defaults ([super-class #f]))
+        var:var-decl ... meth:meth-decl ...)
+     (define run-time-method-table-id (generate-temporary 'runtime-method-table))
+     (define has-super? (attribute super-class))
+     (define super-static-info (and has-super? (syntax-local-value #'super-class)))
+     (define super-method-table
+       (and has-super? (static-class-info-run-time-method-table-id super-static-info)))
+     (define super-compile-time-table
+       (if has-super?
+           (static-class-info-compile-time-method-table super-static-info)
+           (make-immutable-free-id-table)))
+     (define super-methods
+       (map car (sort (dict->list super-compile-time-table) < #:key cdr)))
+     (define method-mapping
+       (make-immutable-free-id-table
+        (map cons (syntax->list #'(meth.name ...)) (syntax->list #'(meth ...)))))
+     (define methods
+       (append
+        (for/list ([meth-name (in-list super-methods)]
+                   [i (in-naturals)])
+          (cons meth-name (dict-ref method-mapping meth-name i)))
+        (for/list ([method (in-syntax #'(meth ...))]
+                   [meth-name (in-syntax #'(meth.name ...))]
+                   #:unless (dict-ref super-compile-time-table meth-name #f))
+          (cons meth-name method))))
+     (define/with-syntax super (if has-super? #'#'super-class #'#f))
+     (define/with-syntax (run-time-method ...)
+       (for/list ([meth (in-list methods)])
+         (match-define (cons name body-or-index) meth)
+         (cond
+           [(number? body-or-index) #`(vector-ref #,super-method-table #,body-or-index)]
+           ;; name is used here to support super calls
+           [else #`(method #,body-or-index)])))
      #`(begin
-         (define run-time-method-table
+         (define #,run-time-method-table-id
            (let-syntax (#,@(for/list ([var-name (in-list (syntax->list #'(var.name ...)))]
                                       [i        (in-naturals 1)]) ; 0 is method table
                              #`[#,var-name
@@ -73,18 +112,19 @@
                                      [(set! x val) #'(vector-set! this #,i val)]
                                      [x            #'(vector-ref this #,i)])))]))
              ;; method table
-             (vector (method meth) ...)))
+             (vector run-time-method ...)))
          (define (constructor)
-           (vector run-time-method-table
+           (vector #,run-time-method-table-id
                    #,@(r:make-list (r:length (syntax->list #'(var.name ...))) #f)))
          (define-syntax name
            (static-class-info
+            super
             ;; compile-time method table
             #,(for/fold ([t (make-immutable-free-id-table)])
-                  ([meth-name (in-list (syntax->list #'(meth.name ...)))]
+                  ([meth-name (in-list (map car methods))]
                    [i         (in-naturals)])
                 (dict-set t meth-name i))
-            #'run-time-method-table
+            #'#,run-time-method-table-id
             #'constructor)))]))
 
 ;; for post-processing
