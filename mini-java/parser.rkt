@@ -72,7 +72,7 @@
 (define parse-mini-java
   (parser
    (start Program)
-   (tokens java-vals Keywords ExtraKeywords Separators EmptyLiterals Operators OR_TOK)
+   (tokens java-vals special-toks Keywords ExtraKeywords Separators EmptyLiterals Operators OR_TOK)
    (error (lambda (tok-ok name val start-pos end-pos)
             (raise-read-error (format "Parse error near <~a:~a>" name val)
                               (file-path)
@@ -112,7 +112,9 @@
                  (src->list (build-src 3)))]
      [(class Identifier extends Identifier ClassBody)
       (to-syntax `(class ,$2 extends ,$4{ ,@$5 })
-                 (src->list (build-src 5)))])
+                 (src->list (build-src 5)))]
+     [(2D)
+      $1])
     
     (ClassBody
      [(O_BRACE VariableDeclarations MethodDeclarations C_BRACE)

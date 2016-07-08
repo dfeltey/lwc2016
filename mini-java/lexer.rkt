@@ -2,7 +2,8 @@
 
 (require parser-tools/lex
          (prefix-in re: parser-tools/lex-sre)
-         "parameter.rkt") 
+         "parameter.rkt"
+         "readtable.rkt") 
 
 (define (image-snip%)
   (if (mred?)
@@ -34,7 +35,7 @@
 (define-tokens java-vals
   (INTEGER_LIT IDENTIFIER NUMBER_ERROR))
 
-(define-tokens special-toks (EXAMPLE TEST_SUITE IMAGE_SPECIAL OTHER_SPECIAL))
+(define-tokens special-toks (EXAMPLE TEST_SUITE IMAGE_SPECIAL OTHER_SPECIAL 2D))
 
 (define (trim-string s f l)
   (substring s f (- (string-length s) l)))
@@ -189,6 +190,14 @@
    (Operator (let ((l lexeme))
                (string->symbol l)))
    (OR (token-OR_OP))
+
+   ("#2" (token-2D (dispatch-proc #\2 input-port
+                               #f #f #f #f
+                               (λ (input-port _1 _2)
+                                 (cond
+                                   [(eof-object? (peek-char input-port)) eof]
+                                   [else (read/recursive input-port)]))
+                               #f)))
    
    ;; 3.11
    ("(" (token-O_PAREN))
