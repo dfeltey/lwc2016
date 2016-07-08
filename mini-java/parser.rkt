@@ -114,7 +114,8 @@
       (to-syntax `(class ,$2 extends ,$4{ ,@$5 })
                  (src->list (build-src 5)))]
      [(2D)
-      $1])
+      (to-syntax $1
+                 (src->list (build-src 1)))])
     
     (ClassBody
      [(O_BRACE VariableDeclarations MethodDeclarations C_BRACE)
