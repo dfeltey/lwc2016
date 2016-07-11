@@ -143,10 +143,11 @@
            (static-class-info
             super
             ;; compile-time method table
-            #,(for/fold ([t (make-immutable-free-id-table)])
-                  ([meth-name (in-list method-names)]
-                   [i         (in-naturals)])
-                (dict-set t meth-name i))
+            (make-immutable-free-id-table
+             (list
+              #,@(for/list ([meth-name (in-list method-names)]
+                            [i         (in-naturals)])
+                   #`(cons #'#,meth-name #,i))))
             #'#,run-time-method-table-id
             #'constructor
             #,field-count)))]))
