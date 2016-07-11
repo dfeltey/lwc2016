@@ -5,6 +5,7 @@
          racket/stxparam
          (for-syntax syntax/parse
                      syntax/id-table
+                     syntax/id-set
                      racket/stxparam-exptime
                      racket/dict
                      racket/match
@@ -48,11 +49,54 @@
               ;; can have `define-local`s here, but we just consider them part of the body
               body ...)))
 
+ (define-splicing-syntax-class extends-decl
+   #:attributes (super-method-table super-compile-time-table super super-field-count)
+   (pattern
+    (~seq #:extends super-class:id)
+    #:attr super #'#'super-class
+    #:attr super-static-info (syntax-local-value #'super-class)
+    #:attr super-method-table (static-class-info-run-time-method-table-id (attribute super-static-info))
+    #:attr super-compile-time-table (static-class-info-compile-time-method-table (attribute super-static-info))
+    #:attr super-field-count (static-class-info-field-count (attribute super-static-info)))
+   (pattern
+    (~seq)
+    #:attr super #'#f
+    #:attr super-method-table #f
+    #:attr super-compile-time-table (make-immutable-free-id-table)
+    #:attr super-field-count 0))
+
+ (define (build-method-names+stxs super-compile-time-table method-mapping super-method-table)
+   (define defined-methods (immutable-free-id-set (free-id-table-keys method-mapping)))
+   (define all-methods
+       (free-id-set-union defined-methods
+                          (immutable-free-id-set (free-id-table-keys super-compile-time-table))))
+   (define methods-count (free-id-set-count all-methods))
+   (define method-names (make-vector methods-count))
+   (define method-stx (make-vector methods-count))
+   (for/fold ([new-method-idx (free-id-table-count super-compile-time-table)])
+             ([method-name (in-free-id-set all-methods)])
+     (cond
+       [(dict-ref super-compile-time-table method-name #f)
+        =>
+        (λ (idx)
+          (vector-set! method-names idx method-name)
+          (if (free-id-set-member? defined-methods method-name)
+              (vector-set! method-stx idx #`(method #,(dict-ref method-mapping method-name)))
+              (vector-set! method-stx idx #`(vector-ref #,super-method-table #,idx)))
+          new-method-idx)]
+       [else
+        (vector-set! method-names new-method-idx method-name)
+        (vector-set! method-stx new-method-idx #`(method #,(dict-ref method-mapping method-name)))
+        (add1 new-method-idx)]))
+   (values (vector->list method-names)
+           (vector->list method-stx)))
+
  ;; might also need the field names ...
  (struct static-class-info (super-class
                             compile-time-method-table
                             run-time-method-table-id
-                            constructor-id))
+                            constructor-id
+                            field-count))
 
  )
 
@@ -67,43 +111,22 @@
 ;; TODO add inheritance, and super. and whatever else old version had
 (define-syntax (define-class stx)
   (syntax-parse stx
-    [(_ name (~optional (~seq #:extends super-class) #:defaults ([super-class #f]))
-        var:var-decl ... meth:meth-decl ...)
+    [(_ name super-class:extends-decl var:var-decl ... meth:meth-decl ...)
      (define run-time-method-table-id (generate-temporary 'runtime-method-table))
-     (define has-super? (attribute super-class))
-     (define super-static-info (and has-super? (syntax-local-value #'super-class)))
-     (define super-method-table
-       (and has-super? (static-class-info-run-time-method-table-id super-static-info)))
-     (define super-compile-time-table
-       (if has-super?
-           (static-class-info-compile-time-method-table super-static-info)
-           (make-immutable-free-id-table)))
-     (define super-methods
-       (map car (sort (dict->list super-compile-time-table) < #:key cdr)))
+     (define super-method-table (attribute super-class.super-method-table))
+     (define super-compile-time-table (attribute super-class.super-compile-time-table))
+     (define super-field-count (attribute super-class.super-field-count))
+     (define field-count (+ super-field-count (r:length (syntax->list #'(var.name ...)))))
      (define method-mapping
        (make-immutable-free-id-table
         (map cons (syntax->list #'(meth.name ...)) (syntax->list #'(meth ...)))))
-     (define methods
-       (append
-        (for/list ([meth-name (in-list super-methods)]
-                   [i (in-naturals)])
-          (cons meth-name (dict-ref method-mapping meth-name i)))
-        (for/list ([method (in-syntax #'(meth ...))]
-                   [meth-name (in-syntax #'(meth.name ...))]
-                   #:unless (dict-ref super-compile-time-table meth-name #f))
-          (cons meth-name method))))
-     (define/with-syntax super (if has-super? #'#'super-class #'#f))
-     (define/with-syntax (run-time-method ...)
-       (for/list ([meth (in-list methods)])
-         (match-define (cons name body-or-index) meth)
-         (cond
-           [(number? body-or-index) #`(vector-ref #,super-method-table #,body-or-index)]
-           ;; name is used here to support super calls
-           [else #`(method #,body-or-index)])))
+     (define-values (method-names method-stxs)
+       (build-method-names+stxs super-compile-time-table method-mapping super-method-table))
+     (define/with-syntax super (attribute super-class.super))
      #`(begin
          (define #,run-time-method-table-id
            (let-syntax (#,@(for/list ([var-name (in-list (syntax->list #'(var.name ...)))]
-                                      [i        (in-naturals 1)]) ; 0 is method table
+                                      [i        (in-naturals (add1 super-field-count))]) ; 0 is method table, start after super-fields
                              #`[#,var-name
                                 (make-set!-transformer
                                  (lambda (stx)
@@ -112,20 +135,21 @@
                                      [(set! x val) #'(vector-set! this #,i val)]
                                      [x            #'(vector-ref this #,i)])))]))
              ;; method table
-             (vector run-time-method ...)))
+             (vector #,@method-stxs)))
          (define (constructor)
            (vector #,run-time-method-table-id
-                   #,@(r:make-list (r:length (syntax->list #'(var.name ...))) #f)))
+                   #,@(r:make-list field-count #f)))
          (define-syntax name
            (static-class-info
             super
             ;; compile-time method table
             #,(for/fold ([t (make-immutable-free-id-table)])
-                  ([meth-name (in-list (map car methods))]
+                  ([meth-name (in-list method-names)]
                    [i         (in-naturals)])
                 (dict-set t meth-name i))
             #'#,run-time-method-table-id
-            #'constructor)))]))
+            #'constructor
+            #,field-count)))]))
 
 ;; for post-processing
 ;; `define-method` (and `define-field`) is fixed syntax in `define-class`
