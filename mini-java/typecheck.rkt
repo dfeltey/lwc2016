@@ -94,7 +94,7 @@
 (define ((typecheck-method env method-env current-class) method)
   (syntax-parse method
     [meth:method-declaration
-     #:do [(define body-env (extend-env (extend-env (empty-env)
+     #:do [(define body-env (extend-env (extend-env env
                                                     #'(meth.param-name ...) #'(meth.param-type ...))
                                         #'(meth.local-name ...) #'(meth.local-type ...)))]
      (quasisyntax/loc method

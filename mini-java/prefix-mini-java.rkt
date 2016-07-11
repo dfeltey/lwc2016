@@ -189,10 +189,11 @@
         receiver method-name arg ...)
      #:do [(define ct-method-table
              (static-class-info-compile-time-method-table (syntax-local-value #'the-class)))]
-     #`(let* ([rt-method-table (vector-ref receiver 0)]
+     #`(let* ([receiver-val receiver]
+              [rt-method-table (vector-ref receiver-val 0)]
               [method-index    #,(dict-ref ct-method-table #'method-name)]
               [method          (vector-ref rt-method-table method-index)])
-         (method receiver arg ...))]))
+         (method receiver-val arg ...))]))
 
 (define-syntax (new stx)
   (syntax-parse stx
