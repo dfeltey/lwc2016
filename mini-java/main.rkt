@@ -10,7 +10,18 @@
     (map syntax->datum (read-syntax 'prog in)))
   #:whole-body-readers?
   #t
-
-  (require "parser.rkt")
   
-  (define (read-syntax name in) (parse in name)))
+  #:info
+  (lambda (mode default get-default)
+    (get-info mode default get-default))
+  
+  (require racket
+           "lexer.rkt"
+           "parser.rkt")
+  
+  (define (get-info mode default get-default)
+    (case mode
+      [(color-lexer) color-lexer]
+      [else (get-default mode default)]))
+  
+  (define (read-syntax name in) (parse-program in name)))

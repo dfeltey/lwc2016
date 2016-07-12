@@ -3,7 +3,7 @@
 (require parser-tools/lex
          (prefix-in re: parser-tools/lex-sre)
          "parameter.rkt"
-         "readtable.rkt") 
+         "readtable.rkt")
 
 (define (image-snip%)
   (if (mred?)
@@ -15,6 +15,37 @@
 (define-struct example-box (contents))
 (define-struct interact-case (box))
 (define-struct class-case (box))
+
+
+(define (token->string t v)
+  (if v
+      (format "~a" v)
+      (format "~a" t)))
+
+(define (color-lexer in offset mode)
+    (define tok (get-token in))
+    (define (ret mode paren [eof? #f])
+      (values (if eof?
+                  eof
+                  (token->string (position-token-token tok)
+                                 (token-value (position-token-token tok))))
+              mode 
+              paren
+              (position-offset (position-token-start-pos tok))
+              (position-offset (position-token-end-pos tok))
+              0 
+              #f))
+    (case (token-name (position-token-token tok))
+      [(EOF) (ret 'eof #f #t)]
+      [(O_PAREN) (ret 'parenthesis '|(|)]
+      [(C_PAREN) (ret 'parenthesis '|)|)]
+      [(O_BRACE) (ret 'parenthesis '|{|)]
+      [(C_BRACE) (ret 'parenthesis '|}|)]
+      [(O_BRACKET) (ret 'parenthesis '|[|)]
+      [(C_BRACKET) (ret 'parenthesis '|]|)]
+      [(IDENTIFIER) (ret 'symbol #f)]
+      [(INTEGER_LIT) (ret 'constant #f)]
+      [else (ret 'other #f)]))
 
 (define-empty-tokens Operators
   (&& == < + - * ! =))
@@ -191,13 +222,14 @@
                (string->symbol l)))
    (OR (token-OR_OP))
 
-   ("#2" (token-2D (dispatch-proc #\2 input-port
-                               #f #f #f #f
-                               (λ (input-port _1 _2)
-                                 (cond
-                                   [(eof-object? (peek-char input-port)) eof]
-                                   [else (read/recursive input-port)]))
-                               #f)))
+    ("#2" (let-values ([(line col pos) (port-next-location input-port)])
+           (token-2D (dispatch-proc #\2 input-port
+                                    #f line col pos
+                                    (λ (input-port _1 _2)
+                                      (cond
+                                        [(eof-object? (peek-char input-port)) eof]
+                                        [else ((dynamic-require "../mini-java/parser.rkt" 'parse-box-contents) input-port 'prog)]))
+                                    #f))))
    
    ;; 3.11
    ("(" (token-O_PAREN))

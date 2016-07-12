@@ -1,15 +1,16 @@
 #lang racket
 
-(require "lexer.rkt"
-         "ast.rkt"
-         "parameter.rkt")           
+(require "ast.rkt"
+         "parameter.rkt"
+         "lexer.rkt")           
 
 (require parser-tools/yacc
          (except-in parser-tools/lex input-port)
          syntax/readerr
          racket/syntax)
 
-(provide parse)
+(provide parse-program
+         parse-box-contents)
 
 (define (lex-port port filename)
   (port-count-lines! port)
@@ -28,10 +29,15 @@
             (unless (null? (cdr token-list))
               (set! token-list (cdr token-list))))))
 
-(define (parse is filename)
+(define (parse-program is filename)
   (let* ((lexed (lex-port is filename))
          (my-get (getter lexed)))
     (parse-mini-java my-get)))
+
+(define (parse-box-contents is filename)
+  (let* ((lexed (lex-port is filename))
+         (my-get (getter lexed)))
+    (parse-mini-java-box-contents my-get)))
 
 (define-syntax (build-src stx)
   (syntax-case stx ()
@@ -69,9 +75,9 @@
 (define (to-syntax s-expr srcloc)
   (datum->syntax #f s-expr srcloc orig-prop))
 
-(define parse-mini-java
+(define parsers
   (parser
-   (start Program)
+   (start Program Box)
    (tokens java-vals special-toks Keywords ExtraKeywords Separators EmptyLiterals Operators OR_TOK)
    (error (lambda (tok-ok name val start-pos end-pos)
             (raise-read-error (format "Parse error near <~a:~a>" name val)
@@ -86,6 +92,16 @@
    (src-pos)
    
    (grammar
+
+    (Box
+     [(Statements Identifier) (to-syntax `(,@(reverse $1) ,$2)
+                                         (src->list (build-src 2)))]
+     [(Identifier) (to-syntax `(,$1)
+                              (src->list (build-src 1)))])
+
+    (Statements
+     [(Statement) (list $1)]
+     [(Statements Statement) (cons $2 $1)])
     
     (Program
      [(MainClass) (list $1)]
@@ -350,3 +366,6 @@
     
     (DimExpr
      [(O_BRACKET Expression C_BRACKET) $2]))))
+
+(define parse-mini-java (car parsers))
+(define parse-mini-java-box-contents (cadr parsers))
