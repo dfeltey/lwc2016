@@ -40,12 +40,12 @@
 
  (define-syntax-class var-decl
    #:literals (define-field)
-   (pattern (define-field type:id name:id)))
+   (pattern (define-field name:id)))
  ;; TODO add check-syntax collaboration?
 
  (define-syntax-class meth-decl
    #:literals (define-field define-local)
-   (pattern (define-method ret-type:id name:id ([arg-type:id arg-name:id] ...)
+   (pattern (define-method name:id (arg-name:id ...)
               ;; can have `define-local`s here, but we just consider them part of the body
               body ...)))
 
@@ -160,7 +160,7 @@
      ([current-this #'receiver])
      meth.body ...)))
 
-(define-simple-macro (define-local type x)
+(define-simple-macro (define-local x)
   (define x #f))
 
 ;; statements (rest are just re-exported from Racket, linguistic-reuse-style)

@@ -1,9 +1,9 @@
 #lang s-exp "prefix-mini-java.rkt"
 
 (define-class Fact
-  (define-field int x)
-  (define-method int fact ([int n])
-    (define-local int y)
+  (define-field x)
+  (define-method fact (n)
+    (define-local y)
     (= y 3)
     (= x 2)
     this
