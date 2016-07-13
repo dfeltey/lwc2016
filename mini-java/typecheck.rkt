@@ -5,7 +5,9 @@
 
 (require syntax/parse
          syntax/id-table
+         syntax/id-set
          racket/dict
+         unstable/error
          (for-template "prefix-mini-java.rkt"))
 
 (provide typecheck-program)
@@ -18,27 +20,136 @@
                      extends return else)))
 (require (for-template (submod "." literals)))
 
+;; Env
+(define current-env (make-parameter (make-immutable-free-id-table)))
+
+;; Types
+(struct type ())
+(struct class-type type (name super methods) #:transparent)
+(struct object-type type (class-type) #:transparent)
+(struct method-type type (name arg-types res-type) #:transparent)
+(struct base-type type (key) #:transparent)
+(define int-type (base-type (gensym)))
+(define bool-type (base-type (gensym)))
+(define int-array-type (base-type (gensym)))
+(struct binop-type (left right res) #:transparent)
+
+(define (make-class-type name super methods)
+  (class-type
+   name
+   super
+   (make-immutable-free-id-table
+    (for/list ([method (in-list methods)])
+      (match-define (method-type name _ _) method)
+      (cons name method)))))
+
+;; (or/c type? identifier?) -> type?
+(define (resolve-type t [env (current-env)])
+  (define (error)
+    (raise-syntax-error 'resolve-type (~a "No type for identifier: " (syntax-e t)) t))
+  (cond
+    [(type? t) t]
+    [(identifier? t) (free-id-table-ref env t error)]
+    [else (raise-syntax-error 'resolve-type "This shouldn't happen!")]))
+
+(define (resolve-object-type t [env (current-env)])
+  (define rt (resolve-type t env))
+  (cond
+    [(class-type? rt) (object-type rt)]
+    [else rt]))
+
+(define (subtype? t1 t2 [env (current-env)])
+  (define rty1 (resolve-type t1 env))
+  (define rty2 (resolve-type t2 env))
+  (match* (rty1 rty2)
+    [((base-type k1) (base-type k2)) (eq? k1 k2)]
+    [((class-type _ _ _) (class-type n2 _ _))
+     (free-id-set-member? (ancestors rty1 env) n2)]
+    [((method-type n1 arg-tys1 res-ty1) (method-type n2 arg-tys2 res-ty2))
+     (and (= (length arg-tys1) (length arg-tys2))
+          (subtype? res-ty1 res-ty2 env)
+          (for/and ([t1 (in-list arg-tys1)]
+                    [t2 (in-list arg-tys2)])
+            (subtype? t2 t1 env)))]
+    [((object-type cty1) (object-type cty2))
+     (subtype? cty1 cty2 env)]
+    [(_ _) #f]))
+
+;; Returns a free-id-set of all ancestors
+;; of the given class-type
+(define (ancestors class-ty [env (current-env)])
+  (let loop ([ancestors (immutable-free-id-set)]
+             [current class-ty])
+    (match (and current (resolve-type current env))
+      [(class-type n s _)
+       (loop (free-id-set-add ancestors n)
+             s)]
+      [_ ancestors])))
+
+(define (find-method-type meth-name class-id [env (current-env)])
+  (cond
+    [class-id
+     (define resolved-super (resolve-type class-id env))
+     (match resolved-super
+       [(class-type super-name super-super super-method-dict)
+        (define method-type (dict-ref super-method-dict meth-name #f))
+        (or method-type
+            (find-method-type meth-name super-super env))]
+       [_ (raise-syntax-error 'find-inherited-method-type
+                              "Super type was not a class type")])]
+    [else #f]))
+     
+
+(define-splicing-syntax-class type-sc
+  #:literals (int boolean)
+  (pattern (~seq int ())
+           #:attr type int-array-type)
+  (pattern int
+           #:attr type int-type)
+  (pattern boolean
+           #:attr type bool-type)
+  (pattern class-name:id
+           #:attr type #'class-name))
+
 (define-syntax-class var-declaration
-  (pattern (type:id name:id)))
+  (pattern (ty:type-sc name:id)
+           #:attr type (attribute ty.type)))
 
 (define-syntax-class method-declaration
   #:literals (public return)
-  (pattern (public return-type:id name:id (param:param-group ...)
+  (pattern (public return-type:type-sc name:id (param:param-group ...)
                    {local:var-declaration ... body ... return ret})
     #:with (param-name ...) #'(param.name ...)
-    #:with (param-type ...) #'(param.type ...)
     #:with (local-name ...) #'(local.name ...)
-    #:with (local-type ...) #'(local.type ...)))
+    #:attr local-names (attribute local.name)
+    #:attr local-types (attribute local.type)
+    #:attr param-names (attribute param.name)
+    #:attr param-types (attribute param.type)
+    #:attr method-type (method-type #'name (attribute param.type) (attribute return-type.type))
+    #:attr extend-names (append (attribute param-names) (attribute local-names))
+    #:attr extend-types (append (attribute param-types) (attribute local-types))))
+    
 (define-splicing-syntax-class param-group
-  (pattern (~seq type:id name:id)))
+  (pattern (~seq ty:type-sc name:id)
+           #:attr type (attribute ty.type)))
 
 (define-syntax-class binop
   #:literals (&& < + - *)
-  (pattern && #:with return-type #'boolean)
-  (pattern <  #:with return-type #'boolean)
-  (pattern +  #:with return-type #'int)
-  (pattern -  #:with return-type #'int)
-  (pattern *  #:with return-type #'int))
+  (pattern &&
+           #:with return-type #'boolean
+           #:attr type (binop-type bool-type bool-type bool-type))
+  (pattern <
+           #:with return-type #'boolean
+           #:attr type (binop-type int-type int-type bool-type))
+  (pattern +
+           #:with return-type #'int
+           #:attr type (binop-type int-type int-type int-type))
+  (pattern -
+           #:with return-type #'int
+           #:attr type (binop-type int-type int-type int-type))
+  (pattern *
+           #:with return-type #'int
+           #:attr type (binop-type int-type int-type int-type)))
 
 (define-syntax-class main-class
   #:literals (class public static void main)
@@ -47,79 +158,144 @@
 (define-syntax-class regular-class
   #:literals (class extends)
   (pattern (class name:id (~optional (~seq extends parent:id) ;; TODO actually implement inheritance and super
-                                     #:defaults ([parent #'#f]))
+                                     #:defaults ([parent #f]))
              {var:var-declaration ... meth:method-declaration ...})
     #:with (field-name ...)         #'(var.name ...)
-    #:with (field-type ...)         #'(var.type ...)
     #:with (method-name ...)        #'(meth.name ...)
-    #:with (method-return-type ...) #'(meth.return-type ...)))
+    #:with (method-return-type ...) #'(meth.return-type ...)
+    #:attr field-names (attribute var.name)
+    #:attr field-types (attribute var.type)
+    #:attr extends-stx (if (attribute parent) #'(#:extends parent) #'())
+    #:attr class-type (make-class-type #'name (attribute parent) (attribute meth.method-type))))
 
 (define (empty-env) (make-immutable-free-id-table))
 (define (extend-env env vars types)
   (for/fold ([env env])
-      ([name (in-list (syntax->list vars))]
-       [type (in-list (syntax->list types))])
-    (dict-set env name type)))
+      ([name (in-list vars)]
+       [type (in-list types)])
+    (dict-set env name (resolve-object-type type))))
+
+(define-syntax-rule (with-extended-env vars types . body)
+  (parameterize ([current-env (extend-env (current-env) vars types)]) . body))
 
 ;; a program is a list of class declarations (which includes main classes)
 (define (typecheck-program stx)
-  (define method-env (build-method-env (syntax->list stx)))
-  #`(#,@(map (typecheck-class method-env) (syntax->list stx))))
+  (define toplevel-env (build-toplevel-env (syntax->list stx)))
+  #`(#,@(parameterize ([current-env toplevel-env])
+          (for/list ([class (in-syntax stx)])
+            (typecheck-class class)))))
 
 ;; maps (class-name . method-name) pairs to their return types
-(define (build-method-env classes)
-  (for/fold ([env (make-immutable-hash)])
+(define (build-toplevel-env classes)
+  (for/fold ([env (make-immutable-free-id-table)])
       ([class (in-list classes)])
     (syntax-parse class
       [c:main-class
        env]
       [c:regular-class
-       (for/fold ([env env])
-           ([meth-name (in-list (syntax->list #'(c.method-name ...)))]
-            [meth-type (in-list (syntax->list #'(c.method-return-type ...)))])
-         (dict-set env (cons (syntax-e #'c.name) (syntax-e meth-name)) meth-type))])))
+       (dict-set env #'c.name (attribute c.class-type))])))
 
-(define ((typecheck-class method-env) stx)
+(define (typecheck-class stx [toplevel-env (current-env)])
   (syntax-parse stx
     [c:main-class
      (quasisyntax/loc stx
-       (main #,((typecheck-statement (empty-env) method-env #f) #'c.body)))]
+       (main #,(typecheck-statement #f #'c.body toplevel-env)))]
     [c:regular-class
-     #:do [(define env (extend-env (empty-env) #'(c.field-name ...) #'(c.field-type ...)))]
+     (define extends-clause (attribute c.extends-stx))
      (quasisyntax/loc stx
-       (define-class c.name ;; TODO propagate extends as #:extends
-         (define-field c.field-type c.field-name) ...
-         #,@(map (typecheck-method env method-env #'c.name) (syntax->list #'(c.meth ...)))))]))
+       (define-class c.name #,@extends-clause
+         (define-field c.field-name) ...
+         #,@(with-extended-env (attribute c.field-names) (attribute c.field-types)
+              (for/list ([method (in-syntax #'(c.meth ...))])
+                (typecheck-method #'c.name method)))))]))
 
-(define ((typecheck-method env method-env current-class) method)
+;; FIXME: typecheck-expression returns 2 values
+;; need to check the actual return type against the expected one
+;; figure out the places where identifiers are passed through as types
+;; so that I can resolve them when necessary
+;; Also all field declarations and local variable types need to be checked that
+;; they actually exist ...
+(define (typecheck-method current-class-name method [env (current-env)])
   (syntax-parse method
     [meth:method-declaration
-     #:do [(define body-env (extend-env (extend-env env
-                                                    #'(meth.param-name ...) #'(meth.param-type ...))
-                                        #'(meth.local-name ...) #'(meth.local-type ...)))]
-     (quasisyntax/loc method
-       (define-method meth.return-type meth.name (meth.param ...)
-         (define-local meth.local-type meth.local-name) ...
-         #,@(map (typecheck-statement body-env method-env current-class)
-                 (syntax->list #'(meth.body ...)))
-         #,((typecheck-expression body-env method-env current-class) #'meth.ret)))]))
+     (define current-class-type (resolve-type current-class-name))
+     ;; This might need better error handling ...
+     (match-define (class-type name super method-dict) current-class-type)
+     (define inherited-method-type (find-method-type #'meth.name super env))
+     (define method-ty (attribute meth.method-type))
+     (unless (or (not inherited-method-type)
+                 (subtype? method-ty inherited-method-type env))
+       (raise-syntax-error* "Method type not a subtype of inherited method"
+                            #'meth.name
+                            "in class" (syntax-e current-class-name)))
+     (define expected-result-type
+       (resolve-object-type (method-type-res-type method-ty)))
+     
+     (with-extended-env (attribute meth.extend-names) (attribute meth.extend-types)
+       (define-values (ret-ty ret-stx) (typecheck-expression current-class-name #'meth.ret))
+       (unless (subtype? ret-ty expected-result-type)
+         (raise-syntax-error* "return type mismatch"
+                              method
+                              #f))
+       (quasisyntax/loc method
+         (define-method meth.name (meth.param-name ...)
+           (define-local meth.local-name) ...
+           #,@(for/list ([statement (in-syntax #'(meth.body ...))])
+                (typecheck-statement current-class-name statement))
+           #,ret-stx)))]))
 
 ;; TODO could do actual typechecking. for now, just converts to prefix and recurs
-(define ((typecheck-statement env method-env current-class) statement)
-  (define t-s (typecheck-statement  env method-env current-class))
-  (define t-e (typecheck-expression env method-env current-class))
+(define (typecheck-statement current-class-name statement [env (current-env)])
+  (define (t-s s) (typecheck-statement current-class-name s env))
+  (define (t-e e) (typecheck-expression current-class-name e env))
   (syntax-parse statement
     #:literals (if else while System.out.println =)
     [(lhs:id = rhs)
-     (quasisyntax/loc statement (= lhs #,(t-e #'rhs)))]
+     (define lhs-ty (resolve-type #'lhs))
+     (define-values (rhs-ty rhs-stx) (t-e #'rhs))
+     (unless (subtype? rhs-ty lhs-ty)
+       (raise-syntax-error* "Type mismatch in assignment"
+                            statement                            
+                            #f))
+     (quasisyntax/loc statement (= lhs #,rhs-stx))]
     [(lhs:id [idx] = rhs)
-     (quasisyntax/loc statement (array= lhs #,(t-e #'idx) #,(t-e #'rhs)))]
+     (define lhs-ty (resolve-type #'lhs))
+     (define-values (idx-ty idx-stx) (t-e #'ids))
+     (define-values (rhs-ty rhs-stx) (t-e #'rhs))
+     (unless (subtype? lhs-ty int-array-type)
+       (raise-syntax-error* "Type mismatch in assignment"
+                            #'=
+                            #f))
+     (unless (subtype? idx-ty int-type)
+       (raise-syntax-error* "Type mismatch in array index"
+                            #'=
+                            #f))
+     (unless (subtype? rhs-ty int-type)
+       (raise-syntax-error* "Type mismatch in array assignment"
+                            #'=
+                            #f))
+     (quasisyntax/loc statement (array= lhs #,idx-stx #,rhs-stx))]
     [(if (tst) thn else els)
-     (quasisyntax/loc statement (if #,(t-e #'tst) #,(t-s #'thn) #,(t-s #'els)))]
+     (define-values (tst-ty tst-stx) (t-e #'tst))
+     (unless (subtype? tst-ty bool-type)
+       (raise-syntax-error* "Type mismatch in if condition"
+                            #'if
+                            #f))
+     (quasisyntax/loc statement (if #,tst-stx #,(t-s #'thn) #,(t-s #'els)))]
     [(while (tst) body)
-     (quasisyntax/loc statement (while #,(t-e #'tst) #,(t-s #'body)))]
+     (define-values (tst-ty tst-stx) (t-e #'tst))
+     (unless (subtype? tst-ty bool-type)
+       (raise-syntax-error* "Type mismatch in while condition"
+                            #'while
+                            #f))
+     (quasisyntax/loc statement (while #,tst-stx #,(t-s #'body)))]
     [(System.out.println (arg))
-     (quasisyntax/loc statement (System.out.println #,(t-e #'arg)))]
+     (define-values (arg-ty arg-stx) (t-e #'arg))
+     (unless (subtype? arg-ty int-type)
+       (raise-syntax-error* "Type mismatch"
+                            #'System.out.println
+                            #f))
+     (quasisyntax/loc statement (System.out.println #,arg-stx))]
     [{s ...}
      (quasisyntax/loc statement (compound #,@(map t-s (syntax->list #'(s ...)))))]))
 
@@ -130,41 +306,116 @@
   (syntax-property stx type-key))
 
 ;; TODO as with typecheck-statement, could do actual checking. for now just makes type info explicit
-(define ((typecheck-expression env method-env current-class) expression)
-  (define t-e (typecheck-expression env method-env current-class))
+(define (typecheck-expression current-class expression [env (current-env)])
+  (define (t-e expr) (typecheck-expression current-class expr env))
   (syntax-parse expression
     #:literals (new int length true false ! this)
     [(new int [len])
-     (add-type #'int-array (quasisyntax/loc expression
-                             (new-int-array #,(t-e #'len))))]
+     (define-values (len-ty len-stx) (t-e #'len))
+     (unless (subtype? len-ty int-type env)
+       (raise-syntax-error* "Type mismatch"
+                            #'len
+                            #f
+                            "expected" "int"))
+     (values int-array-type
+             (quasisyntax/loc expression
+               (new-int-array #,len-stx)))]
     [(new the-class:id ())
-     (add-type #'the-class (quasisyntax/loc expression
-                             (new the-class)))]
+     (define class-ty (resolve-type #'the-class env))
+     (match class-ty
+       [(class-type n s ms)
+        (values (object-type class-ty)
+                (quasisyntax/loc expression (new the-class)))]
+       [_ (raise-syntax-error* "Type mismatch"
+                               #'the-class
+                               #f
+                               "expected" "a class name")])]
     ;; TODO add `super` (and add as literal)
     [(lhs op:binop rhs)
-     (add-type #'binop.return-type (quasisyntax/loc expression
-                                     (op #,(t-e #'lhs) #,(t-e #'rhs))))]
+     (match-define (binop-type left-ty right-ty res-ty) (attribute op.type))
+     (define-values (lhs-ty lhs-stx) (t-e #'lhs))
+     (define-values (rhs-ty rhs-stx) (t-e #'rhs))
+     (unless (and (subtype? lhs-ty left-ty env)
+                  (subtype? rhs-ty right-ty env))
+       (raise-syntax-error* "Type mismatch"
+                            #'op
+                            #f))
+     (values res-ty
+             (quasisyntax/loc expression
+               (op #,lhs-stx #,rhs-stx)))]
     [(array [idx])
-     (add-type #'int (quasisyntax/loc expression
-                        (index #,(t-e #'array) #,(t-e #'idx))))]
+     (define-values (array-ty array-stx) (t-e #'array))
+     (define-values (idx-ty idx-stx) (t-e #'idx))
+     (unless (and (subtype? idx-ty int-type env)
+                  (subtype? array-ty int-array-type env))
+       (raise-syntax-error* "Type mismatch"
+                            expression
+                            #f))
+     (values int-type
+             (quasisyntax/loc expression
+               (index #,array-stx #,idx-stx)))]
     [(array length)
-     (add-type #'int (quasisyntax/loc expression
-                        (length #,(t-e #'array))))]
+     (define-values (array-ty array-stx) (t-e #'array))
+     (unless (subtype? array-ty int-array-type env)
+       (raise-syntax-error* "Type mismatch"
+                            expression
+                            #f))
+     (values int-type
+             (quasisyntax/loc expression
+               (vector-length #,array-stx)))]
     [(-receiver meth:identifier (arg ...)) ; needs to be after the binop and new object cases
-     (define receiver      (t-e #'-receiver))
-     (define receiver-type (get-type receiver))
-     (define return-type   (dict-ref method-env (cons (syntax-e receiver-type) (syntax-e #'meth))))
-     (add-type return-type
-               (quasisyntax/loc expression
-                 (send #,receiver-type #,receiver meth
-                       #,@(map t-e (syntax->list #'(arg ...))))))]
+     (define-values (recvr-ty recvr-stx) (t-e #'-receiver))
+     (match recvr-ty
+       [(object-type class-ty)
+        (match-define (class-type class-name _ _) class-ty)
+        (define method-ty (find-method-type #'meth class-ty env))
+        (unless method-ty
+          (raise-syntax-error* "Method not found"
+                               #'meth
+                               #f))
+        (match-define (method-type mname marg-types mres-type) method-ty)
+        (define-values (garg-types garg-stxs)
+          (for/lists (garg-types garg-stxs)
+                     ([garg (in-syntax #'(arg ...))])
+            (t-e garg)))
+        (unless (= (length garg-types) (length marg-types))
+          (raise-syntax-error* "Wrong number of arguments to method"
+                               #'meth
+                               #f))
+        (unless (for/and ([garg-ty (in-list garg-types)]
+                          [marg-ty (in-list marg-types)])
+                  (subtype? garg-ty marg-ty env))
+          (raise-syntax-error* "Type mismatch"
+                               expression
+                               #f))
+        (values (resolve-object-type mres-type)
+                (quasisyntax/loc expression
+                  (send #,class-name #,recvr-stx meth #,@garg-stxs)))]
+       [_
+        (raise-syntax-error* "Type mismatch"
+                             expression
+                             #f
+                             "expected" "object type")])]
     [(! arg)
-     (add-type #'boolean (quasisyntax/loc expression (! #,(t-e #'arg))))]
+     (define-values (arg-ty arg-stx) (t-e #'arg))
+     (unless (subtype? arg-ty bool-type env)
+       (raise-syntax-error* "Type mismatch"
+                            #'arg
+                            #f
+                            "expected" "boolean"))
+     (values bool-type
+             (quasisyntax/loc expression (! #,arg-stx)))]
     [(~or true false)
-     (add-type #'boolean expression)]
+     (values bool-type expression)]
     [this
-     (add-type current-class expression)]
+     (define class-ty (resolve-type current-class env))
+     (values (object-type class-ty) expression)]
     [var:id
-     (add-type (dict-ref env #'var) expression)]
+     (define var-ty (resolve-type #'var env))
+     (unless var-ty
+       (raise-syntax-error* "No type for identifier"
+                            #'var
+                            #f))
+     (values var-ty expression)]
     [n:exact-integer
-     (add-type #'int expression)]))
+     (values int-type expression)]))

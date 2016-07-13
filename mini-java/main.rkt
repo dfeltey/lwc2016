@@ -1,7 +1,7 @@
 #lang racket
 
 (module reader syntax/module-reader
-  mini-java/mini-java
+  mini-java/infix-mini-java
   #:read-syntax
   (λ (name in)
     (read-syntax name in))
