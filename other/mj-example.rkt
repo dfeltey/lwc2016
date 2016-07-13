@@ -1,4 +1,4 @@
-#lang mini-java
+ #lang mini-java
 
 /* example mini-java program */
 

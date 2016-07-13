@@ -99,11 +99,11 @@
                   "switch"      "length"       "System.out.println"
                   "main"        "String"       "super"))
   
-  (IntegerTypeSuffix (char-set "lL"))
   (DecimalNumeral (re:or #\0
                          (re:: (re:/ "19") (re:* (re:/ "09")))))
   
-  (Operator (re:or "&&"   "=="   "<"     "+"     "-"     "*"      	"!"	"="   "||")))
+  (Operator (re:or "&&"   "=="   "<"     "+"     "-"     "*"      	"!"	"=" ))
+  (OR "||"))
 
 ;; Handle Comments
 (define read-line-comment
@@ -137,6 +137,8 @@
    
    (Operator (let ((l lexeme))
                (string->symbol l)))
+
+   (OR (token-OR_OP))
    
    ("(" (token-O_PAREN))
    (")" (token-C_PAREN))

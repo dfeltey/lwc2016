@@ -15,7 +15,7 @@
 (define-values/invoke-unit/infer lexer+parser@)
 
 (define (output input-string)
-  (map syntax->datum (parse-program (open-input-string input-string) 'program)))
+  (map syntax->datum (parse (open-input-string input-string) 'program 'program)))
 
 
 (check-equal? (output "class Test{
