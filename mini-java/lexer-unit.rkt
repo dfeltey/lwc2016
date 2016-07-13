@@ -125,14 +125,14 @@
 
 (define get-token
   (lexer-src-pos
-   ;; Special form for handling 2d syntax pass parse-box-contents
+   ;; Special form for handling 2d syntax pass parse function to handle box contents
    ("#2" (let-values ([(line col pos) (port-next-location input-port)])
            (token-2D (dispatch-proc #\2 input-port
                                     #f line col pos
                                     (λ (input-port _1 _2)
                                       (cond
                                         [(eof-object? (peek-char input-port)) eof]
-                                        [else (parse-box-contents input-port 'prog)]))
+                                        [else (parse input-port 'prog 'box)]))
                                     #f))))
    
    (Operator (let ((l lexeme))

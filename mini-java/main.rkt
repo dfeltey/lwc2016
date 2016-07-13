@@ -33,4 +33,4 @@
       [(color-lexer) color-lexer]
       [else (get-default mode default)]))
   
-  (define (read-syntax name in) (parse-program in name)))
+  (define (read-syntax name in) (displayln (parse in name 'program))))

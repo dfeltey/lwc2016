@@ -30,15 +30,12 @@
             (unless (null? (cdr token-list))
               (set! token-list (cdr token-list))))))
 
-(define (parse-program is filename)
+(define (parse is filename mode)
   (let* ((lexed (lex-port is filename))
          (my-get (getter lexed)))
-    (parse-mini-java my-get)))
-
-(define (parse-box-contents is filename)
-  (let* ((lexed (lex-port is filename))
-         (my-get (getter lexed)))
-    (parse-mini-java-box-contents my-get)))
+    (match mode
+      ['program (parse-mini-java my-get)]
+      ['box (parse-mini-java-box-contents my-get)])))
 
 (define orig-prop (read-syntax 'src (open-input-bytes #"x")))
 
