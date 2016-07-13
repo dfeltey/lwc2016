@@ -1,16 +1,17 @@
-#lang racket
+#lang racket/unit
 
-(require "ast.rkt"
-         "parameter.rkt"
-         "lexer.rkt")           
+(require "tokens.rkt"
+         "lexer-sig.rkt"
+         "parser-sig.rkt"
 
-(require parser-tools/yacc
+         parser-tools/yacc
          (except-in parser-tools/lex input-port)
          syntax/readerr
-         racket/syntax)
+         racket/syntax
+         racket)
 
-(provide parse-program
-         parse-box-contents)
+(import lexer^)
+(export parser^)
 
 (define (lex-port port filename)
   (port-count-lines! port)
@@ -39,6 +40,18 @@
          (my-get (getter lexed)))
     (parse-mini-java-box-contents my-get)))
 
+(define orig-prop (read-syntax 'src (open-input-bytes #"x")))
+
+(define (to-syntax s-expr srcloc)
+  (datum->syntax #f s-expr srcloc orig-prop))
+
+(define interactions-offset (make-parameter 0))
+
+(struct src (line col pos span file) #:mutable #:prefab)
+
+(define (src->list src)
+  (list (src-file src) (src-line src) (src-col src) (src-pos src) (src-span src)))
+
 (define-syntax (build-src stx)
   (syntax-case stx ()
     ((_ end)
@@ -55,30 +68,18 @@
                               (format "$~a-end-pos"
                                       (syntax->datum (syntax end)))))))
        (syntax
-        (make-src (position-line start-pos)
-                  (position-col start-pos)
-                  (+ (position-offset start-pos) (interactions-offset))
-                  (- (position-offset end-pos)
-                     (position-offset start-pos))
-                  (file-path)
-                  ))))))
-
-(define (construct-method-header mods ret-type declarator)
-  (make-method mods 
-               (make-type-spec (type-spec-name ret-type)
-                               (+ (type-spec-dim ret-type) (caddr declarator)))
-               (car declarator)
-               (cadr declarator)
-               #f))
-
-(define orig-prop (read-syntax 'src (open-input-bytes #"x")))
-(define (to-syntax s-expr srcloc)
-  (datum->syntax #f s-expr srcloc orig-prop))
+        (src (position-line start-pos)
+             (position-col start-pos)
+             (+ (position-offset start-pos) (interactions-offset))
+             (- (position-offset end-pos)
+                (position-offset start-pos))
+             (file-path)
+             ))))))
 
 (define parsers
   (parser
    (start Program Box)
-   (tokens java-vals special-toks Keywords ExtraKeywords Separators EmptyLiterals Operators OR_TOK)
+   (tokens mini-java-vals special-toks Keywords Separators EmptyLiterals Operators)
    (error (lambda (tok-ok name val start-pos end-pos)
             (raise-read-error (format "Parse error near <~a:~a>" name val)
                               (file-path)
@@ -257,7 +258,7 @@
 
     (ConditionalOrExpression
      [(ConditionalAndExpression) $1]
-     [(ConditionalOrExpression OR_OP ConditionalAndExpression)
+     [(ConditionalOrExpression || ConditionalAndExpression)
       (to-syntax `(,$1 || ,$3)
                  (src->list (build-src 3)))])
     

@@ -16,8 +16,17 @@
     (get-info mode default get-default))
   
   (require racket
-           "lexer.rkt"
-           "parser.rkt")
+           "lexer-sig.rkt"
+           "parser-sig.rkt"
+           "lexer-unit.rkt"
+           "parser-unit.rkt")
+  
+  (define-compound-unit/infer lexer+parser@
+    (import)
+    (export lexer^ parser^)
+    (link lexer@ parser@))
+  
+  (define-values/invoke-unit/infer lexer+parser@)
   
   (define (get-info mode default get-default)
     (case mode

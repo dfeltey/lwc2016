@@ -1,10 +1,21 @@
 #lang racket
 
 (require rackunit
-         "parser.rkt")
+         racket
+         "lexer-sig.rkt"
+         "parser-sig.rkt"
+         "lexer-unit.rkt"
+         "parser-unit.rkt")
+
+(define-compound-unit/infer lexer+parser@
+  (import)
+  (export lexer^ parser^)
+  (link lexer@ parser@))
+  
+(define-values/invoke-unit/infer lexer+parser@)
 
 (define (output input-string)
-  (map syntax->datum (parse (open-input-string input-string) 'program)))
+  (map syntax->datum (parse-program (open-input-string input-string) 'program)))
 
 
 (check-equal? (output "class Test{
