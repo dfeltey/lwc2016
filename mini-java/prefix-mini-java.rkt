@@ -21,6 +21,7 @@
          (rename-out [begin         compound]
                      [displayln     System.out.println]
                      [set!          =]
+                     [eqv?          ==]
                      [vector-set!   array=]
                      [and           &&]
                      [vector-ref    index]
@@ -28,6 +29,9 @@
                      [not           !]
                      [make-vector   new-int-array]))
 
+
+(define-syntax-rule (|| x y)
+  (or x y))
 
 (define-syntax-rule (define-literals (lit ...))
   (begin (define-syntax lit (syntax-rules ())) ...))
