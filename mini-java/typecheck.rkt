@@ -25,6 +25,7 @@
 
 ;; Types
 (struct type ())
+(struct top-type type ())
 (struct class-type type (name super methods) #:transparent)
 (struct object-type type (class-type) #:transparent)
 (struct method-type type (name arg-types res-type) #:transparent)
@@ -62,6 +63,7 @@
   (define rty1 (resolve-type t1 env))
   (define rty2 (resolve-type t2 env))
   (match* (rty1 rty2)
+    [(_ (top-type)) #t]
     [((base-type k1) (base-type k2)) (eq? k1 k2)]
     [((class-type _ _ _) (class-type n2 _ _))
      (free-id-set-member? (ancestors rty1 env) n2)]
@@ -134,8 +136,14 @@
            #:attr type (attribute ty.type)))
 
 (define-syntax-class binop
-  #:literals (&& < + - *)
+  #:literals (&& < + - * || ==)
+  (pattern ==
+           #:with return-type #'boolean
+           #:attr type (binop-type (top-type) (top-type) bool-type))
   (pattern &&
+           #:with return-type #'boolean
+           #:attr type (binop-type bool-type bool-type bool-type))
+  (pattern ||
            #:with return-type #'boolean
            #:attr type (binop-type bool-type bool-type bool-type))
   (pattern <
