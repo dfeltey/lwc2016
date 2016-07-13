@@ -102,8 +102,7 @@
   (DecimalNumeral (re:or #\0
                          (re:: (re:/ "19") (re:* (re:/ "09")))))
   
-  (Operator (re:or "&&"   "=="   "<"     "+"     "-"     "*"      	"!"	"=" ))
-  (OR "||"))
+  (Operator (re:or "&&"   "=="   "<"     "+"     "-"     "*"      	"!"	"="   "||")))
 
 ;; Handle Comments
 (define read-line-comment
@@ -136,9 +135,9 @@
                                     #f))))
    
    (Operator (let ((l lexeme))
-               (string->symbol l)))
-
-   (OR (token-OR_OP))
+               (cond
+                 [(string=? l "||") (token-OR)]
+                 [else (string->symbol l)])))
    
    ("(" (token-O_PAREN))
    (")" (token-C_PAREN))

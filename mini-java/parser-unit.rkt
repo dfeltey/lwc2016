@@ -70,13 +70,12 @@
              (+ (position-offset start-pos) (interactions-offset))
              (- (position-offset end-pos)
                 (position-offset start-pos))
-             (file-path)
-             ))))))
+             (file-path)))))))
 
 (define parsers
   (parser
    (start Program Box)
-   (tokens mini-java-vals special-toks Keywords Separators EmptyLiterals Operators OR_TOK)
+   (tokens mini-java-vals special-toks Keywords Separators EmptyLiterals Operators)
    (error (lambda (tok-ok name val start-pos end-pos)
             (raise-read-error (format "Parse error near <~a:~a>" name val)
                               (file-path)
@@ -255,7 +254,7 @@
 
     (ConditionalOrExpression
      [(ConditionalAndExpression) $1]
-     [(ConditionalOrExpression OR_OP ConditionalAndExpression)
+     [(ConditionalOrExpression OR ConditionalAndExpression)
       (to-syntax `(,$1 || ,$3)
                  (src->list (build-src 3)))])
     
