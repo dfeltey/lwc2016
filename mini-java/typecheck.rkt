@@ -257,7 +257,8 @@
   (define (t-s s) (typecheck-statement current-class-name s env))
   (define (t-e e) (typecheck-expression current-class-name e env))
   (syntax-parse statement
-    #:literals (if else while System.out.println =)
+    #:literals (if else while System.out.println = break)
+    [(break) (quasisyntax/loc statement (break))]
     [(lhs:id = rhs)
      (define lhs-ty (resolve-type #'lhs))
      (define-values (rhs-ty rhs-stx) (t-e #'rhs))

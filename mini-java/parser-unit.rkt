@@ -205,7 +205,8 @@
      [(IfThenElseStatement) $1]
      [(WhileStatement) $1]
      [(Println) $1]
-     [(Assignment) $1])
+     [(Assignment) $1]
+     [(BreakStatement) $1])
     
     (BlockStatements 
      [(Statement) (list $1)]
@@ -240,7 +241,12 @@
     (Assignment
      [(LeftHandSide AssignmentOperator Expression SEMI_COLON)
       (to-syntax `(,@$1 = ,$3)
-                 (src->list (build-src 4)))])      
+                 (src->list (build-src 4)))])
+
+    (BreakStatement
+     [(BREAK_LIT SEMI_COLON)
+      (to-syntax `(break)
+                 (src->list (build-src 2)))])
     
     (LeftHandSide
      [(Identifier) `(,$1)]

@@ -151,6 +151,7 @@
    
    ("true" (token-TRUE_LIT))
    ("false" (token-FALSE_LIT))
+   ("break" (token-BREAK_LIT))
    
    (DecimalNumeral
     (token-INTEGER_LIT (string->number lexeme 10)))

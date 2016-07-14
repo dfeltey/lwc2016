@@ -40,6 +40,10 @@
 (define-syntax-parameter current-this (syntax-rules ()))
 (define-syntax this (lambda (stx) (syntax-parameter-value #'current-this)))
 
+(define-syntax-parameter break
+  (λ (stx)
+    (raise-syntax-error 'break "break used out of context")))
+
 (begin-for-syntax
 
  (define-syntax-class var-decl
@@ -180,10 +184,15 @@
             (syntax-loc #'then)
             (syntax-loc #'else)))]))
 
-(define-simple-macro (while test body ...)
-  (let loop ()
-    (when test
-      body ...)))
+(define-syntax (while stx)
+  (syntax-parse stx
+    [(while test body ...)
+     #`(let/ec local-break
+         (syntax-parameterize ([break (syntax-parser [(break) #'(local-break)])])
+           (let loop ()
+             (when test
+               body ...
+               (loop)))))]))
 
 ;; expressions (except Racket re-exports)
 
