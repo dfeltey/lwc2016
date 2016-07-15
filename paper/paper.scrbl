@@ -73,6 +73,9 @@ After a program has been read, the @emph{expansion} pass further processes the s
 fully-expanded syntax object. Fully-expanded programs resemble an enriched lambda calculus. Because programmers
 may extend the language as they see fit with new macro definitions, the expansion process is necessarily recursive
 and may introduce new opportunities for expansion, or even new macro definitions during the traversal of a syntax object.
+Unlike functions which must evaluate their arguments before the function may be applied in an inside-out process,
+macro expansion, instead, happens outside-in. Macros expand to produce syntax objects which may contain other
+macro invocations which must be further expanded until the result is a fully-expanded syntax object.
 
 The ability to define new syntactic forms allows programmers to define entirely new languages on top of Racket.
 Notable examples of languages utilizing Racket's macro facilities to define new languages include Typed Racket,
@@ -80,6 +83,9 @@ a gradually-typed sister language of Racket, and Lazy Racket, which adds lazines
 we demonstrate several techniques for building languages on top of Racket making heavy use of the Racket's macro system.
 
 @subsection{The Implementation of MiniJava}
+We have chosen MiniJava as the language to extend in our solutions to the benchmark problems.
+In this section we describe the implementation of MiniJava in Racket. @Figure-ref{mj-syntax}
+shows an example MiniJava program written using Racket's @bold{#lang} mechanism.
 
 @Figure-ref{mj-impl} shows the structure of our MiniJava implementation on top of Racket. Similar to a standard
 compiler, there are phases for lexing, parsing, and type checking. In place of a compilers code generation phase
@@ -94,34 +100,6 @@ Racket code and eventually fully-expanded code. Because the lexing, parsing, and
 rest of this section will focus primarily on the implementation of the macros that translate parenthesized MiniJava programs
 into Racket.
 
-@;; ----------------------------------------------------------------------------
-
-Steps one through
-three comprise the translation from MiniJava into an equivalent Racket program. Step one performs lexing and
-parsing on MiniJava's concrete syntax to produce an abstract syntax tree. In step two the abstract syntax tree is type
-checked and transformed into a parenthesized version of MiniJava which elides most of the type information present
-in the concrete syntax. The parenthesized language is implemented as a number of Racket macros which translate the
-MiniJava classes into a correpsonding Racket program which implements the necessary method tables. The fourth step
-displayed in @figure-ref{mj-example} is not strictly a part of the MiniJava implementation, but a part of the process
-by which a MiniJava program is transformed into an executable Racket program.
-
-Following the steps illustrated in @figure-ref{mj-example}, our implementation of MiniJava can be decomposed into
-two main components. The first component consists of lexing, parsing, and type checking. In this phase of the
-implementation, the MiniJava concrete syntax is first transformed into an abstract syntax tree which is then
-type checked and 
-
-
-The first is a standard Java lexer
-and parser to support the usual concrete syntax of MiniJava.
-
-The second component is the implementation
-of an prefix s-expression based version of MiniJava which is produced by our parser. @Figure-ref{mj-sexp-example}
-shows the prefix variant of the MiniJava program that our parser produces from the program in @figure-ref{mj-example}.
-The parenthesized MiniJava is implemented as a number macros that transform the parenthesized MiniJava forms into
-method tables implemented as Racket vectors.
-
-
-@;; ----------------------------------------------------------------------------
 @(figure
   "mj-impl"
   "Structure of the MiniJava implemntation"
@@ -136,39 +114,28 @@ method tables implemented as Racket vectors.
   "Parenthesized MiniJava"
   @mj-paren-example)
 
-@;; This section discusses the use of macros syntax-classes to implement mini-java
-We have chosen MiniJava as the language to extend in our solutions to the benchmark problems.
-In this section we describe the implementation of MiniJava in Racket. @Figure-ref{mj-example}
-shows an example MiniJava program written using Racket's @bold{#lang} mechanism.
-
-
+@Figure-ref{mj-sexp-example} shows the parenthesized version of the MiniJava program from @figure-ref{mj-syntax}.
 The parenthesized version of MiniJava programs are the the result of parsing the concrete syntax of MiniJava
 and performing type checking over the abstract syntax tree. The type checking pass is necessary to insert type
-information where it will be used in the process of macro expansion. For example, consider the method call
+information where it will be used in the process of macro expansion. For example, consider the method call from
+@figure-ref{mj-syntax}
+@;; FIXME: Want to use codeblock here to get syntax coloring, but just the method call doesn't parse
 @racketblock[this.is_odd(n-1)]
 The type checking pass propogates information about the type of @racket[this], in this example @racket[Even],
-into the method call resulting in the expression:
+into the method call resulting in the parenthesized expression:
 @racketblock[(send this Even is_odd (- n 1))]
-When macro expansion further translates this method call to look up the correct indices in the method table
-for the @racket[Even] class the type information is required in order to correctly resolve the method.
-@;; FIXME: is this actually true?????
-Since the @racket[send] macro has a reference to the type information, it can be implemented separately
-from the @racket[define-class] macro. This form of communication between different macro implementations
-is a powerful tool for designing languages and the use of Racket as a language workbench.
+When macro expansion further translates this method call, the implementation of the @racket[send] macro
+uses the type information to find the correct index into the method table for the @racket[Even] class.
+The type information is necessary here in order to always properly resolve method calls into the correct
+corresponding vector references. Since the @racket[send] macro has a reference to the type information,
+it can be implemented separately from the @racket[define-class] macro. This form of communication between
+different macro implementations is a powerful tool for designing languages and the use of Racket as a
+language workbench.
 
-
-@;; FIXME: better transition into details of macros/implementation ...
-@;; this next "paragraph" needs to be broken up somehow
-@;; start with the small example of the or macro on the inside of the m-j program
-@;; then build out towards a description of the mini-java compilation process
-In contrast to function calls which must first evaluate their arguments before the function may be applied
-in an inside-out process, the process of macro expansion, instead, happens outside-in. First outer macros are
-expanded and then any new unexpanded code that results from the first round of expansion will be
-expanded until the program is fully expanded. In order to better understand the macro expansion process and
-how to implement macros in Racket, consider the use of the logical or operation in the
-MiniJava program from @figure-ref{mj-example}. In our implementation, the MiniJava expression
-@racket[(x || y)] compiles into the Racket expression @racket[(or x y)]. The Racket definition of the
-@racket[or] operatation is reproduced below:
+To better understand the macro expansion process and how to implement macros in Racket, consider the use
+of the logical or operation in the MiniJava program from @figure-ref{mj-syntax}. In our implementation,
+the MiniJava expression @racket[(x || y)] compiles into the Racket expression @racket[(or x y)]. The Racket
+definition of the @racket[or] operatation is reproduced below:
 @racketblock[
  (define-syntax (or stx)
   (syntax-parse stx
@@ -200,7 +167,6 @@ side-effecting code, may need to run at compile time in order to expand a syntac
 the issue of mingling compile time code with run-time code through a phase distinction that makes explicit
 the execution time of a piece of code.
 
-
 A more complex example of the macro expansion process used in our implementation of MiniJava is the translation
 from method calls to instance and method table lookups. Consider the compilation from the parenthesized MiniJava
 in @figure-ref{mj-sexp-example} into the method table in @figure-ref{mj-compiled-vector}. The method call in the
@@ -215,7 +181,6 @@ The inner use of @racket[vector-ref] looks up the class method table of the @rac
 stored at index 0. The outer @racket[vector-ref] is an index into the method table of the @racket[Even] class.
 Since the @racket[is_odd] method is the second method of the class it is stored at index 1, this reference returns
 a function which is called on the argument to the method.
-
 
 To support this compilation, the @racket[send] macro must have access to information about the @racket[Even]
 class. In particular, the @racket[send] macro needs to determine the index of the @racket[is_odd] method in
@@ -235,9 +200,8 @@ to store static information that can be accessed at compile time using the @rack
 Our implementation of MiniJava expands class forms to bind static information about class types using
 @racket[define-syntax]. In @figure-ref{mj-even-static-info}, the class name @racket[Even] is bound to a
 record, created with a call to the procedure @racket[static-class-info], containing three elements necessary
-@;; FIXME: Even:static-method-info is possibly too wide
 @;; Do we need an example of the constructor definition for instances of the even class???
-to compile MiniJava classes. The first element in the record, @racket[Even:static-method-info], is a compile-time
+to compile MiniJava classes. @racket[Even:static-method-info], the first element in the record, is a compile-time
 table that maps method identifiers to their indices in the method table. The second element, @racket[#'Even:method-table],
 is a syntax object that corresponds to the identifier bound as the runtime method table for the @racket[Even] class in
 @figure-ref{mj-compiled-vector}. The last element in the record, @racket[#'Even:constructor], is similarly the syntax
