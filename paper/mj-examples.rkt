@@ -1,5 +1,5 @@
 #lang racket
-(require pict/code)
+(require pict pict/code)
 (provide (all-defined-out))
 
 
@@ -13,7 +13,7 @@ class Even {
   return (n == 0) || this.is_odd(n - 1);
  }
  public boolean is_odd(int n) {
-  return (n == 1) || this.is_even(n - 1);
+  return (! (n == 0)) && this.is_even(n - 1); 
  }
 }
 >>
@@ -22,13 +22,13 @@ class Even {
 (define mj-paren-example
   (codeblock-pict
    #<<>>
-#lang s-exp mini-java/mini-java
+#lang s-exp mini-java/prefix-mini-java
 
 (define-class Even
-  (define-method boolean is_even ([int n])
+  (define-method is_even (n)
     (or (== n 0) (send Even this is_odd (- n 1))))
-  (define-method boolean is_odd ([int n])
-    (or (== n 1) (send Even this is_even (- n 1)))))
+  (define-method is_odd (n)
+    (and (! (== n 0)) (send Even this is_even (- n 1)))))
 >>
   ))
 
@@ -57,10 +57,10 @@ class Even {
      (static-class-info
       Even:static-method-info
       #'Even:method-table
-      #'Even:constructor))
+      #'Even:constructor
+      0))
 >>
    ))
-
 
 (define mj-send-macro
   (codeblock-pict
@@ -74,10 +74,11 @@ class Even {
      (define ct-method-table
        (static-class-info-compile-time-method-table
         (syntax-local-value #'the-class)))
-     #`(let* ([rt-method-table (vector-ref receiver 0)]
+     #`(let* ([receiver-val receiver]
+              [rt-method-table (vector-ref receiver-val 0)]
               [method-index    #,(dict-ref ct-method-table #'method-name)]
               [method          (vector-ref rt-method-table method-index)])
-         (method receiver arg ...))]))
+         (method receiver-val arg ...))]))
 >>
   ))
 
@@ -98,3 +99,65 @@ class Even {
 ╚══════════╩══════════════════════════════════╩══════════════════════════════════╝
 >>
    ))
+
+;; MiniJava implementation phase diagram
+(define (make-lang-box txt [w 165] [h 20])
+    (cc-superimpose
+     (text txt)
+     (rounded-rectangle w h)))
+(define MJ
+  (make-lang-box "MiniJava"))
+(define AST
+  (make-lang-box "Abstract Syntax Tree"))
+(define PMJ
+  (make-lang-box "Parenthesized MiniJava"))
+(define RKT
+  (make-lang-box "Racket"))
+(define EXP
+  (make-lang-box "Fully-Expanded Code"))
+(define lang-phases (list MJ AST PMJ RKT EXP))
+(define combined (apply vc-append 30 lang-phases))
+(define pairs
+  (reverse
+   (let loop ([pairs null]
+              [lst lang-phases])
+     (cond
+       [(= 2 (length lst))
+        (cons (apply cons lst) pairs)]
+       [else
+        (match-define (list f s r ...) lst)
+        (loop (cons (cons f s) pairs)
+              (rest lst))]))))
+(define explanations
+  (list "Lexing + Parsing"
+        "Type Checking"
+        "Macro Expansion"
+        "More Macro Expansion"))
+
+(define the-x 20)
+(define (find-bot pict find)
+  (define-values (x y) (cb-find pict find))
+  (values the-x y))
+(define (find-top pict find)
+  (define-values (x y) (ct-find pict find))
+  (values the-x y))
+
+(define pipeline-diagram
+  (for/fold ([diagram combined])
+            ([pair (in-list pairs)]
+             [explanation (in-list explanations)]
+             [i (in-naturals 1)])
+    (define count (text (~a (number->string i) ".   ")))
+    (define count-width (pict-width count))
+    (match-define (cons top bot) pair)
+    (define txt (text explanation))
+    (define adjustment (/ (- (pict-width txt)count-width) 2))
+    (pin-arrow-line 5 diagram
+                    top find-bot
+                    bot find-top
+                    #:line-width 1
+                    #:label (hc-append count txt)
+                    #:x-adjust-label adjustment)))
+(define pipeline+mj-example
+  (hc-append  20 pipeline-diagram
+             mj-simple-example))
