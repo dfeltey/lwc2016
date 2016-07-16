@@ -37,8 +37,7 @@
   (begin (define-syntax lit (syntax-rules ())) ...))
 (define-literals (define-field define-method))
 
-(define-syntax-parameter current-this (syntax-rules ()))
-(define-syntax this (lambda (stx) (syntax-parameter-value #'current-this)))
+(define-syntax-parameter this (syntax-rules ()))
 
 (define-syntax-parameter break
   (λ (stx)
@@ -165,7 +164,7 @@
 (define-simple-macro (method meth:meth-decl)
   (lambda (receiver meth.arg-name ...)
     (syntax-parameterize
-     ([current-this #'receiver])
+     ([this (make-rename-transformer #'receiver)])
      meth.body ...)))
 
 (define-simple-macro (define-local x)

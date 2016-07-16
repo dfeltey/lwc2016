@@ -161,7 +161,8 @@
 
 (define-syntax-class main-class
   #:literals (class public static void main)
-  (pattern (class name:id {public static void main (String [] param:id) { body }})))
+  (pattern (class name:id {public static void main (String [] param:id) { body }})
+    #:attr class-type (make-class-type #'name #f null)))
 
 (define-syntax-class regular-class
   #:literals (class extends)
@@ -199,7 +200,7 @@
       ([class (in-list classes)])
     (syntax-parse class
       [c:main-class
-       env]
+       (dict-set env #'c.name (attribute c.class-type))]
       [c:regular-class
        (dict-set env #'c.name (attribute c.class-type))])))
 
@@ -207,7 +208,7 @@
   (syntax-parse stx
     [c:main-class
      (quasisyntax/loc stx
-       (main #,(typecheck-statement #f #'c.body toplevel-env)))]
+       (main #,(typecheck-statement #'c.name #'c.body toplevel-env)))]
     [c:regular-class
      (define extends-clause (attribute c.extends-stx))
      (quasisyntax/loc stx
