@@ -17,7 +17,7 @@
 
 ;; syntax-coloring for use in get-info
 (define (color-lexer in offset mode)
-    (define tok (get-color-token in))
+    (define tok (get-token in))
     (define (ret mode paren [eof? #f])
       (values (if eof?
                   eof
@@ -39,7 +39,6 @@
       [(C_BRACKET) (ret 'parenthesis '|]|)]
       [(IDENTIFIER) (ret 'symbol #f)]
       [(INTEGER_LIT) (ret 'constant #f)]
-      [(White-Space) (ret 'white-space #f)]
       [else (ret 'other #f)]))
 
 (define-lex-abbrevs
@@ -96,8 +95,7 @@
   (Keyword (re:or "if"          "this"         "boolean"     "public"
                   "else"        "return"       "extends"     "int"
                   "static"      "void"         "class"       "super"
-                  "while"       "const"        "for"        "new"
-                  "switch"      "length"       "System.out.println"
+                  "while"       "new"          "length"      "System.out.println"
                   "main"        "String"       "super"))
   
   (DecimalNumeral (re:or #\0
@@ -123,9 +121,8 @@
    [(special) (read-block-comment input-port)]
    [(special-comment) (read-block-comment input-port)]))
 
-(define (make-get-token [color? #f])
+(define get-token
   (lexer-src-pos
-   ("#lang" (token-LANG))
    ;; Special form for handling 2d syntax pass parse function to handle box contents
    ("#2" (let-values ([(line col pos) (port-next-location input-port)])
            (token-2D (dispatch-proc #\2 input-port
@@ -153,7 +150,6 @@
    
    ("true" (token-TRUE_LIT))
    ("false" (token-FALSE_LIT))
-   ("break" (token-BREAK_LIT))
    
    (DecimalNumeral
     (token-INTEGER_LIT (string->number lexeme 10)))
@@ -165,11 +161,7 @@
    ("//" (begin (read-line-comment input-port) (return-without-pos (get-token input-port))))
    ("/*" (begin (read-block-comment input-port) (return-without-pos (get-token input-port))))
    
-   ((re:+ WhiteSpace) (if color?
-                          (token-White-Space)
-                          (return-without-pos (get-token input-port))))
+   ((re:+ WhiteSpace) (return-without-pos (get-token input-port)))
    
    (#\032 'EOF)
    ((eof) 'EOF)))
-(define get-token (make-get-token))
-(define get-color-token (make-get-token #t))
