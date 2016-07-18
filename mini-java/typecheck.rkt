@@ -8,7 +8,9 @@
          syntax/id-set
          racket/dict
          unstable/error
-         (for-template "prefix-mini-java.rkt"))
+         racket/syntax
+         (for-template "prefix-mini-java.rkt")
+         "state-machine.rkt")
 
 (provide typecheck-program)
 
@@ -202,7 +204,14 @@
       [c:main-class
        (dict-set env #'c.name (attribute c.class-type))]
       [c:regular-class
-       (dict-set env #'c.name (attribute c.class-type))])))
+       (dict-set env #'c.name (attribute c.class-type))]
+      [c:2dstate-class
+       (dict-set #'c.class-name
+                 (make-class-type
+                  #'c.class-name
+                  #f
+                  (for/list ([n (in-syntax (attribute c.method-names))])
+                    (method-type n null #'int))))])))
 
 (define (typecheck-class stx [toplevel-env (current-env)])
   (syntax-parse stx
@@ -216,7 +225,23 @@
          (define-field c.field-name) ...
          #,@(with-extended-env (attribute c.field-names) (attribute c.field-types)
               (for/list ([method (in-syntax #'(c.meth ...))])
-                (typecheck-method #'c.name method)))))]))
+                (typecheck-method #'c.name method)))))]
+    [(and
+      class:2dstate-class
+      (2dstate-machine
+       a b
+       cell:cell-mapping ...))
+     (define/with-syntax ((new-body ...) ...)
+       (for/list ([b* (in-syntax #'((cell.body ...) ...))])
+         (for/list ([stmt (in-syntax b*)])
+           (typecheck-statement (attribute class.class-name) stmt))))
+     (quasisyntax/loc stx
+       (2dstate-machine
+        a b
+        (((cell.x cell.y) ...)
+         new-body ...
+         cell.uses)
+        ...))]))
 
 ;; FIXME: typecheck-expression returns 2 values
 ;; need to check the actual return type against the expected one
