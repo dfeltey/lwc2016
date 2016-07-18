@@ -10,7 +10,7 @@
          unstable/error
          racket/syntax
          (for-template "prefix-mini-java.rkt")
-         "state-machine.rkt")
+         "state-machine-classes.rkt")
 
 (provide typecheck-program)
 
@@ -206,12 +206,13 @@
       [c:regular-class
        (dict-set env #'c.name (attribute c.class-type))]
       [c:2dstate-class
-       (dict-set #'c.class-name
+       (dict-set env
+                 #'c.class-name
                  (make-class-type
                   #'c.class-name
                   #f
                   (for/list ([n (in-syntax (attribute c.method-names))])
-                    (method-type n null #'int))))])))
+                    (method-type n null int-type))))])))
 
 (define (typecheck-class stx [toplevel-env (current-env)])
   (syntax-parse stx
@@ -226,21 +227,20 @@
          #,@(with-extended-env (attribute c.field-names) (attribute c.field-types)
               (for/list ([method (in-syntax #'(c.meth ...))])
                 (typecheck-method #'c.name method)))))]
-    [(and
+    [(~and
       class:2dstate-class
-      (2dstate-machine
-       a b
+      (form
+       co1 co2
        cell:cell-mapping ...))
      (define/with-syntax ((new-body ...) ...)
        (for/list ([b* (in-syntax #'((cell.body ...) ...))])
          (for/list ([stmt (in-syntax b*)])
            (typecheck-statement (attribute class.class-name) stmt))))
      (quasisyntax/loc stx
-       (2dstate-machine
-        a b
+       (form
+        co1 co2
         (((cell.x cell.y) ...)
-         new-body ...
-         cell.uses)
+         (new-body ... cell.uses))
         ...))]))
 
 ;; FIXME: typecheck-expression returns 2 values

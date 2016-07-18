@@ -10,12 +10,15 @@
                      racket/dict
                      racket/match
                      racket/syntax
+                     racket/list
                      (only-in racket/sequence in-syntax)
                      (prefix-in r: racket)
                      "../editing/syntax-info.rkt"
-                     "../editing/property.rkt"))
+                     "../editing/property.rkt"
+                     "state-machine-classes.rkt"))
 
 (provide (all-defined-out)
+         2dstate-machine
          #%module-begin #%app
          #%datum true false < + - *
          (rename-out [begin         compound]
@@ -211,3 +214,63 @@
   (syntax-parse stx
     [(_ the-class)
      #`(#,(static-class-info-constructor-id (syntax-local-value #'the-class)))]))
+
+
+(define-syntax 2dstate-machine
+  (syntax-parser
+    [t:2dstate-class
+     (define mapping1 (attribute t.mapping))
+     (define rows (attribute t.rows))
+     (define columns (attribute t.columns))
+     (define/with-syntax (transitions ...)
+       (attribute t.method-names))
+     (define/with-syntax (state ...)
+       (attribute t.state-names))
+     (define state-ints
+       (for/hash ([s (in-syntax #'(state ...))]
+                  [i (in-naturals)])
+         (values (syntax-e s) i)))
+     (define sorted-cells
+       (filter
+        (lambda (x) (not (or (equal? (caar x) 0)
+                             (equal? (second (car x)) 0))))
+        (sort
+         (hash->list mapping1)
+         #:key car
+         (lambda (x y) (or (< (first x) (first y))
+                           (< (second x) (second y)))))))
+     (define/with-syntax (((_ new-state body ...) ...) ...)
+       (group-by
+        first
+        (for/list ([x (in-list sorted-cells)])
+         (define b (cdr x))
+         (define-values (body state) (split-at b (- (length b) 1)))
+         (list*
+          (second (car x))
+          (hash-ref state-ints (syntax-e (first state)))
+          body))))
+     (define/with-syntax name
+       (attribute t.class-name))
+     (define/with-syntax (state-int ...) (r:range 0 (length (syntax->list #'(state ...)))))
+     (define cls
+       #'(define-class name
+           (define-field st)
+           (define-method transitions ()
+             (unless st (set! st 0))
+             (case st
+               [(state-int)
+                body ...
+                (set! st new-state)] ...)
+             -42)
+           ...))
+     (syntax-property
+      (syntax-property
+       cls
+       'disappeared-use
+       (map
+        syntax-local-introduce
+        (syntax->list (attribute t.uses))))
+      'disappeared-binding
+      (map
+       syntax-local-introduce
+       (syntax->list #'(transitions ... state ...))))]))
