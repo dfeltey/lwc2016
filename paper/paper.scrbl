@@ -343,10 +343,6 @@ on Racket's macro expander as much as possible and make use of compile-time valu
   "Definition of the MiniJava send form"
   @mj-send-macro)
 
-@(figure*
-  "2d-state-machine"
-  "Tabular Notation for State Machines"
-  @2d-state-machine)
 
 
 @include-section{notation.scrbl}

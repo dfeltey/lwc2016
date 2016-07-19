@@ -103,23 +103,51 @@
 >>
   ))
 
-(define 2d-state-machine
-  (codeblock-pict
-   #:keep-lang-line? #f
-   #<<>>
-#lang 2d s-exp mini-java/mini-java
+(define 2d-state-machine-text
+  #<<>>
+#lang mini-java
 #2dstate-machine
 ╔══════════╦══════════════════════════════════╦══════════════════════════════════╗
 ║ Receiver ║              wait_0              ║              wait_1              ║
 ╠══════════╬══════════════════════════════════╬══════════════════════════════════╣
-║   zero   ║  (System.out.println (0))        ║     (System.out.println (0))     ║
+║   zero   ║    System.out.println(0);        ║       System.out.println(1);     ║
 ║          ║              wait_1              ║              wait_1              ║
 ╠══════════╬══════════════════════════════════╬══════════════════════════════════╣
-║   one    ║     (System.out.println (0))     ║     (System.out.println (0))     ║
+║   one    ║       System.out.println(2);     ║       System.out.println(3);     ║
 ║          ║              wait_0              ║              wait_0              ║
 ╚══════════╩══════════════════════════════════╩══════════════════════════════════╝
 >>
-   ))
+  )
+
+(define 2d-state-machine
+  (codeblock-pict
+   #:keep-lang-line? #f
+   2d-state-machine-text))
+
+(define 2d-state-exped
+  (code
+   (define-class Receiver
+     (define-field state)
+     (define-method zero ()
+       (unless state (set! state 0))
+       (case state
+         [(0)
+          (System.out.println 0)
+          (set! state 1)]
+         [(1)
+          (System.out.println 1)
+          (set! state 1)]))
+     (define-method one ()
+       (unless state (set! state 0))
+       (case state
+         [(0)
+          (System.out.println 2)
+          (set! state 0)]
+         [(1)
+          (System.out.println 3)
+          (set! state 0)])))))
+
+
 
 ;; MiniJava implementation phase diagram
 (define (make-lang-box txt [w 165] [h 20])
