@@ -34,26 +34,26 @@ system to hygienically obtain the bindings used during expansion.
 
 TODO:parsing
 
-The implementation extends the type checker with the new case to understand the new AST node a
-class. From here the macro for the state machines maps the different states to integers and
-generates a class with a method for each transition function. And example of this for the program in
-@figure-ref["2d-state-machine"] in is @figure-ref["2d-state-exped"].
+The implementation extends the type checker with the new case to understand the new AST node for
+state machines as a class. From here the macro for the state machine maps the different states to
+integers and generates a class with a method for each transition function. And example of this for
+the program in @figure-ref["2d-state-machine"] in is @figure-ref["2d-state-exped"].
 
-Node that the bodies of the methods use the racket form's @racket[unless] and @racket[case]. Comping
-into either MiniJava or fully expanded Racket would make the macro that does this more difficult to
-implement. However because Racket's syntax system allows macro's to use any identifiers that are
-bound in there environment, we can use these more convenient forms.
+Note that the bodies of the methods use the racket forms @racket[unless] and @racket[case]. Comping
+into either MiniJava or directly to fully expanded Racket would make the macro that does this more
+difficult to implement. However because Racket's syntax system allows macros to use any identifiers
+that are bound in their environment, we can use these more convenient forms.
 
 @section{Variants}
 
-One possible variant of this problem would a tabular @racket[if] or @code{switch} form, where each
-cell is run if both of the tests in that row and column are true.
+One possible variant of this problem would be a tabular @racket[if] or @code{switch} form, where
+each cell is run if both of the tests in that row and column are true.
 
 @section{Usability}
 
-The tabular notation is built by the DrRacket IDE. It contains key binds for extending cells within
-a table and centering that cells contents. It also can convert boxes drawn with ``-'', ``|'', and
-``+'' into the Unicode notation.
+The tabular notation is difficult to use outside the DrRacket IDE. DrRacket contains key bindings
+for extending cells within a table and centering the contents of cells. It also can convert boxes
+drawn with ``-'', ``|'', and ``+'' into the Unicode notation.
 
 @section{Impact}
 
