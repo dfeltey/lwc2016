@@ -352,15 +352,21 @@
                             #'len
                             #f
                             "expected" "int"))
-     (values int-array-type
-             (quasisyntax/loc expression
-               (new-int-array #,len-stx)))]
+     (define type int-array-type)
+     (values type
+             (tooltip
+              (quasisyntax/loc expression
+                (new-int-array #,len-stx))
+              (whole-range-tip expression type)))]
     [(new the-class:id ())
      (define class-ty (resolve-type #'the-class env))
      (match class-ty
        [(class-type n s ms)
-        (values (object-type class-ty)
-                (quasisyntax/loc expression (new the-class)))]
+        (define type (object-type class-ty))
+        (values type
+                (tooltip
+                 (quasisyntax/loc expression (new the-class))
+                 (whole-range-tip expression type)))]
        [_ (raise-syntax-error* "Type mismatch"
                                #'the-class
                                #f
@@ -376,8 +382,11 @@
                             #'op
                             #f))
      (values res-ty
-             (quasisyntax/loc expression
-               (op #,lhs-stx #,rhs-stx)))]
+             (tooltip
+              (quasisyntax/loc expression
+                (op #,lhs-stx #,rhs-stx))
+              (whole-range-tip #'op res-ty)
+              (boundary-range-tip expression res-ty)))]
     [(array [idx])
      (define-values (array-ty array-stx) (t-e #'array))
      (define-values (idx-ty idx-stx) (t-e #'idx))
@@ -386,19 +395,25 @@
        (raise-syntax-error* "Type mismatch"
                             expression
                             #f))
-     (values int-type
-             (quasisyntax/loc expression
-               (index #,array-stx #,idx-stx)))]
+     (define type int-type)
+     (values type
+             (tooltip
+              (quasisyntax/loc expression
+                (index #,array-stx #,idx-stx))
+              (whole-range-tip expression type)))]
     [(array length)
      (define-values (array-ty array-stx) (t-e #'array))
      (unless (subtype? array-ty int-array-type env)
        (raise-syntax-error* "Type mismatch"
                             expression
                             #f))
-     (values int-type
-             (quasisyntax/loc expression
-               (vector-length #,array-stx)))]
-    [(-receiver meth:identifier (arg ...)) ; needs to be after the binop and new object cases
+     (define type int-type)
+     (values type
+             (tooltip
+              (quasisyntax/loc expression
+                (vector-length #,array-stx))
+              (whole-range-tip expression type)))]
+    [(-receiver meth:identifier (~and args (arg ...))) ; needs to be after the binop and new object cases
      (define-values (recvr-ty recvr-stx) (t-e #'-receiver))
      (match recvr-ty
        [(object-type class-ty)
@@ -423,9 +438,14 @@
           (raise-syntax-error* "Type mismatch"
                                expression
                                #f))
-        (values (resolve-object-type mres-type)
-                (quasisyntax/loc expression
-                  (send #,class-name #,recvr-stx meth #,@garg-stxs)))]
+        (define type (resolve-object-type mres-type))
+        (values type
+                (tooltip
+                 (quasisyntax/loc expression
+                   (send #,class-name #,recvr-stx meth #,@garg-stxs))
+                 (boundary-range-tip #'args type)
+                 (whole-range-tip #'meth type)
+                 (boundary-range-tip expression type)))]
        [_
         (raise-syntax-error* "Type mismatch"
                              expression
@@ -438,19 +458,57 @@
                             #'arg
                             #f
                             "expected" "boolean"))
-     (values bool-type
-             (quasisyntax/loc expression (! #,arg-stx)))]
+     (define type bool-type)
+     (values type
+             (tooltip
+              (quasisyntax/loc expression (! #,arg-stx))
+              (whole-range-tip expression type)))]
     [(~or true false)
-     (values bool-type expression)]
+     (values bool-type
+             (tooltip expression (whole-range-tip expression bool-type)))]
     [this
      (define class-ty (resolve-type current-class env))
-     (values (object-type class-ty) expression)]
+     (define type (object-type class-ty))
+     (values type
+             (tooltip expression (whole-range-tip expression type)))]
     [var:id
      (define var-ty (resolve-type #'var env))
      (unless var-ty
        (raise-syntax-error* "No type for identifier"
                             #'var
                             #f))
-     (values var-ty expression)]
+     (values var-ty (tooltip expression (whole-range-tip expression var-ty)))]
     [n:exact-integer
-     (values int-type expression)]))
+     (values int-type
+             (tooltip expression (whole-range-tip expression int-type)))]))
+
+(define (boundary-range-tip expression type)
+  (list
+   (vector expression
+           (- (syntax-position expression) 2)
+           (sub1 (syntax-position expression))
+           (get-type-text type))
+   (vector expression
+           (sub1 (+ (sub1 (syntax-position expression))
+                    (syntax-span expression)))
+           (+ (sub1 (syntax-position expression))
+              (syntax-span expression))
+           (get-type-text type))))
+(define (whole-range-tip expression type)
+  (vector expression
+          (sub1 (syntax-position expression))
+          (+ (sub1 (syntax-position expression))
+             (syntax-span expression))
+          (get-type-text type)))
+
+(define (tooltip e . v)
+  (syntax-property e 'mouse-over-tooltips v))
+
+(define (get-type-text type)
+  ;(lambda ())
+  (match type
+    [(== int-array-type) "int[]"]
+    [(== int-type) "int"]
+    [(== bool-type) "bool"]
+    [(object-type (class-type name _ _)) (symbol->string (syntax-e name))]
+    [(binop-type _ _ res) (get-type-text res)]))
