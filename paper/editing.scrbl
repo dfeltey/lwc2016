@@ -3,7 +3,7 @@
           (only-in scribble/manual racket racketblock))
 @(define (section title)
    (s:section #:tag (string-append "editing:" title) title))
-
+@title[#:tag "editing"]{Editing: Restructuring}
 In this section we present our solution to the "Restructuring" benchmark problem
 from the "Editing" category. We address the problem of restructuring through the
 implementation of a refactoring tool for MiniJava. Our refactoring tool restructures
@@ -22,5 +22,5 @@ valid program when the refactoring applies.
 @section{Uses and Examples}
 @section{Effort}
 @;; Maybe leave this out
-@section{Other Comments}
+@;; @section{Other Comments}
 

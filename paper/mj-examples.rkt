@@ -2,33 +2,54 @@
 (require pict pict/code)
 (provide (all-defined-out))
 
+(require (for-syntax syntax/parse))
 
 (define mj-simple-example
   (codeblock-pict
-   #<<>>
-#lang mini-java
+   (port->string (open-input-file "../mini-java/even-odd.rkt"))))
 
-class Even {          
- public boolean is_even(int n){
-  return (n == 0) || this.is_odd(n - 1);
- }
- public boolean is_odd(int n) {
-  return (! (n == 0)) && this.is_even(n - 1); 
- }
-}
->>
-   ))
+(define parenthesized-mj-example
+  (codeblock-pict
+   (port->string (open-input-file "../mini-java/even-odd-prefix.rkt"))))
+
+(define (extract file [name ""] #:lang [lang "racket"])
+  (define marker (~a ";; ~~~EXTRACT:" name "~~~"))
+  (define-values (_1 _2 lines)
+    (for/fold ([done? #f]
+               [keep? #f]
+               [lines null])
+              ([line (in-lines (open-input-file file))]
+               #:break done?)
+      (cond
+        [(equal? marker line) (values keep? (not keep?) lines)]
+        [keep? (values done? keep? (cons line lines))]
+        [else (values done? keep? lines)])))
+  (string-join (reverse lines)
+               "\n"
+               #:before-first (string-append "#lang " lang "\n")))
+
+(define-syntax (define-extract stx)
+  (syntax-parse stx 
+    [(_ name file (~or (~optional (~seq #:lang lang))
+                       (~optional (~seq #:keep-lang-line? keep?))) ...)
+     #`(define name
+         (codeblock-pict
+          #:keep-lang-line? #,(or (attribute keep?) #'#t)
+          (extract file 'name #,@(if (attribute lang) #'(#:lang lang) #'()))))]))
+
+(define-extract mj-new "../mini-java/prefix-mini-java.rkt" #:keep-lang-line? #f)
+(define-extract typecheck-mod-beg "../mini-java/infix-mini-java.rkt" #:keep-lang-line? #f)
 
 (define mj-paren-example
   (codeblock-pict
    #<<>>
 #lang s-exp mini-java/prefix-mini-java
 
-(define-class Even
+(define-class Parity
   (define-method is_even (n)
-    (or (== n 0) (send Even this is_odd (- n 1))))
+    (or (== n 0) (send Parity this is_odd (- n 1))))
   (define-method is_odd (n)
-    (and (! (== n 0)) (send Even this is_even (- n 1)))))
+    (and (! (== n 0)) (send Parity this is_even (- n 1)))))
 >>
   ))
 
@@ -37,7 +58,7 @@ class Even {
    #<<>>
 #lang racket
 
-(define Even:method-table
+(define Parity:method-table
   (vector
    (λ (this n)
      (or (= n 0)
@@ -53,11 +74,11 @@ class Even {
    #:keep-lang-line? #f
    #<<>>
 #lang racket
-(define-syntax Even
+(define-syntax Parity
      (static-class-info
-      Even:static-method-info
-      #'Even:method-table
-      #'Even:constructor
+      Parity:static-method-info
+      #'Parity:method-table
+      #'Parity:constructor
       0))
 >>
    ))
@@ -91,10 +112,10 @@ class Even {
 ╔══════════╦══════════════════════════════════╦══════════════════════════════════╗
 ║ Receiver ║              wait_0              ║              wait_1              ║
 ╠══════════╬══════════════════════════════════╬══════════════════════════════════╣
-║   zero   ║  (System.out.println ("ACK 0"))  ║  (System.out.println ("ACK 0"))  ║
+║   zero   ║  (System.out.println (0))        ║     (System.out.println (0))     ║
 ║          ║              wait_1              ║              wait_1              ║
 ╠══════════╬══════════════════════════════════╬══════════════════════════════════╣
-║   one    ║  (System.out.println ("ACK 1"))  ║  (System.out.println ("ACK 1"))  ║
+║   one    ║     (System.out.println (0))     ║     (System.out.println (0))     ║
 ║          ║              wait_0              ║              wait_0              ║
 ╚══════════╩══════════════════════════════════╩══════════════════════════════════╝
 >>

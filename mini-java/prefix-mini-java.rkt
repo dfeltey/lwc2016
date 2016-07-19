@@ -21,8 +21,7 @@
          2dstate-machine
          #%module-begin #%app
          #%datum true false < + - *
-         (rename-out [begin         compound]
-                     [displayln     System.out.println]
+         (rename-out [displayln     System.out.println]
                      [set!          =]
                      [eqv?          ==]
                      [vector-set!   array=]
@@ -35,6 +34,9 @@
 
 (define-syntax-rule (|| x y)
   (or x y))
+
+(define-syntax-rule (compound body ...)
+  (begin body ... (void)))
 
 (define-syntax-rule (define-literals (lit ...))
   (begin (define-syntax lit (syntax-rules ())) ...))
@@ -189,12 +191,13 @@
 (define-syntax (while stx)
   (syntax-parse stx
     [(while test body ...)
+     (define temp (generate-temporary 'loop))
      #`(let/ec local-break
          (syntax-parameterize ([break (syntax-parser [(break) #'(local-break)])])
-           (let loop ()
+           (let #,temp ()
              (when test
                body ...
-               (loop)))))]))
+               (#,temp)))))]))
 
 ;; expressions (except Racket re-exports)
 
@@ -210,11 +213,13 @@
               [method          (vector-ref rt-method-table method-index)])
          (method receiver-val arg ...))]))
 
+;; ~~~EXTRACT:mj-new~~~
 (define-syntax (new stx)
   (syntax-parse stx
     [(_ the-class)
-     #`(#,(static-class-info-constructor-id (syntax-local-value #'the-class)))]))
-
+     #`(#,(static-class-info-constructor-id
+           (syntax-local-value #'the-class)))]))
+;; ~~~EXTRACT:mj-new~~~
 
 (define-syntax 2dstate-machine
   (syntax-parser
@@ -274,3 +279,4 @@
       (map
        syntax-local-introduce
        (syntax->list #'(transitions ... state ...))))]))
+

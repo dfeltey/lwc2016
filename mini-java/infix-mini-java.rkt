@@ -4,7 +4,7 @@
                      syntax/parse)
          (submod "typecheck.rkt" literals)
          "prefix-mini-java.rkt")
-
+;; ~~~EXTRACT:typecheck-mod-beg~~~
 (provide (all-from-out (submod "typecheck.rkt" literals))
          (except-out (all-from-out "prefix-mini-java.rkt") #%module-begin)
          (rename-out [module-begin #%module-begin]))
@@ -15,3 +15,4 @@
      (define post-typechecking (typecheck-program #'(class ...)))
      (quasisyntax/loc stx
        (#%module-begin #,@post-typechecking))]))
+;; ~~~EXTRACT:typecheck-mod-beg~~~
