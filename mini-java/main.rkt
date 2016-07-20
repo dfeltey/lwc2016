@@ -1,4 +1,4 @@
-#lang racket
+#lang racket/base
 
 (module reader syntax/module-reader
   mini-java/infix-mini-java
@@ -19,7 +19,8 @@
            "lexer-sig.rkt"
            "parser-sig.rkt"
            "lexer-unit.rkt"
-           "parser-unit.rkt")
+           "parser-unit.rkt"
+           2d/lexer)
   
   (define-compound-unit/infer lexer+parser@
     (import)
@@ -30,7 +31,7 @@
   
   (define (get-info mode default get-default)
     (case mode
-      [(color-lexer) color-lexer]
+      [(color-lexer) (2d-lexer color-lexer)]
       [else (get-default mode default)]))
   
   (define (read-syntax name in) (parse in name 'program)))

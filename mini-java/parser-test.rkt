@@ -5,7 +5,8 @@
          "lexer-sig.rkt"
          "parser-sig.rkt"
          "lexer-unit.rkt"
-         "parser-unit.rkt")
+         "parser-unit.rkt"
+         syntax-color/lexer-contract)
 
 (define-compound-unit/infer lexer+parser@
   (import)
@@ -13,6 +14,61 @@
   (link lexer@ parser@))
   
 (define-values/invoke-unit/infer lexer+parser@)
+
+
+;                                                                       
+;                                                                       
+;                                                                       
+;                                                                       
+;  ;;;                                    ;                   ;         
+;  ;;;                                  ;;;                 ;;;         
+;  ;;;   ;;;;  ;;; ;;;   ;;;;  ;;; ;;   ;;;;   ;;;;   ;;;;  ;;;;  ;;;;  
+;  ;;;  ;; ;;;  ;; ;;   ;; ;;; ;;;;;    ;;;;  ;; ;;; ;;; ;; ;;;; ;;; ;; 
+;  ;;; ;;; ;;;  ;;;;;  ;;; ;;; ;;;      ;;;  ;;; ;;; ;;;    ;;;  ;;;    
+;  ;;; ;;;;;;;   ;;;   ;;;;;;; ;;;      ;;;  ;;;;;;;  ;;;;  ;;;   ;;;;  
+;  ;;; ;;;      ;;;;;  ;;;     ;;;      ;;;  ;;;        ;;; ;;;     ;;; 
+;  ;;;  ;;;;;;  ;; ;;   ;;;;;; ;;;      ;;;;  ;;;;;; ;; ;;; ;;;; ;; ;;; 
+;  ;;;   ;;;;  ;;; ;;;   ;;;;  ;;;       ;;;   ;;;;   ;;;;   ;;;  ;;;;  
+;                                                                       
+;                                                                       
+;                                                                       
+;                                                                       
+
+
+(define (get-tokens str)
+  (define sp (open-input-string str))
+  (port-count-lines! sp)
+  (let loop ()
+    (define this (call-with-values (λ () (color-lexer sp 0 #f)) list))
+    (if (eof-object? (list-ref this 0))
+        (list this)
+        (cons this (loop)))))
+
+(check-equal? (get-tokens "λ")
+              `(("error" error #f 1 2 0 #f) (,eof eof #f 2 2 0 #f)))
+(check-equal? (get-tokens "λλλλ")
+              `(("error" error #f 1 5 0 #f) (,eof eof #f 5 5 0 #f)))
+(void (invariant-assertion lexer/c color-lexer))
+
+
+;                                                                               
+;                                                                               
+;                                                                               
+;                                                                               
+;                                                 ;                   ;         
+;                                               ;;;                 ;;;         
+;  ;;; ;;   ;;;;;  ;;; ;;;;;;    ;;;;  ;;; ;;   ;;;;   ;;;;   ;;;;  ;;;;  ;;;;  
+;  ;;;;;;; ;;;;;;; ;;;;;;;; ;;  ;; ;;; ;;;;;    ;;;;  ;; ;;; ;;; ;; ;;;; ;;; ;; 
+;  ;;; ;;; ;;  ;;; ;;;  ;;;    ;;; ;;; ;;;      ;;;  ;;; ;;; ;;;    ;;;  ;;;    
+;  ;;; ;;;   ;;;;; ;;;   ;;;;  ;;;;;;; ;;;      ;;;  ;;;;;;;  ;;;;  ;;;   ;;;;  
+;  ;;; ;;; ;;; ;;; ;;;     ;;; ;;;     ;;;      ;;;  ;;;        ;;; ;;;     ;;; 
+;  ;;;;;;; ;;; ;;; ;;;  ;; ;;;  ;;;;;; ;;;      ;;;;  ;;;;;; ;; ;;; ;;;; ;; ;;; 
+;  ;;; ;;   ;;;;;; ;;;   ;;;;    ;;;;  ;;;       ;;;   ;;;;   ;;;;   ;;;  ;;;;  
+;  ;;;                                                                          
+;  ;;;                                                                          
+;                                                                               
+;                                                                               
+
 
 (define (output input-string)
   (map syntax->datum (parse (open-input-string input-string) 'program 'program)))

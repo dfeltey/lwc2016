@@ -1,6 +1,8 @@
 #lang racket/unit
 
 (require parser-tools/lex
+         syntax/readerr
+         racket/port
          (prefix-in re: parser-tools/lex-sre)
          "tokens.rkt"
          "lexer-sig.rkt"
@@ -40,6 +42,7 @@
       [(IDENTIFIER) (ret 'symbol #f)]
       [(INTEGER_LIT) (ret 'constant #f)]
       [(White-Space) (ret 'white-space #f)]
+      [(error) (ret 'error #f)]
       [else (ret 'other #f)]))
 
 (define-lex-abbrevs
@@ -170,6 +173,30 @@
                           (return-without-pos (get-token input-port))))
    
    (#\032 'EOF)
-   ((eof) 'EOF)))
+   ((eof) 'EOF)
+   [any-char
+    (cond
+      [color?
+       (let loop ()
+         (define c (peek-char input-port))
+         (cond
+           [(eof-object? c)
+            (define-values (line col pos) (port-next-location input-port))
+            (return-without-pos
+             (make-position-token 'error
+                                  start-pos
+                                  (make-position pos line col)))]
+           [else
+            (read-char input-port)
+            (loop)]))]
+      [else
+       (raise-read-error
+        (format "lexer: No match found in input starting with: ~a" (string-ref lexeme 0))
+        (file-path)
+        (position-line start-pos)
+        (position-col start-pos)
+        (position-offset start-pos)
+        (- (position-offset end-pos) (position-offset start-pos)))])]))
+
 (define get-token (make-get-token))
 (define get-color-token (make-get-token #t))
