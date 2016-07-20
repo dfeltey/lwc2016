@@ -39,21 +39,24 @@
 
 (define-extract mj-new "../mini-java/prefix-mini-java.rkt" #:keep-lang-line? #f)
 (define-extract typecheck-mod-beg "../mini-java/infix-mini-java.rkt" #:keep-lang-line? #f)
+(define-extract add-tool-tips "../mini-java/typecheck.rkt" #:keep-lang-line? #f)
 
-(define mj-paren-example
-  (codeblock-pict
+(define mj-while-macro
+  (codeblock-pict #:keep-lang-line? #f
    #<<>>
-#lang s-exp mini-java/prefix-mini-java
-
-(define-class Parity
-  (define-method is_even (n)
-    (or (== n 0) (send Parity this is_odd (- n 1))))
-  (define-method is_odd (n)
-    (and (! (== n 0)) (send Parity this is_even (- n 1)))))
+#lang racket
+(define-syntax (while stx)
+    (syntax-parse stx
+      [(while test body ...)
+       (define temp (generate-temporary 'loop))
+       #`(let #,temp ()
+           (when test
+             body ...
+             (#,temp)))]))
 >>
   ))
 
-(define mj-compiled-vector
+(define mj-parity-compiled
   (codeblock-pict
    #<<>>
 #lang racket
@@ -61,19 +64,15 @@
 (define Parity:method-table
   (vector
    (λ (this n)
-     (or (= n 0)
+     (or (== n 0)
          ((vector-ref (vector-ref this 0) 1) this (- n 1))))
    (λ (this n)
-     (or (= n 1)
-         ((vector-ref (vector-ref this 0) 0) this (- n 1))))))
->>
-   ))
+     (and (! (== n 0))
+          ((vector-ref (vector-ref this 0) 0) this (- n 1))))))
 
-(define mj-even-static-info
-  (codeblock-pict
-   #:keep-lang-line? #f
-   #<<>>
-#lang racket
+(define (Parity:constructor)
+  (vector Parity:method-table))
+
 (define-syntax Parity
      (static-class-info
       Parity:static-method-info

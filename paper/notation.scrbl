@@ -14,7 +14,6 @@ messages @code{zero} and one @code{one} and prints a number based on which trans
 This example creates a class called @code{Receiver} with two methods, @code{zero} and
 @code{one}. The initial state is @code{wait_1}.
 
-
 @(figure*
   "2d-state-machine"
   "Tabular Notation for State Machines"

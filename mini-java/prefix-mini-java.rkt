@@ -216,7 +216,7 @@
 ;; ~~~EXTRACT:mj-new~~~
 (define-syntax (new stx)
   (syntax-parse stx
-    [(_ the-class)
+    [(new the-class)
      #`(#,(static-class-info-constructor-id
            (syntax-local-value #'the-class)))]))
 ;; ~~~EXTRACT:mj-new~~~

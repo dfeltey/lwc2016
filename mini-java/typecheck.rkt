@@ -500,15 +500,15 @@
           (+ (sub1 (syntax-position expression))
              (syntax-span expression))
           (get-type-text type)))
-
+;; ~~~EXTRACT:add-tool-tips~~~
 (define (tooltip e . v)
   (syntax-property e 'mouse-over-tooltips v))
 
 (define (get-type-text type)
-  ;(lambda ())
   (match type
     [(== int-array-type) "int[]"]
     [(== int-type) "int"]
     [(== bool-type) "bool"]
     [(object-type (class-type name _ _)) (symbol->string (syntax-e name))]
     [(binop-type _ _ res) (get-type-text res)]))
+;; ~~~EXTRACT:add-tool-tips~~~
