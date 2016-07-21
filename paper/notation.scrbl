@@ -31,7 +31,10 @@ system to hygienically obtain the bindings used during expansion.
   "Partially Expanded State Machine"
   @2d-state-exped)
 
-The parser reuses Racket's reader extension for tabular syntax.
+We extended the lexer with a new class of tokens for 2-dimensional tables. Those are recognized by
+the @code{#2dstate-machine} prefix, at which point the input stream is passed to an auxiliary
+parser---Racket's existing 2d syntax---parser. After the 2d token is parsed, lexing resumes as
+usual. This 2d parser will call back into the original parser to parse the contents of each cell.
 
 The implementation extends the type checker with the new case to understand the new AST node for
 state machines as a class. From here the macro for the state machine maps the different states to
@@ -56,15 +59,16 @@ drawn with ``-'', ``|'', and ``+'' into the Unicode notation.
 
 @section{Impact}
 
-Implementing this tabular notation required changes to each piece of the artifact. A new cases was
-added to the parser to handle text beginning with ``#2d''. A
-new AST node was added to represent the parsed form of the table. New type checking rules were added
-to type check this @code{2dstate-machine} form. This new AST node and type checking rule were
-minor modifications, as the new top-level form could be described in terms of existing types. A new
-macro was added to compile the state machine into a combination of MiniJava and racket. This macro
-was able to share many of the mechanisms used by type checking rule. Overall these changes added one
-clause the type checker and one new macro to the MiniJava implementation, plus some shared code to
-handle extracting information from the @code{2dstate-machine} AST node.
+Implementing this tabular notation required changes to each piece of the artifact. The lexer was
+extended to recognized the new keyword and call into the existing 2d parser. This parser was a
+private API, and so its implementation was copied into the solution. A new AST node was added to
+represent the parsed form of the table. New type checking rules were added to type check this
+@code{2dstate-machine} form. This new AST node and type checking rule were minor modifications, as
+the new top-level form could be described in terms of existing types. A new macro was added to
+compile the state machine into a combination of MiniJava and racket. This macro was able to share
+many of the mechanisms used by type checking rule. Overall these changes added one clause the type
+checker and one new macro to the MiniJava implementation, plus some shared code to handle extracting
+information from the @code{2dstate-machine} AST node.
 
 @section{Composability}
 
@@ -75,7 +79,9 @@ other extensions using the same tabular notation.
 
 @section{Limitations}
 
-Convenient usage of the tabular notation is limited to the DrRacket IDE.
+Convenient usage of the tabular notation is limited to the DrRacket IDE. As already mentioned, the
+existing 2d parser did not publicly provide the API needed to extend the existing MiniJava parser
+and had to be copied from the internals of the 2d package.
 
 @section{Uses and Examples}
 
