@@ -93,8 +93,8 @@ forms are used in the implementation of Redex.
 
 @section{Effort}
 
-TODO:parsing. Once parsing was completed the remainder of the work required about 140 lines of code
-and took 2-3 hours.
+Adding the 2d capabilities to the existing parser took 1-2 hours. Once parsing was completed the
+remainder of the work required about 140 lines of code and took 2-3 hours.
 
 @;; Maybe leave this out
 @;; @section{Other Comments}
