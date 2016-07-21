@@ -7,7 +7,7 @@
    (s:section #:tag (string-append "notation:" title) title))
 @title[#:tag "notation"]{Notation: Tabular Notation}
 
-In the "Notation" category, we have addressed the prpblem of "Tabular Notation" by extending the
+In the "Notation" category, we have addressed the problem of "Tabular Notation" by extending the
 syntax of MiniJava with a tabular syntax for specifying state machines. An example of one of these
 tabular state machines is in @figure-ref["2d-state-machine"]. This state machine accepts transition
 messages @code{zero} and one @code{one} and prints a number based on which transition is followed.
@@ -31,7 +31,7 @@ system to hygienically obtain the bindings used during expansion.
   "Partially Expanded State Machine"
   @2d-state-exped)
 
-TODO:parsing
+The parser reuses Racket's reader extension for tabular syntax.
 
 The implementation extends the type checker with the new case to understand the new AST node for
 state machines as a class. From here the macro for the state machine maps the different states to
@@ -56,7 +56,8 @@ drawn with ``-'', ``|'', and ``+'' into the Unicode notation.
 
 @section{Impact}
 
-Implementing this tabular notation required changes to each piece of the artifact. TODO:parsing. A
+Implementing this tabular notation required changes to each piece of the artifact. A new cases was
+added to the parser to handle text beginning with ``#2d''. A
 new AST node was added to represent the parsed form of the table. New type checking rules were added
 to type check this @code{2dstate-machine} form. This new AST node and type checking rule were
 minor modifications, as the new top-level form could be described in terms of existing types. A new
