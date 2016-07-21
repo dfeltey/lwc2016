@@ -37,6 +37,16 @@ the Racket programming language.
 @;; TODO: Fill in the rest of these details later          
 }
 
+@authorinfo["Daniel Feltey" "Northwestern University" "daniel.feltey@eecs.northwestern.edu"]
+@authorinfo["Spencer Florence" "Northwestern University" "spencer.florence@eecs.northwestern.edu"]
+@authorinfo["Vincent St-Amour" "Northwestern University" "stamourv@eecs.northwestern.edu"]
+@authorinfo["Tim Knutson" "University of Utah" "tkkemo@gmail.com"]
+@authorinfo["Ryan Culpepper" "Northeastern University" "ryanc@ccs.neu.edu"]
+@authorinfo["Matthew Flatt" "University of Utah" "mflatt@cs.utah.edu"]
+@authorinfo["Robert Bruce Findler" "Northwestern University" "robby@eecs.northwestern.edu"]
+@authorinfo["Matthias Felleisen" "Northeastern University" "matthias@ccs.neu.edu"]
+
+
 @section[#:tag "intro"]{Introduction}
 This paper demonstrates the use of the Racket programming language and the DrRacket programming
 environment as a language workbench. For the 2016 Language Workbench Challenge, we have
