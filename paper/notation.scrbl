@@ -32,7 +32,7 @@ system to hygienically obtain the bindings used during expansion.
   @2d-state-exped)
 
 We extended the lexer with a new class of tokens for 2-dimensional tables. Those are recognized by
-the @code{#2dstate-machine} prefix, at which point the input stream is passed to an auxiliary
+the @emph{#2dstate-machine} prefix, at which point the input stream is passed to an auxiliary
 parser---Racket's existing 2d syntax---parser. After the 2d token is parsed, lexing resumes as
 usual. This 2d parser will call back into the original parser to parse the contents of each cell.
 
