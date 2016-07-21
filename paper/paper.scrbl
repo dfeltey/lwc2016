@@ -2,6 +2,7 @@
 
 @(require pict/code
           (only-in pict bitmap scale)
+          "bib.rkt"
           "mj-examples.rkt"
           scriblib/figure
           (only-in scribble/manual racket racketblock hash-lang)
@@ -70,15 +71,32 @@ of MiniJava as a guiding example. Additionally, this section provides necessary 
 our solutions to the benchmark problems. We begin with a high-level overview of Racket then discuss many
 of its features in depth using our implementation of MiniJava as a driving example.
 
-@subsection{An Overview of Racket}
+@subsection{An Overview of Racket and its Macro System}
 @;; brief overview of expansion and syntax objects to set up discussion of syntax properties
 @;; later on, and the built in forms that we can rely on to implement languages
 @;; (such as syntax-parameters which will be discussed later in the evolution section)
-Racket is an untyped call-by-value programming language descending from Scheme and Lisp. As a member
-of this family of languages, one of Racket's most prominent features is its powerful hygienic macro
-system. Racket's macro system is central to the consideration of Racket as a language workbench.
-Extensible syntax allows programmers to extend the programming language as necessary to suit
-their needs for the task at hand.
+Racket is an untyped, call-by-value programming language in
+the Lisp family. One of Racket's most prominent features is
+its powerful hygienic macro system and it is central to the
+consideration of Racket as a language workbench. While the
+macro system is clearly an evolution of the early
+Assembly@~cite[mcilroy] and Lisp@~cite[lisp-macros] macro systems,
+it has changed so much that it is nearly unrecognizable as a
+descendant of them. Instead, it is easier to approach the
+Racket macro system as if it is a domain-specific language
+for writing an extensible compiler. Racket's macro
+programmers start from the compiler from some initial
+language and add new constructs to it, writing declarations
+that say how the new constructs compile into existing ones;
+perhaps existing cases in the initial language, but also
+perhaps constructs in yet some other language. As an example,
+Racket has a hierarchy of feature-poor (but error-message
+rich) teaching languages that are built using macros on top
+of the basic Racket programming language. These languages
+consist of macros that compile into regular Racket, but
+using scoping declarations provided by Racket's module
+system to completely hide access to the more powerful
+constructs in Racket proper.
 
 In order to support this level of extensibility, Racket programs are processed in two passes. The first,
 @emph{read} pass, turns a textual program into a tree of syntax objects. Syntax objects are rich data structures that
@@ -86,15 +104,12 @@ combine a symbolic representation of a program with a number of properties. Prop
 include source location information and lexical binding information as well as arbitrary information that
 programmers may attach and access using Racket's @racket[syntax-property] procedure.
 
-After a program has been read, the @emph{expansion} pass translates the syntax objects into fully-expanded
-syntax objects. Fully-expanded programs resemble an enriches lambda calculus. This pass is essentially a
-compilation step that recursively processes syntax turning language extensions into Racket's core forms.
-In the process of expansion new opportunities for expansion, or even new macro definitions, which require
-further expansion to produce fully-expanded code. In contrast to function evaluation, in which arguments must
-be evaluated before a function is applied in an inside-out process, the expansion process, instead, happens outside-in.
-Macros expand to produce syntax objects which may contain other macro invocations which must be further expanded
-until the result is a fully-expanded syntax object. Essentially, the expander processes the leaves of a syntax object last,
-only after they are contained within a otherwise fully-expanded syntax object.
+After a program has been read, the @emph{expansion} process invokes macros to translate the syntax objects into a
+low-level programming language that looks like a lambda calculus with conditionals, local binding forms, and
+many primitive functions. In contrast to function evaluation, in which arguments must
+be evaluated before a function is applied, in an inside-out process, the expansion process happens outside-in.
+The macro expander finds the outermost expression that is not in the core form and applies one step of macro expansion
+to it, step by step, eliminating the use of macros from the program.
 
 Racket's facilities for language extension and its rich core library allow programmers to implement entirely new
 languages on top of Racket. A notable example is Typed Racket, a gradually-typed sister language of Racket, but
@@ -103,11 +118,6 @@ Algol 60, Datalog, and Scribble, a language for formatting prose, on top of Rack
 languages are made possible by Racket's expressive syntax system along with many useful features of the Racket module
 system.
 
-Racket's module systems provides namespace control allowing a module to rename and remove bindings froms its list of
-exports. This allows the definition of languages that are not strictly supersets of Racket itself, but entirely new
-languages. The module system further allows the definitions of macros to refer to run-time values which may not be
-exported providing a form of modularity in language definition. These features allow simple definitions of new languages,
-in particular a language in Racket bundles a reader, as described above, with bindings that implement the language's syntax.
 In the rest of this section we demonstrate several of Racket's features for building languages and their use in the
 implementation of MiniJava.
 
@@ -133,7 +143,7 @@ implementation of MiniJava.
 
 @Figure-ref{mj-impl} shows the structure of our MiniJava implementation on top of Racket. Similar to a standard
 compiler, there are phases for lexing, parsing, and type checking. The result of the type checking phase is
-an untyped, parenthesized version of MiniJava. In place of a traditional code gneration phase, the implementation
+an untyped, parenthesized version of MiniJava. In place of a traditional code generation phase, the implementation
 relies on Racket's macro system to transform the parenthesized MiniJava classes into method tables implemented
 with Racket's vector data type.
 
@@ -313,3 +323,5 @@ to the 2016 Language Workbench Challenge benchmark problems.
 @include-section{evolution.scrbl}
 @include-section{editing.scrbl}
 @section[#:tag "conclusion"]{Conclusion}
+
+@(generate-bibliography)
