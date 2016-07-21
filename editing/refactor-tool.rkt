@@ -119,7 +119,7 @@
                 "swap if branches"
                 (λ (obj evt)
                   (send obj refactor-key-callback)))
-          (send keymap map-function "c:x;r" "swap if branches"))
+          (send keymap map-function "c:r;s" "swap if branches"))
 
         (keymap:add-to-right-button-menu/before
          (let ([old (keymap:add-to-right-button-menu/before)])

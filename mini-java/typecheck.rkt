@@ -3,7 +3,7 @@
 ;; typecheck, and turn the old, paren-but-infix syntax to the new, fully-prefix one,
 ;; with explicit types at `send`s
 
-(require syntax/parse
+(require (rename-in syntax/parse [syntax-parse sp:syntax-parse])
          syntax/id-table
          syntax/id-set
          racket/dict
@@ -21,6 +21,20 @@
                      String int boolean int-array
                      extends return else)))
 (require (for-template (submod "." literals)))
+
+;; Presever syntax properties on the result of typechecking
+(define typecheck #'typecheck)
+(define-syntax-rule (syntax-parse/track-origin stx body ...)
+  (apply
+   values
+   (map
+    (λ (new-stx)
+      (if (syntax? new-stx)
+          (syntax-track-origin new-stx stx typecheck)
+          new-stx))
+    (call-with-values
+     (λ () (sp:syntax-parse stx body ...))
+     list))))
 
 ;; Env
 (define current-env (make-parameter (make-immutable-free-id-table)))
@@ -200,7 +214,7 @@
 (define (build-toplevel-env classes)
   (for/fold ([env (make-immutable-free-id-table)])
       ([class (in-list classes)])
-    (syntax-parse class
+    (syntax-parse/track-origin class
       [c:main-class
        (dict-set env #'c.name (attribute c.class-type))]
       [c:regular-class
@@ -215,7 +229,7 @@
                     (method-type n null int-type))))])))
 
 (define (typecheck-class stx [toplevel-env (current-env)])
-  (syntax-parse stx
+  (syntax-parse/track-origin stx
     [c:main-class
      (quasisyntax/loc stx
        (main #,(typecheck-statement #'c.name #'c.body toplevel-env)))]
@@ -243,14 +257,8 @@
          (new-body ... cell.uses))
         ...))]))
 
-;; FIXME: typecheck-expression returns 2 values
-;; need to check the actual return type against the expected one
-;; figure out the places where identifiers are passed through as types
-;; so that I can resolve them when necessary
-;; Also all field declarations and local variable types need to be checked that
-;; they actually exist ...
 (define (typecheck-method current-class-name method [env (current-env)])
-  (syntax-parse method
+  (syntax-parse/track-origin method
     [meth:method-declaration
      (define current-class-type (resolve-type current-class-name))
      ;; This might need better error handling ...
@@ -278,11 +286,10 @@
                 (typecheck-statement current-class-name statement))
            #,ret-stx)))]))
 
-;; TODO could do actual typechecking. for now, just converts to prefix and recurs
 (define (typecheck-statement current-class-name statement [env (current-env)])
   (define (t-s s) (typecheck-statement current-class-name s env))
   (define (t-e e) (typecheck-expression current-class-name e env))
-  (syntax-parse statement
+  (syntax-parse/track-origin statement
     #:literals (if else while System.out.println = break)
     [(break) (quasisyntax/loc statement (break))]
     [(lhs:id = rhs)
@@ -343,7 +350,7 @@
 ;; TODO as with typecheck-statement, could do actual checking. for now just makes type info explicit
 (define (typecheck-expression current-class expression [env (current-env)])
   (define (t-e expr) (typecheck-expression current-class expr env))
-  (syntax-parse expression
+  (syntax-parse/track-origin expression
     #:literals (new int length true false ! this)
     [(new int [len])
      (define-values (len-ty len-stx) (t-e #'len))
