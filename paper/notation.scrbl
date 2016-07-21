@@ -81,7 +81,8 @@ other extensions using the same tabular notation.
 
 Convenient usage of the tabular notation is limited to the DrRacket IDE. As already mentioned, the
 existing 2d parser did not publicly provide the API needed to extend the existing MiniJava parser
-and had to be copied from the internals of the 2d package.
+and had to be copied from the internals of the 2d package. The 2d package was designed to compose
+with Racket readtable mechanism, which does not compose with generic parser automatically.
 
 @section{Uses and Examples}
 
