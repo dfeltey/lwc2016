@@ -49,6 +49,12 @@
     "\n"
     (extract "../mini-java/prefix-mini-java.rkt" 'refactor-if #:prefix-lang? #f))))
 
+(define break-impl
+  (codeblock-pict
+   (string-append
+    (extract "../mini-java/prefix-mini-java.rkt" 'break-param)
+    "\n\n"
+    (extract "../mini-java/prefix-mini-java.rkt" 'while+break #:prefix-lang? #f))))
 
 (define mj-while-macro
   (codeblock-pict #:keep-lang-line? #f

@@ -44,9 +44,11 @@
 
 (define-syntax-parameter this (syntax-rules ()))
 
+;; ~~~EXTRACT:break-param~~~
 (define-syntax-parameter break
   (λ (stx)
     (raise-syntax-error 'break "break used out of context")))
+;; ~~~EXTRACT:break-param~~~
 
 (begin-for-syntax
 
@@ -189,6 +191,7 @@
             (syntax-loc #'else)))]))
 ;; ~~~EXTRACT:refactor-if~~~
 
+;; ~~~EXTRACT:while+break~~~
 (define-syntax (while stx)
   (syntax-parse stx
     [(while test body ...)
@@ -199,6 +202,7 @@
              (when test
                body ...
                (#,temp)))))]))
+;; ~~~EXTRACT:while+break~~~
 
 ;; expressions (except Racket re-exports)
 

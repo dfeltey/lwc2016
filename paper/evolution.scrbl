@@ -1,20 +1,39 @@
 #lang scribble/sigplan @10pt
 @(require (prefix-in s: scribble/base)
           (only-in scribble/manual racket racketblock)
+          scriblib/figure
           "mj-examples.rkt")
 @(define (section title)
    (s:section #:tag (string-append "evolution:" title) title))
 @title[#:tag "evolution"]{Evolution and Reuse: Beyond-Grammar Restrictions}
 This section presents our solution to the @emph{Beyond-Grammar Restrictions} benchmark problem.
 Our solution extends MiniJava with a @racket[break] keyword, that is only valid within @racket[while] loops.
-
+To implement the @racket[break] keyword, we make use of rackets @emph{syntax parameters} which allow
+hygienic macros to to introduce identifiers that would otherwise be unhygienic.
 
 @section{Assumptions}
-We assume access to the Racket implementation of MiniJava. Although the addition of the @racket[break]
-keyword does not involve a significant change to any phase of the implementation it does require small
-modifications to each piece of the implementation.
+We assume access to the Racket implementation of MiniJava. Generally, to apply this strategy of language
+extension requires a language implemented using macros because syntax parameters can only affect the
+macro expansion process. Although the addition of the @racket[break] keyword does not involve a significant
+change to any phase of the implementation it does require small modifications to each piece of the implementation.
 
 @section{Implementation}
+@(figure*
+  "break-impl"
+  "The break syntax parameter and its use in while"
+  break-impl)
+@Figure-ref{break-impl} shows the definition of the @racket[break] keyword as a syntax parameter and the
+extension to MiniJava's @racket[while] macro to support the use of @racket[break]. Similar to Racket's
+parameters, which allow a controlled form of dynamic scoping, syntax parameters allow macros to redefine
+the meaning of a syntactic form within the dynamic extent of the macro expansion process.
+
+The @racket[break] keyword is initially bound as a syntax parameter to a transformer which will always
+raise a syntax error. This ensures that if the @racket[break] keyword is used outside of a @racket[while] loop
+that the error will be raised statically. In order to allow @racket[break] within MiniJava's @racket[while] loops
+the @racket[while] macro must be extended to use the @racket[syntax-parameterize] form to extend the meaning
+of the @racket[break] keyword, but only within the body of a @racket[while] loop. The new definition of @racket[while]
+ensures that any use of @racket[break] within its body will now expand to a call to the escape continuation bound
+by @racket[let/ec], thus allowing the @racket[break] keyword to terminate a @racket[while] loop.
 
 @section{Variants}
 One variant of this benchmark problem would be to add Java's @racket[super] keyword to MiniJava.
