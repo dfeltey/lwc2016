@@ -27,14 +27,22 @@
 @;;  - Racket TR1
 @;;  - readtables??? docs???
 @;;  - dave herman blog post
+@;;  - Visual Studio Code, Lnaguage server protocol
 
 
 @title{Language Workbench Challenge 2016: Racket Submission}
 
 @abstract{
 We present a submission to the 2016 Language Workbench Challenge using
-the Racket programming language. 
-@;; TODO: Fill in the rest of these details later          
+the Racket programming language. Racket provides a wealth of features
+that aid in the process of language design including a mechanism for
+dispatching on a language implementation and a powerful linguistic
+extension system. To address the 2016 language workbench challenge
+benchmark problems we have implemented a version of the MiniJava
+programming language relying on these core features of Racket.
+Building upon the implementation of MiniJava we demonstrate the
+use of Racket as a language workbench for building and extending
+programming languages.
 }
 
 @authorinfo["Daniel Feltey" "Northwestern University" "daniel.feltey@eecs.northwestern.edu"]
@@ -333,5 +341,32 @@ to the 2016 Language Workbench Challenge benchmark problems.
 @include-section{evolution.scrbl}
 @include-section{editing.scrbl}
 @section[#:tag "conclusion"]{Conclusion}
+@;; cite Fowler's website
+Fowler's definition of a language workbench requires:
+@itemlist[@item{Free definition of new languages which fully integrate with one another}
+          @item{An abstract representation as the primary source of information}
+          @item{DSLs defined as a schema, an editor, and generators}
+          @item{DSLs can be manipulated with a projectional editor}
+          @item{Persisting incomplete or contradictory information in the abstract representation}]
+Racket's communicating macros and @emph{#lang} mechanism enable the free definition of new languages.
+Syntax objects comprise an abstract repsentation of programs implemented on top of Racket and can store user specified
+information in syntax properties. Racket's @emph{#lang} feature enables the composition of language readers and
+bindings which implement the language's semantics, whereas DrRacket's plugin mechanism provides an extensible
+editor for manipulating programs that compile down to Racket. Although, DrRacket does not provide a projectional
+editing mechanism, its plugin mechanism allows extensions to support program editing. Finally, the syntax object
+representation may persist incomplete or contradictory information due to macro expansion introducing syntax from
+private modules or rearranging pieces of syntax.
+
+In the previous sections we have introduced the features of Racket that make it suitable for use as a language workbench.
+We have shown how Racket's @emph{#lang} mechanism is used to connect the components of a language implementation and
+how Racket's macro system allows programmers to freely extend a programming language to suit their needs. The implementation
+of MiniJava demonstrates how these features work together to build new languages upon Racket.
+
+Through the solution of threee benchmark problems we further explore how languages built in Racket can be extended with
+tabular notation, restricted syntax extensions, and tool support. Racket' ability to specify a language's reader through
+the @emph{#lang} mechanism allows a new tabular notation for state machines in MiniJava. Syntax parameters allow the addition
+of new language forms that are only valid within certain contexts. Finally, syntax properties and DrRacket's plugin mechanism
+enable the creation of new language-specific tools. The Racket ecosystem readily allows the composition of these features
+to build and extend programming languages.
 
 @(generate-bibliography)

@@ -4,9 +4,8 @@
 @(define (section title)
    (s:section #:tag (string-append "evolution:" title) title))
 @title[#:tag "evolution"]{Evolution and Reuse: Beyond-Grammar Restrictions}
-This section discusses a solution to @emph{Beyond-Grammar Restrictions} benchmark problem. 
-Our solution to the benchmark problem extends MiniJava with a @racket[break] keyword, that is
-only valid within @racket[while] loops. 
+This section presents our solution to the @emph{Beyond-Grammar Restrictions} benchmark problem.
+Our solution extends MiniJava with a @racket[break] keyword, that is only valid within @racket[while] loops.
 
 
 @section{Assumptions}
@@ -17,7 +16,7 @@ modifications to each piece of the implementation.
 @section{Implementation}
 
 @section{Variants}
-One potential variant of this benchmark problem would be to add Java's @racket[super] keyword to MiniJava.
+One variant of this benchmark problem would be to add Java's @racket[super] keyword to MiniJava.
 The @racket[super] keyword, like @racket[break], is only valid in certain contexts, notably in the non-static
 methods of classes which inherit from a parent class. The technique of using syntax parameters is well-suited
 to restricting such uses of super, in fact the @racket[super] keyword in Racket's class system is implemented
