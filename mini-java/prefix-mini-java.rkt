@@ -176,17 +176,18 @@
   (define x #f))
 
 ;; statements (rest are just re-exported from Racket, linguistic-reuse-style)
-
+;; ~~~EXTRACT:refactor-if~~~
 (define-syntax (if stx)
   (syntax-parse stx
-    [(_ test then else)
+    [(if test then else)
      (add-refactor-property
       (syntax/loc this-syntax (r:if test then else))
-      (list (if (syntax-property stx 'mini-java) 'mini-java 'sexp-mini-java)
+      (list (r:if (syntax-property stx 'mini-java) 'mini-java 'sexp-mini-java)
             (syntax-loc stx)
             (syntax-loc #'test)
             (syntax-loc #'then)
             (syntax-loc #'else)))]))
+;; ~~~EXTRACT:refactor-if~~~
 
 (define-syntax (while stx)
   (syntax-parse stx

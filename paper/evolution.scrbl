@@ -1,6 +1,7 @@
 #lang scribble/sigplan @10pt
 @(require (prefix-in s: scribble/base)
-          (only-in scribble/manual racket racketblock))
+          (only-in scribble/manual racket racketblock)
+          "mj-examples.rkt")
 @(define (section title)
    (s:section #:tag (string-append "evolution:" title) title))
 @title[#:tag "evolution"]{Evolution and Reuse: Beyond-Grammar Restrictions}

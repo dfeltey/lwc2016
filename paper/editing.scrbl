@@ -1,6 +1,8 @@
 #lang scribble/sigplan @10pt
 @(require (prefix-in s: scribble/base)
-          (only-in scribble/manual racket racketblock))
+          (only-in scribble/manual racket racketblock)
+          scriblib/figure
+          "mj-examples.rkt")
 @(define (section title)
    (s:section #:tag (string-append "editing:" title) title))
 @title[#:tag "editing"]{Editing: Restructuring}
@@ -20,6 +22,30 @@ we require that this information be stored in syntax property with the key @rack
 to find possible opportunities for refactoring.
 
 @section{Implementation}
+@(figure*
+  "refactor-prop"
+  "The syntax property used to implement the refactoring tool"
+  refactor-impl)
+@;; TODO: need example use of the refactoring, probably DrRacket screenshots would be best
+Syntax objects and the ability to attach arbitrary information to them using Racket's syntax properties
+were introduced in @secref{racket-overview} and further explored in @secref{drracket} as a way for
+languages written in Racket to communicate with external tools. To implement the @racket[if] restructuring
+tool we have used syntax properties to attach information about the source location of a MiniJava @racket[if]
+statement that will persist in a program's fully expanded syntax. @Figure-ref{refactor-prop} shows the implementation
+of MiniJava's @racket[if] statement. In order to enable our refactoring tool to operate on both regular MiniJava and
+parenthesized MiniJava programs we require that the MiniJava parser also attach a syntax property to indicate that the
+program was written in MiniJava's concrete syntax. The provenance of the @racket[if] statement is necessary because the
+syntax of conditions in @racket[if] statements in MiniJava and parenthesized MiniJava differ, and the same program
+transformation would not be valid in both languages.
+
+Our tool is implemented as a plugin for DrRacket, similar to the check-syntax tool discussed briefly in @secref{drracket}.
+The tool processes a program's fully-expanded syntax and performs a depth-first traversal of the syntax tree. The source locations
+of syntax objects that have the @racket['refactor] property attached are stored, along with the value of the syntax property,
+and later used to determine where the @racket[if] refactoring applies within a MiniJava program. As @figure-ref{refactor-prop} shows,
+the @racket['refactor] syntax property contains the source locations of each part of an @racket[if] statement, this is all the
+information necessary to swap the @emph{then} and @emph{else} branches of an @racket[if] statement and negate the @emph{condition}.
+The design of this refactoring tool further emphasizes the use of syntax properties as a communication channel between
+a language and tools that operate on that language and a central feature in the use of Racket as a language workbench.
 
 @section{Variants}
 The @racket[if] statement refactoring is valid in MiniJava because MiniJava's syntax requires that each

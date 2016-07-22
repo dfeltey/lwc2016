@@ -89,7 +89,7 @@ of MiniJava as a guiding example. Additionally, this section provides necessary 
 our solutions to the benchmark problems. We begin with a high-level overview of Racket then discuss many
 of its features in depth using our implementation of MiniJava as a driving example.
 
-@subsection{An Overview of Racket and its Macro System}
+@subsection[#:tag "racket-overview"]{An Overview of Racket and its Macro System}
 @;; brief overview of expansion and syntax objects to set up discussion of syntax properties
 @;; later on, and the built in forms that we can rely on to implement languages
 @;; (such as syntax-parameters which will be discussed later in the evolution section)
@@ -267,7 +267,7 @@ expansion within the functions stored in @racket[Parity:method-table].
 @;; class definitions compiling to define-syntax stuff ..
 @;; using define-syntax to store the compile time method table info, etc ...
 @;; maybe use the `new` macro as the example here since it is simpler than `send`
-@subsection{DrRacket Integration}
+@subsection[#:tag "drracket"]{DrRacket Integration}
 @;; tooling/tool-tips with type info ... using syntax properties (screen shot)
 @;; more than just communication (with compiler and) between our macros, also communicate with tools
 @;; Talk about syntax properties a little bit with the example of

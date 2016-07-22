@@ -12,7 +12,7 @@
   (codeblock-pict
    (port->string (open-input-file "../mini-java/even-odd-prefix.rkt"))))
 
-(define (extract file [name ""] #:lang [lang "racket"])
+(define (extract file [name ""] #:lang [lang "racket"] #:prefix-lang? [prefix? #t])
   (define marker (~a ";; ~~~EXTRACT:" name "~~~"))
   (define-values (_1 _2 lines)
     (for/fold ([done? #f]
@@ -26,7 +26,8 @@
         [else (values done? keep? lines)])))
   (string-join (reverse lines)
                "\n"
-               #:before-first (string-append "#lang " lang "\n")))
+               #:before-first (or (and prefix? (string-append "#lang " lang "\n"))
+                                  "")))
 
 (define-syntax (define-extract stx)
   (syntax-parse stx 
@@ -40,6 +41,14 @@
 (define-extract mj-new "../mini-java/prefix-mini-java.rkt" #:keep-lang-line? #f)
 (define-extract typecheck-mod-beg "../mini-java/infix-mini-java.rkt" #:keep-lang-line? #f)
 (define-extract add-tool-tips "../mini-java/typecheck.rkt" #:keep-lang-line? #f)
+
+(define refactor-impl
+  (codeblock-pict
+   (string-append
+    (extract "../editing/property.rkt" 'refactor-prop)
+    "\n"
+    (extract "../mini-java/prefix-mini-java.rkt" 'refactor-if #:prefix-lang? #f))))
+
 
 (define mj-while-macro
   (codeblock-pict #:keep-lang-line? #f
