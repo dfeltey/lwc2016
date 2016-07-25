@@ -134,7 +134,7 @@ class StateMachineRunner {
 ╔══════════╦══════════════════════════════════╦══════════════════════════════════╗
 ║ Receiver ║              wait_0              ║              wait_1              ║
 ╠══════════╬══════════════════════════════════╬══════════════════════════════════╣
-║   zero   ║    System.out.println(0);        ║       System.out.println(1);     ║
+║   zero   ║       System.out.println(0);     ║       System.out.println(1);     ║
 ║          ║              wait_1              ║              wait_1              ║
 ╠══════════╬══════════════════════════════════╬══════════════════════════════════╣
 ║   one    ║       System.out.println(2);     ║       System.out.println(3);     ║
