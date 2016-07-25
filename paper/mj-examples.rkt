@@ -118,6 +118,18 @@
 (define 2d-state-machine-text
   #<<>>
 #lang mini-java
+class StateMachineRunner {
+    public int doTheThing() {
+        Receiver r;
+        r = new Receiver();
+        System.out.println(r.one());
+        System.out.println(r.zero());
+        System.out.println(r.zero());
+        System.out.println(r.one());
+        return 0;
+    }
+}
+
 #2dstate-machine
 ╔══════════╦══════════════════════════════════╦══════════════════════════════════╗
 ║ Receiver ║              wait_0              ║              wait_1              ║
