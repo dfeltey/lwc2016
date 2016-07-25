@@ -12,7 +12,8 @@ syntax of MiniJava with a tabular syntax for specifying state machines. An examp
 tabular state machines is in @figure-ref["2d-state-machine"]. This state machine accepts transition
 messages @code{zero} and @code{one} and prints a number based on which transition is followed.
 This example creates a class called @code{Receiver} with two methods, @code{zero} and
-@code{one}. The initial state is @code{wait_1}.
+@code{one}. The initial state is @code{wait_0}. The example in the @code{StateMachineRunner} class
+will print @code{2}, @code{0}, @code{1}, then @code{3}.
 
 @(figure*
   "2d-state-machine"
