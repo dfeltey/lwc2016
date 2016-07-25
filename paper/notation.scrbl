@@ -21,13 +21,13 @@ This example creates a class called @code{Receiver} with two methods, @code{zero
 
 @section{Assumptions}
 
-The implementation uses Racket's existing @racket[2d] parsing package to parse the tabular notation,
-and relies on Racket's module system to hygienically obtain the bindings used during expansion. In
-addition the implementation requires that the state machine be fully connected.
+The implementation uses Racket's existing @racket[2d] parsing package to parse the tabular
+notation. In addition the implementation requires that the state machine be fully connected.
+
 
 @section{Implementation}
 
-@(figure*
+@(figure
   "2d-state-exped"
   "Partially Expanded State Machine"
   @2d-state-exped)
