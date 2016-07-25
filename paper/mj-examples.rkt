@@ -61,13 +61,11 @@
    #<<>>
 #lang racket
 (define-syntax (while stx)
-    (syntax-parse stx
-      [(while test body ...)
-       (define temp (generate-temporary 'loop))
-       #`(let #,temp ()
-           (when test
-             body ...
-             (#,temp)))]))
+  (syntax-parse stx
+    [(while test body ...)
+     (define temp (generate-temporary 'loop))
+     #`(letrec ([loop (λ () (when test body ... (loop)))])
+         (loop))]))
 >>
   ))
 

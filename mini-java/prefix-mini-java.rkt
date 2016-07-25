@@ -198,10 +198,8 @@
      (define temp (generate-temporary 'loop))
      #`(let/ec local-break
          (syntax-parameterize ([break (syntax-parser [(break) #'(local-break)])])
-           (let #,temp ()
-             (when test
-               body ...
-               (#,temp)))))]))
+           (letrec ([loop (λ () (when test body ... (loop)))])
+             (loop))))]))
 ;; ~~~EXTRACT:while+break~~~
 
 ;; expressions (except Racket re-exports)
