@@ -222,11 +222,8 @@
     
     (IfThenElseStatement
      [(if O_PAREN Expression C_PAREN Statement else Statement)
-      (syntax-property
-       (to-syntax `(if (,$3) ,$5 else ,$7)
-                  (src->list (build-src 7)))
-       'mini-java
-       #t)])
+      (to-syntax `(if (,$3) ,$5 else ,$7)
+                 (src->list (build-src 7)))])
     
     (WhileStatement
      [(while O_PAREN Expression C_PAREN Statement)

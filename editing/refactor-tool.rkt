@@ -91,7 +91,7 @@
               (define negate-id (get-negate-id lang))
               (send this insert ")" (+ start span))
               (case lang
-                [(racket sexp-mini-java)
+                [(racket)
                  (send this insert (string-append "(" negate-id " ") start)]
                 [(mini-java)
                  (send this insert (string-append negate-id " " "(") start)])

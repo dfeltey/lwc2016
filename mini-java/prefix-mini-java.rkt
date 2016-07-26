@@ -184,7 +184,7 @@
     [(if test then else)
      (add-refactor-property
       (syntax/loc this-syntax (r:if test then else))
-      (list (r:if (syntax-property stx 'mini-java) 'mini-java 'sexp-mini-java)
+      (list 'mini-java
             (syntax-loc stx)
             (syntax-loc #'test)
             (syntax-loc #'then)

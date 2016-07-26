@@ -233,3 +233,9 @@ class StateMachineRunner {
 (define pipeline+mj-example
   (hc-append  20 pipeline-diagram
              mj-simple-example))
+(define refactoring-pict
+  (scale
+   (hc-append
+    (bitmap "refactoring.png")
+    (bitmap "after-refactor.png"))
+   .6))
