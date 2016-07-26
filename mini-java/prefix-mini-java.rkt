@@ -183,7 +183,8 @@
   (syntax-parse stx
     [(if test then else)
      (add-refactor-property
-      (syntax/loc this-syntax (r:if test then else))
+      (syntax/loc this-syntax
+        (r:if test then else))
       (list 'mini-java
             (syntax-loc stx)
             (syntax-loc #'test)
@@ -197,7 +198,10 @@
     [(while test body ...)
      #`(let/ec local-break
          (syntax-parameterize ([break (λ (stx) #'(local-break))])
-           (letrec ([loop (λ () (when test body ... (loop)))])
+           (letrec ([loop (λ ()
+                            (when test
+                              body ...
+                              (loop)))])
              (loop))))]))
 ;; ~~~EXTRACT:while+break~~~
 

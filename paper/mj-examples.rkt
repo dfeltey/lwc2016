@@ -4,7 +4,7 @@
 
 (require (for-syntax syntax/parse))
 
-(define SCALE-FACTOR 0.9)
+(define SCALE-FACTOR 0.83)
 
 (define mj-simple-example
   (scale
@@ -76,7 +76,10 @@
 (define-syntax (while stx)
   (syntax-parse stx
     [(while test body ...)
-     #`(letrec ([loop (λ () (when test body ... (loop)))])
+     #`(letrec ([loop (λ ()
+                        (when test
+                          body ...
+                          (loop)))])
          (loop))]))
 >>
   ) SCALE-FACTOR))

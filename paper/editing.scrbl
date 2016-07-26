@@ -2,7 +2,8 @@
 @(require (prefix-in s: scribble/base)
           (only-in scribble/manual racket racketblock)
           scriblib/figure
-          "mj-examples.rkt")
+          "mj-examples.rkt"
+          "bib.rkt")
 @(define (section title)
    (s:section #:tag (string-append "editing:" title) title))
 @title[#:tag "editing"]{Editing: Restructuring}
@@ -16,7 +17,7 @@ We assume that we can modify the implementation of MiniJava to expose additional
 about conditional statements. 
 
 @section{Implementation}
-@(figure*
+@(figure
   "refactor-prop"
   "The syntax property used to implement the refactoring tool"
   refactor-impl)
@@ -27,7 +28,7 @@ the key @racket['refactor] to a list containing the source position and span of 
 statement: the @emph{condition}, the @emph{then} branch, and the @emph{else} branch.
 @Figure-ref{refactor-prop} shows this extension.
 
-Our tool is implemented as a plugin for DrRacket which processes a program's fully-expanded syntax to find syntax objects with the @racket['refactor] syntax property attached.
+Our tool is implemented as a plugin for DrRacket@~cite[drracket] which processes a program's fully-expanded syntax to find syntax objects with the @racket['refactor] syntax property attached.
 These locations are where the refactoring may apply. When a user applies the refactoring, the tool rewrites the conditional within the editor's buffer.
 
 @section{Variants}

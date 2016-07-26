@@ -2,6 +2,7 @@
 @(require (prefix-in s: scribble/base)
           scriblib/figure scriblib/footnote
           "mj-examples.rkt"
+          "bib.rkt"
           (only-in scribble/manual racket racketblock code))
 @(define (section title)
    (s:section #:tag (string-append "notation:" title) title))
@@ -66,10 +67,9 @@ To compose with the @emph{check syntax} tool and enable reasoning about state na
 
 Convenient usage of the tabular notation is limited to DrRacket.
 
-@;TODO citation
-
 Racket's 2d parser relies on @emph{read tables}
-@note{Racket's read tables descend from Common Lisp and MacLISP, a modern Racket-specific treatment of read tables is found in} @;; CITE
+@note{Racket's read tables descend from Common Lisp@~cite[commonlisp] and MacLISP@~cite[readtables], a modern Racket-specific treatment of read tables is found at
+ http://docs.racket-lang.org/reference/readtables.html?q=readtables}
 to extend the reader. MiniJava's reader does not support
 read tables, which led to using one of the 2d parser's internal APIs.
 
@@ -79,7 +79,7 @@ read tables, which led to using one of the 2d parser's internal APIs.
 @;TODO citations/links?
 
 This form of tabular notation is used by Racket's @code{2dcond} and @code{2dmatch} forms. These
-forms are used in the implementation of Redex.
+forms are used in the implementation of Redex@~cite[redex-book].
 
 @section{Effort}
 

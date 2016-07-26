@@ -67,6 +67,16 @@
                #:pages '(72 83))
    #:date 2002))
 
+(define mtwt
+  (make-bib
+   #:title "Macros that Work Together: Compile-Time Bindings, Partial Expansion, and Definition Contexts"
+   #:author (authors "Matthew Flatt" "Ryan Culpepper" "David Darais" "Robert Bruce Findler")
+   #:location (journal-location "Journal of Functional Programming"
+                                #:pages '(181 216)
+                                #:volume 22
+                                #:number 2)
+   #:date 2012))
+   
 ;;  - Languages as Libraries
 (define langs-as-libs
   (make-bib
@@ -85,7 +95,7 @@
    #:date 2007))
 
 ;;  - typed racket
-(define tobin-hochstadt-dissertation-2010
+(define tr-diss
   (make-bib
    #:title "Typed Scheme: From Scripts to Programs"
    #:author "Sam Tobin-Hochstadt"

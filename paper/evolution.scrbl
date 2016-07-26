@@ -2,6 +2,7 @@
 @(require (prefix-in s: scribble/base)
           (only-in scribble/manual racket racketblock)
           scriblib/figure
+          "bib.rkt"
           "mj-examples.rkt")
 @(define (section title)
    (s:section #:tag (string-append "evolution:" title) title))
@@ -9,7 +10,7 @@
 This section presents our solution to the @emph{Beyond-Grammar Restrictions} benchmark problem in the @emph{Evolution} category.
 Our solution extends MiniJava with a @racket[break] keyword that is only valid within @racket[while] loops.
 The implementation uses Racket's @emph{syntax parameters} to control the meaning of a
-binding depending on its context.
+binding depending on its context@~cite[syntax-params].
 
 @section{Assumptions}
 Our implementation technique for @racket[break] relies on our use of macros to
