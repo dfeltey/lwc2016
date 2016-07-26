@@ -420,10 +420,18 @@ Through lingusitic dispatch and its rich hygienic macro system, Racket allows pr
 Our MiniJava implementation demonstrates language building the Racket way.
 Our solutions to three benchmark problems showcase how to extend Racket-based languages with new concrete syntax, additional restrictions, and custom tool support.
 
+Racket's language-building facilites are the result of a gradual evolution over its twenty year history.
+Racket builds on Lisp's macro system, first adding hygiene to support lexical scope.
+The introduction of syntax objects hides the implementation details of hygiene.
+Extending syntax objects to store source locations and arbitrary properties allows tooling support.
+Beyond syntax, Racket's module system enables reader customization and linguistic dispatch.
+Racket succeeds as a language workbench by generalizing language features and opening their use to programmers
+resulting in a powerful tool for building and extending languages.
+@;{
 Racket's language-building facilities are not the consequence of any one language construct or design decision.
 Rather, they are the result of a myriad of little decisions, refinements, and enrichments, based on twenty years of building languages with Racket and
 building on another thirty years of Lisp tradition.
 We do not claim to have arrived at the final word on language building; consider instead this work as a snapshot of our thinking about building languages.
-
+}
 
 @(generate-bibliography)

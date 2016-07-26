@@ -149,6 +149,13 @@
    #:date 1974
    #:url "http://www.softwarepreservation.org/projects/LISP/MIT/Moon-MACLISP_Reference_Manual-Apr_08_1974.pdf"))
 
+(define commonlisp
+  (make-bib
+   #:title "An Overview of COMMON LISP"
+   #:author "Guy L. Steele, Jr."
+   #:location (proceedings-location lfp #:pages '(98 107))
+   #:date 1982))
+
 ;;  - Racket TR1
 (define plt-tr1
   (make-bib

@@ -7,7 +7,7 @@
    (s:section #:tag (string-append "notation:" title) title))
 @title[#:tag "notation"]{Notation: Tabular Notation}
 
-In the "Notation" category, we tackle the problem of "Tabular Notation" by extending MiniJava with a
+In the @emph{Notation} category, we tackle the problem of @emph{Tabular Notation} by extending MiniJava with a
 syntax for specifying state machines, as seen in @figure-ref["2d-state-machine"].  A state machine
 compiles into a class, whose name is in the top left cell.  The top row lists the state names.  The
 left column lists the transition methods, whose bodies are in the inner cells, followed by the next

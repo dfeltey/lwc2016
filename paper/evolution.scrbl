@@ -6,7 +6,7 @@
 @(define (section title)
    (s:section #:tag (string-append "evolution:" title) title))
 @title[#:tag "evolution"]{Evolution and Reuse: Beyond-Grammar Restrictions}
-This section presents our solution to the @emph{Beyond-Grammar Restrictions} benchmark problem.
+This section presents our solution to the @emph{Beyond-Grammar Restrictions} benchmark problem in the @emph{Evolution} category.
 Our solution extends MiniJava with a @racket[break] keyword, that is only valid within @racket[while] loops.
 In the implementation, we use Racket's @emph{syntax parameters} which allow control over the meaning of a
 binding depending on its context.
