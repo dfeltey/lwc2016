@@ -101,7 +101,7 @@ macro system is clearly an evolution of the early
 Assembly@~cite[mcilroy] and Lisp@~cite[lisp-macros] macro systems,
 it has changed so much that it is nearly unrecognizable as a
 descendant of them. Instead, it is easier to approach the
-Racket macro system as if it is a domain-specific language
+Racket macro system as if it were a domain-specific language
 for writing an extensible compiler. Racket's macro
 programmers start from the compiler from some initial
 language and add new constructs to it, writing declarations
@@ -126,7 +126,7 @@ After a program has been read, the @emph{expansion} process invokes macros to tr
 low-level programming language that looks like a lambda calculus with conditionals, local binding forms, and
 many primitive functions. In contrast to function evaluation, in which arguments must
 be evaluated before a function is applied, in an inside-out process, the expansion process happens outside-in.
-The macro expander finds the outermost expression that is not in the core form and applies one step of macro expansion
+The macro expander finds the outermost expression that is not in core form and applies one step of macro expansion
 to it, step by step, eliminating the use of macros from the program.
 
 Racket's facilities for language building and its rich core library allow programmers to implement entirely new
