@@ -140,7 +140,15 @@
    #:date 2016))
 
 
-;;  - readtables??? docs???
+;; readtables, FIXME: is this the right way to cite this?
+(define readtables
+  (make-bib
+   #:title "MacLISP Reference Manual, Revision 0"
+   #:author "David Moon"
+   #:location "M.I.T. Project MAC"
+   #:date 1974
+   #:url "http://www.softwarepreservation.org/projects/LISP/MIT/Moon-MACLISP_Reference_Manual-Apr_08_1974.pdf"))
+
 ;;  - Racket TR1
 (define plt-tr1
   (make-bib

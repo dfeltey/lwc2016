@@ -162,7 +162,7 @@ by implementations of Algol 60; Datalog; and Scribble, a language for formatting
   "mj-impl"
   "Structure of the MiniJava implemntation"
   @pipeline-diagram)
-@(figure*
+@(figure
   "mj-syntax"
   "A sample MiniJava program"
   @mj-simple-example)
@@ -375,12 +375,13 @@ bindings in the source program.
   "The implementation of new in parenthesized MiniJava"
   @mj-new)
 
-@(figure*
+
+@;{@(figure*
   "add-tool-tips"
   "Adding tool tips to MiniJava programs"
-  add-tool-tips)
+  add-tool-tips)}
 
-@(figure*
+@(figure
   "tool-tips"
   "MiniJava type tool-tips in DrRacket"
   (scale (bitmap "type-tool-tips.png") .75))

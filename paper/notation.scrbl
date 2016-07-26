@@ -1,6 +1,6 @@
 #lang scribble/sigplan @10pt
 @(require (prefix-in s: scribble/base)
-          scriblib/figure
+          scriblib/figure scriblib/footnote
           "mj-examples.rkt"
           (only-in scribble/manual racket racketblock code))
 @(define (section title)
@@ -68,8 +68,11 @@ Convenient usage of the tabular notation is limited to DrRacket.
 
 @;TODO citation
 
-Racket's 2d parser relies on @emph{read tables} to extend the reader. MiniJava's reader does not support
+Racket's 2d parser relies on @emph{read tables}
+@note{Racket's read tables descend from Common Lisp and MacLISP, a modern Racket-specific treatment of read tables is found in} @;; CITE
+to extend the reader. MiniJava's reader does not support
 read tables, which led to using one of the 2d parser's internal APIs.
+
 
 @section{Uses and Examples}
 

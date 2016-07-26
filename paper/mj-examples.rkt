@@ -4,13 +4,19 @@
 
 (require (for-syntax syntax/parse))
 
+(define SCALE-FACTOR 0.9)
+
 (define mj-simple-example
-  (codeblock-pict
-   (port->string (open-input-file "../mini-java/even-odd.rkt"))))
+  (scale
+   (codeblock-pict
+    (port->string (open-input-file "../mini-java/even-odd.rkt")))
+   SCALE-FACTOR))
 
 (define parenthesized-mj-example
-  (codeblock-pict
-   (port->string (open-input-file "../mini-java/even-odd-prefix.rkt"))))
+  (scale
+   (codeblock-pict
+    (port->string (open-input-file "../mini-java/even-odd-prefix.rkt")))
+   SCALE-FACTOR))
 
 (define (extract file [name ""] #:lang [lang "racket"] #:prefix-lang? [prefix? #t])
   (define marker (~a ";; ~~~EXTRACT:" name "~~~"))
@@ -34,30 +40,37 @@
     [(_ name file (~or (~optional (~seq #:lang lang))
                        (~optional (~seq #:keep-lang-line? keep?))) ...)
      #`(define name
-         (codeblock-pict
-          #:keep-lang-line? #,(or (attribute keep?) #'#t)
-          (extract file 'name #,@(if (attribute lang) #'(#:lang lang) #'()))))]))
+         (scale
+          (codeblock-pict
+           #:keep-lang-line? #,(or (attribute keep?) #'#t)
+           (extract file 'name #,@(if (attribute lang) #'(#:lang lang) #'())))
+          SCALE-FACTOR))]))
 
 (define-extract mj-new "../mini-java/prefix-mini-java.rkt" #:keep-lang-line? #f)
 (define-extract typecheck-mod-beg "../mini-java/infix-mini-java.rkt" #:keep-lang-line? #f)
 (define-extract add-tool-tips "../mini-java/typecheck.rkt" #:keep-lang-line? #f)
 
 (define refactor-impl
-  (codeblock-pict
-   (string-append
-    (extract "../editing/property.rkt" 'refactor-prop)
-    "\n"
-    (extract "../mini-java/prefix-mini-java.rkt" 'refactor-if #:prefix-lang? #f))))
+  (scale
+   (codeblock-pict
+    (string-append
+     (extract "../editing/property.rkt" 'refactor-prop)
+     "\n"
+     (extract "../mini-java/prefix-mini-java.rkt" 'refactor-if #:prefix-lang? #f)))
+   SCALE-FACTOR))
 
 (define break-impl
-  (codeblock-pict
-   (string-append
-    (extract "../mini-java/prefix-mini-java.rkt" 'break-param)
-    "\n\n"
-    (extract "../mini-java/prefix-mini-java.rkt" 'while+break #:prefix-lang? #f))))
+  (scale
+   (codeblock-pict
+    (string-append
+     (extract "../mini-java/prefix-mini-java.rkt" 'break-param)
+     "\n\n"
+     (extract "../mini-java/prefix-mini-java.rkt" 'while+break #:prefix-lang? #f)))
+   SCALE-FACTOR))
 
 (define mj-while-macro
-  (codeblock-pict #:keep-lang-line? #f
+  (scale
+   (codeblock-pict #:keep-lang-line? #f
    #<<>>
 #lang racket
 (define-syntax (while stx)
@@ -66,10 +79,10 @@
      #`(letrec ([loop (λ () (when test body ... (loop)))])
          (loop))]))
 >>
-  ))
+  ) SCALE-FACTOR))
 
 (define mj-parity-compiled
-  (codeblock-pict
+  (scale (codeblock-pict
    #<<>>
 #lang racket
 
@@ -92,10 +105,10 @@
    #'Parity:constructor
    0))
 >>
-   ))
+   ) SCALE-FACTOR))
 
 (define mj-send-macro
-  (codeblock-pict
+  (scale (codeblock-pict
    #:keep-lang-line? #f
    #<<>>
 #lang racket
@@ -112,7 +125,7 @@
               [method          (vector-ref rt-method-table method-index)])
          (method receiver-val arg ...))]))
 >>
-  ))
+  ) SCALE-FACTOR))
 
 (define 2d-state-machine-text
   #<<>>
@@ -143,12 +156,13 @@ class StateMachineRunner {
   )
 
 (define 2d-state-machine
-  (codeblock-pict
+  (scale (codeblock-pict
    #:keep-lang-line? #f
-   2d-state-machine-text))
+   2d-state-machine-text) SCALE-FACTOR))
 
 (define 2d-state-exped
-  (code
+  (scale
+   (code
    (define-class Receiver
      (define-field state)
      (define-method zero ()
@@ -168,7 +182,8 @@ class StateMachineRunner {
           (set! state 0)]
          [(1)
           (System.out.println 3)
-          (set! state 0)])))))
+          (set! state 0)]))))
+   SCALE-FACTOR))
 
 
 
