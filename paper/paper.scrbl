@@ -100,9 +100,9 @@ consideration of Racket as a language workbench. While the
 macro system is clearly an evolution of the early
 Assembly@~cite[mcilroy] and Lisp@~cite[lisp-macros] macro systems,
 it has changed so much that it is nearly unrecognizable as a
-descendant of them. Instead, it is easier to approach the
-Racket macro system as if it were a domain-specific language
-for writing an extensible compiler. Racket's macro
+descendant of them. Instead, it is better to approach the
+Racket macro system as a domain-specific language
+for writing an extensible compiler. Racket macro
 programmers start from the compiler from some initial
 language and add new constructs to it, writing declarations
 that say how the new constructs compile into existing ones;
@@ -116,30 +116,41 @@ using scoping declarations provided by Racket's module
 system to completely hide access to the more powerful
 constructs in Racket proper.
 
-In order to support this level of extensibility, Racket programs are processed in two passes. The first,
-the @emph{read} pass, turns a textual program into a tree of syntax objects. Syntax objects are rich data structures that
-combine a symbolic representation of a program with a number of properties. Properties on syntax objects can
-include source location information and lexical binding information, as well as arbitrary information that
+Whereas a typical compiler's front end parses a textual program into
+an abstract syntax tree of meaningful nodes, Racket separates the
+process into two passes: the @emph{reader} and the
+@emph{expander}. The reader turns a textual program into a syntax tree
+of uninterpreted nodes. The expander rewrites instances of derived
+syntactic forms until none remain; the resulting @emph{fully-expanded}
+syntax tree uses only the syntax of core Racket, a programming
+language that looks like a lambda calculus with conditionals, local
+binding forms, and many primitive functions. The expander does not
+know the binding structure or even the expression structure of derived
+syntactic forms @emph{a priori}; rather, it discovers it as it
+works. To contrast expansion with function evaluation, where the
+arguments to the function are evaluated before the function is
+applied, the expansion process happens outside-in: the expander finds
+the outermost expression that is a derived form, rewrites it using the
+associated transformation rule, and continues.
+
+The tree-based representation that the reader produces and the expander processes is called a @emph{syntax object}.
+Syntax objects are rich data structures that
+combine a symbolic representation of a program with a number of properties. Properties on syntax objects
+include original source locations, lexical binding information, as well as arbitrary data that
 programmers may attach and access using Racket's @racket[syntax-property] procedure.
 
-After a program has been read, the @emph{expansion} process invokes macros to translate the syntax objects into a
-low-level programming language that looks like a lambda calculus with conditionals, local binding forms, and
-many primitive functions. In contrast to function evaluation, in which arguments must
-be evaluated before a function is applied, in an inside-out process, the expansion process happens outside-in.
-The macro expander finds the outermost expression that is not in core form and applies one step of macro expansion
-to it, step by step, eliminating the use of macros from the program.
-
-Racket's facilities for language building and its rich core library allow programmers to implement entirely new
+The implementation of new languages is made possible by this expressive syntax system along with Racket's module
+system. In Racket, a language is merely a module that declares a reader along with bindings for the language's
+syntax. Modules provide namespace control, allowing programmers to rename and remove bindings and thus create
+languages that are not just supersets of Racket.
+ 
+These facilities, along with a rich core library, allow programmers to implement entirely new
 languages on top of Racket. A notable example of this is Typed Racket, a gradually-typed sister language of Racket.
-Languages built on top of Racket, however, do not need to share Racket's syntax or even its semantics as demonstrated
-by implementations of Algol 60, Datalog, and Scribble, a language for formatting prose, on top of Racket.
-
-The implementation of new languages is made possible by Racket's expressive syntax system along with Racket's module
-system. In Racket a new language is merely a module that declares a @emph{reader} along with bindings for the language's
-syntax. The module system additionally provides namespace control allowing programmers to rename and remove bindings, thus
-allowing languag definitions that are not just supersets of Racket.
-In the rest of this section we demonstrate several of Racket's features for building languages and their use in the
-implementation of MiniJava.
+Languages built on top of Racket, however, do not need to share Racket's concrete syntax or even its semantics as demonstrated
+by implementations of Algol 60; Datalog; and Scribble, a language for formatting prose, on top of Racket.
+ 
+ In the rest of this section we demonstrate several of Racket's features for building languages and their use in the
+ implementation of MiniJava.
 
 
 @subsection{#lang Languages}
@@ -238,7 +249,7 @@ the implementation of many Racket macros:
 it expands to Racket's built-in conditional expressions, @racket[when], and Racket's
 @racket[letrec] form.
 Furthermore, it relies hygiene to prevent the @racket[letrec]-bound variable, @racket[loop], from conflicting with uses
-of identically-named variables in the source syntax of @racket[while] forms. Racket's hygienic macro system eases
+of identically-named variables in the source syntax of @racket[while] forms. Hygiene eases
 the job of macro writers, allowing them to write macros without worrying that their bindings will conflict with
 those that appear at macro use sites.
 
