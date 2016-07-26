@@ -42,15 +42,12 @@
 @title{Languages: The Racket Way}
 
 @abstract{
-We present a submission to the 2016 Language Workbench Challenge using
-the Racket programming language. Racket provides a wealth of features
-to assist language designers including linguistic dispatch and a powerful
-syntactic extension system. To tackle the 2016 language workbench challenge
-benchmark problems, we have implemented a version of the MiniJava @;; tense??
-programming language based on these core features of Racket.
-Building upon our implementation of MiniJava we demonstrate the
-use of Racket as a language workbench for building and extending
-languages.
+Racket provides a wealth of features to assist language designers, including
+linguistic dispatch and a powerful syntactic extension system.
+To solve the 2016 Language Workbench Challenge, we have implemented a version
+of the MiniJava programming language using these key features of Racket.
+Building upon this implementation of MiniJava, we demonstrate the use of Racket
+as a language workbench for building and extending languages.
 }
 
 @authorinfo["Daniel Feltey" "Northwestern University" "daniel.feltey@eecs.northwestern.edu"]
@@ -70,10 +67,10 @@ chosen MiniJava@~cite[mini-java] as the object language to extend in our solutio
 
 In @secref{racket-lwc} we introduce the key features that make Racket a language workbench,
 using our implementation of MiniJava as the driving example. In the following sections, we present our
-solutions to three benchmark problems from the 2016 Language Workbench Challenge.
-In @secref{notation} under the @emph{Notation} category we solve the @emph{Tabular Notation} problem by extending
+solutions to three benchmark problems.
+In @secref{notation}, we solve the @emph{Tabular Notation} problem under the @emph{Notation} category by extending
 our implementation of MiniJava with a tabular notation for state machines.
-@Secref{evolution} tackles the @emph{Beyond-Grammar Restrictions} benchmark in the @emph{Evolution and Reuse} category,
+@Secref{evolution} tackles the @emph{Beyond-Grammar Restrictions} benchmark in the @emph{Evolution and Reuse} category by
 adding the @racket[break] keyword to MiniJava and enforcing that is is valid only within a @racket[while] loop.
 Finally, in @secref{editing} we consider the problem of program @emph{Restructuring} from the @emph{Editing} category by
 implementing a refactoring tool for MiniJava programs that preserves syntactic and semantic correctness.
