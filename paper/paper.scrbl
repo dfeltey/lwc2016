@@ -309,25 +309,28 @@ that can build upon one another to create more and more sophisticated new langua
 @;; more than just communication (with compiler and) between our macros, also communicate with tools
 @;; Talk about syntax properties a little bit with the example of
 @;; type info attached as tool-tips, this sets up well for the refactoring later
-The use of Racket's @racket[define-syntax] form allows a communication channel between macros, but Racket's
-syntax system, more generally, allows communication between languages and external tools through the
-use of @emph{syntax properties}. As discussed above, Racket's syntax objects are a rich data structure that
-store more than just a symbolic representation of a program fragment. Furthermore programmers can attach arbitrary
-data to syntax objects using the @racket[syntax-property] function.
 
-Our implementation of MiniJava uses syntax properties to attach type information to expressions that 
-the DrRacket programming environment can present as mouse-over tool-tips. @Figure-ref{tool-tips} shows a MiniJava program
-in DrRacket displaying a type tool-tip for the @racket[check] identifier.
-The mouse-over tool tips are integrated in DrRacket using the syntax property mechanism, DrRacket traverses the fully-expanded
-program and determines where tool-tips belong based on the @racket['mouse-over-tooltips] syntax property.
+Transformer bindings are but one of the communication mechanisms available to
+Racket macros.
+As discussed above, Racket's syntax objects are rich data structures that
+store more than just symbolic representations of program fragments;
+macro programmers can attach arbitrary key-value pairs to syntax objects using
+@emph{syntax properties}.
+Syntax properties enable communication between macros, as transformer bindings
+do, but also between macros/languages and external tools.
 
-Whereas @racket[define-syntax] allows for communication and cooperation between macros, syntax properties also allow language
-implementors to collaborate with external tools and libraries that may process or otherwise analyze programs the compile
-into Racket. Additionally, DrRacket's @emph{check syntax} tool, which draws the arrows between identifiers in @figure-ref{tool-tips},
-uses syntax properties to track uses and binding positions of variables in a source program which may not appear in the fully-expanded
-syntax object. As a concrete example, because fields in a MiniJava class are compiled away into vector offsets, a syntax property
-with the key @racket['disappeared-binding] is used to record that a binding is present in the source syntax but has been
-compiled away in the fully-expanded program.
+Our implementation of MiniJava uses syntax properties to attach type information to expressions, which 
+the DrRacket programming environment can present as mouse-over tool-tips, as @figure-ref{tool-tips} shows.
+DrRacket knows to look for @racket['mouse-over-tooltips] syntax properties in
+the expansion of programs, and uses their contents for its display.
+
+Similarly, DrRacket's @emph{check syntax} tool, which draws the binding arrows in @figure-ref{tool-tips},
+uses syntax properties to variable bindings and uses that are present in a
+source program, but absent in its expansion.
+As a concrete example, because MiniJava class fields are compiled away into
+vector offsets (as opposed to Racket variables), a
+@racket['disappeared-binding] syntax property records the presence of field
+bindings in the source program.
 
 @subsection{The Racket Language Workbench}
 The previous subsections highlight many features of Racket that make it suitable for use as a language workbench.
