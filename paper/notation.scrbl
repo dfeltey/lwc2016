@@ -68,7 +68,7 @@ Convenient usage of the tabular notation is limited to DrRacket.
 
 @;TODO citation
 
-Racket's 2d parser relies on @emph{read tables} to extend reader. MiniJava's reader does not support
+Racket's 2d parser relies on @emph{read tables} to extend the reader. MiniJava's reader does not support
 read tables, which led to using one of the 2d parser's internal APIs.
 
 @section{Uses and Examples}

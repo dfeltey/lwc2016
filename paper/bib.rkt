@@ -2,9 +2,38 @@
 (require scriblib/autobib)
 (provide (all-defined-out))
 
+
+(define ACM "ACM ")
+(define Conference "Conf. ")
+(define Workshop "Wksp. ")
+(define Symposium "Sym. ")
+(define icfp
+  "Intl. Conference on Functional Programming")
+(define lfp "LISP and Functional Programming")
+(define pldi (string-append ACM Conference "Programming Language Design and Implementation"))
+(define scheme-workshop (string-append Workshop "Scheme and Functional Programming"))
+(define popl (string-append ACM Symposium "Principles of Programming Languages"))
+
 (define-cite ~cite citet generate-bibliography)
 
-;; TODO: citations
+;; DrRacket
+(define drracket
+  (make-bib
+   #:title "DrScheme: A Programming Environment for Scheme"
+   #:author (authors "Robert Bruce Findler"
+                     "John Clements"
+                     "Cormac Flanagan"
+                     "Matthew Flatt"
+                     "Shriram Krishnamurthi"
+                     "Paul Steckler"
+                     "Matthias Felleisen")
+   #:location (journal-location "Journal of Functional Programming"
+                                #:pages '(159 182)
+                                #:volume 12
+                                #:number 2)
+   #:date 2002))
+
+
 ;;  - MiniJava
 (define mini-java
   (make-bib #:author "Eric Roberts"
@@ -25,21 +54,103 @@
                      "Jay McCarthy"
                      "Sam Tobin-Hochstadt")
    #:title "The Racket Manifesto"
-   #:location (proceedings-location "Summit on Advances in Programming Languages"
-                                    )))
+   #:location (proceedings-location "Summit on Advances in Programming Languages")
+   #:date 2015))
 
 ;;  - You want it when
+(define you-want-it-when
+  (make-bib
+   #:author "Matthew Flatt"
+   #:title "Composable and Compilable Macros: You Want it When?"
+   #:location (proceedings-location
+               icfp
+               #:pages '(72 83))
+   #:date 2002))
+
 ;;  - Languages as Libraries
+(define langs-as-libs
+  (make-bib
+   #:title "Languages as Libraries"
+   #:author (authors "Sam Tobin-Hochstadt" "Vincent St-Amour"
+                     "Ryan Culpepper" "Matthew Flatt" "Matthias Felleisen")
+   #:location (proceedings-location pldi #:pages '(132 141))
+   #:date 2011))
+
 ;;  - Advanced macrology and impl ts
-;;  - syntax-parse
+(define cthf-sfp-2007
+  (make-bib
+   #:title "Advanced Macrology and the Implementation of Typed Scheme"
+   #:author (authors "Ryan Culpepper" "Sam Tobin-Hochstadt" "Matthew Flatt")
+   #:location (proceedings-location scheme-workshop #:pages '(1 13))
+   #:date 2007))
+
 ;;  - typed racket
+(define tobin-hochstadt-dissertation-2010
+  (make-bib
+   #:title "Typed Scheme: From Scripts to Programs"
+   #:author "Sam Tobin-Hochstadt"
+   #:location (dissertation-location #:institution "Northeastern University"
+                                     #:degree "Ph.D.")
+   #:date 2010))
+
+(define thf-popl-2008
+  (make-bib
+   #:title "The Design and Implementation of Typed Scheme"
+   #:author (authors "Sam Tobin-Hochstadt" "Matthias Felleisen")
+   #:location (proceedings-location popl
+                                    #:pages '(395 406))
+   #:date 2008))
+
+;;  - syntax-parse
+(define fortifying-macros
+  (make-bib
+   #:title "Fortifying Macros"
+   #:author (authors "Ryan Culpepper" "Matthias Felleisen")
+   #:location (proceedings-location
+               icfp
+               #:pages '(235 246))
+   #:date 2010))
+
 ;;  - scribble/ algol60/datalog docs
+(define scribble
+  (make-bib
+   #:title "Scribble: Closing the Book on Ad Hoc Documentation Tools"
+   #:author (authors "Matthew Flatt" "Eli Barzilay" "Robert Bruce Findler")
+   #:location (proceedings-location
+               icfp
+               #:pages '(109 120))
+   #:date 2009))
+   
 ;;  - syntax parameters
+(define syntax-params
+  (make-bib
+   #:title "Keeping it Clean with Syntax Parameters"
+   #:author (authors "Eli Barzilay" "Ryan Culpepper" "Matthew Flatt")
+   #:location (proceedings-location scheme-workshop)
+   #:date 2011))
+   
 ;;  - sets of scopes?
-;;  - Racket TR1
+(define scopes
+  (make-bib
+   #:title "Binding as Sets of Scopes"
+   #:author "Matthew Flatt"
+   #:location (proceedings-location
+               popl
+               #:pages '(705 717))
+   #:date 2016))
+
+
 ;;  - readtables??? docs???
-;;  - dave herman blog post
-;;  - Visual Studio Code, Lnaguage server protocol
+;;  - Racket TR1
+(define plt-tr1
+  (make-bib
+   #:title    "Reference: Racket"
+   #:author   (authors "Matthew Flatt" "PLT")
+   #:date     "2010"
+   #:location (techrpt-location #:institution "PLT Inc." #:number "PLT-TR-2010-1")
+   #:url "http://racket-lang.org/tr1/"))
+
+
 
 (define mcilroy
   (make-bib #:author "Doug McIlroy"
@@ -54,3 +165,22 @@
             #:title "MACRO Definitions for LISP"
             #:date 1963
             #:location (techrpt-location #:institution "MIT" #:number "57")))
+
+;; redex book
+(define redex-book
+  (make-bib
+    #:author (authors "Matthias Felleisen" "Robert Bruce Findler" "Matthew Flatt")
+    #:title "Semantics Engineering with PLT Redex"
+    #:location (book-location #:publisher "MIT Press")
+    #:is-book? #t
+    #:date "2010"))
+
+;; hygienic macros
+(define hygienic-macros
+  (make-bib #:title "Hygienic Macro Expansion"
+            #:author (authors "Eugene Kohlbecker"
+                              "Daniel P. Friedman"
+                              "Matthias Felleisen"
+                              "Bruce Duba")
+            #:location (proceedings-location lfp #:pages '(151 161))
+            #:date 1986))
