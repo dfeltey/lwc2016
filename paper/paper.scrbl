@@ -333,19 +333,19 @@ vector offsets (as opposed to Racket variables), a
 @racket['disappeared-binding] syntax property records the presence of field
 bindings in the source program.
 
-@subsection{The Racket Language Workbench}
-The previous subsections highlight many features of Racket that make it suitable for use as a language workbench.
-An extensible language in which programmers can freely add new language forms gives programmers the power to express complex
-problems in a domain specific fashion. The ability to define macros that can query compile-time state in addition to
-their arguments allows for complex extensions to the language and one powerful communication channel for implementing
-cooperating macros. Access to the full Racket programming language at both compile-time and run-time allows for expressive
-extensions to the compiler that do not limit the programmer. Being able to run arbitrary code at compile time allows a
-number of approaches to language implementation. Finally, syntax objects and their attached syntax
-properties allow for yet another communication channel between languages and the tools that process them.
+@; @subsection{The Racket Language Workbench}
+@; The previous subsections highlight many features of Racket that make it suitable for use as a language workbench.
+@; An extensible language in which programmers can freely add new language forms gives programmers the power to express complex
+@; problems in a domain specific fashion. The ability to define macros that can query compile-time state in addition to
+@; their arguments allows for complex extensions to the language and one powerful communication channel for implementing
+@; cooperating macros. Access to the full Racket programming language at both compile-time and run-time allows for expressive
+@; extensions to the compiler that do not limit the programmer. Being able to run arbitrary code at compile time allows a
+@; number of approaches to language implementation. Finally, syntax objects and their attached syntax
+@; properties allow for yet another communication channel between languages and the tools that process them.
 
-Altogether, Racket provides a spectrum of tools for creating and experimenting with programming language design. In the
-rest of this paper we show three further uses of Racket to design extensions to the base MiniJava language providing solutions
-to the 2016 Language Workbench Challenge benchmark problems.
+@; Altogether, Racket provides a spectrum of tools for creating and experimenting with programming language design. In the
+@; rest of this paper we show three further uses of Racket to design extensions to the base MiniJava language providing solutions
+@; to the 2016 Language Workbench Challenge benchmark problems.
 
 @(figure*
   "mj-while-macro"
