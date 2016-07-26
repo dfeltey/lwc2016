@@ -316,8 +316,9 @@ As discussed above, Racket's syntax objects are rich data structures that
 store more than just symbolic representations of program fragments;
 macro programmers can attach arbitrary key-value pairs to syntax objects using
 @emph{syntax properties}.
-Syntax properties enable communication between macros, as transformer bindings
-do, but also between macros/languages and external tools.
+Just as transformer bindings allow communication between macros in different
+@emph{locations}, syntax properties enable communication between different
+processing @emph{passes}---including external tools---at the same location.
 
 Our implementation of MiniJava uses syntax properties to attach type information to expressions, which 
 the DrRacket programming environment can present as mouse-over tool-tips, as @figure-ref{tool-tips} shows.
