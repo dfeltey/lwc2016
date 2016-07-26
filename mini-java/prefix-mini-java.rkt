@@ -47,7 +47,7 @@
 ;; ~~~EXTRACT:break-param~~~
 (define-syntax-parameter break
   (λ (stx)
-    (raise-syntax-error 'break "break used out of context")))
+    (raise-syntax-error 'break "break used outside of `while`")))
 ;; ~~~EXTRACT:break-param~~~
 
 (begin-for-syntax
