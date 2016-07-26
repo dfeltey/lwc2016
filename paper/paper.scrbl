@@ -161,38 +161,37 @@ implementation of MiniJava.
 @;; module system, selective exports language is a set of bindings some of which are recognized specifically
 
 @Figure-ref{mj-impl} shows the structure of our MiniJava implementation on top of Racket. Similar to a standard
-compiler, there are phases for lexing, parsing, and type checking. The result of the type checking phase is
+compiler, there are phases for lexing and parsing (which together form the MiniJava reader), and type checking. The result of the type checking phase is
 an untyped, prefix, parenthesized version of MiniJava with each MiniJava construct corresponding to a macro.
 In place of a traditional code generation phase, the implementation relies on Racket's macro system to transform
 the parenthesized MiniJava classes into method tables implemented with Racket's vector data type. Wherever possible
-MiniJava forms are translated directly into the corresponding Racket form to enable linguistic reuse, particular examples
-of this include Racket's @racket[if] and binding forms.
+MiniJava forms are translated directly into the corresponding Racket form to enable linguistic reuse.
+Particular examples of this include Racket's @racket[if] and binding forms.
+@; TODO that first para now feels out of place. dissolve it through the rest of
+@;   the section?
 
-@Figure-ref{mj-syntax} shows an example MiniJava program.
-The @emph{#lang} form, at the top, controls dispatching to the correct language implementation,
-specifically the language's reader and its syntax definitions.
-The syntax consists of the @emph{#lang} form followed by the name of the module that defines a language.
-This mechanism allows the language to specify its own reader which may differ from Racket's.
-In the case of MiniJava the @emph{mini-java} language specifies a standard Java-style lexer and parser
-which are called on the concrete syntax to produce an abstract syntax tree. As described in the previous
-subsection, this abstract syntax tree is the result of the @emph{read} pass.
 
+The @emph{#lang} line, as seen at the top of @figure-ref{mj-syntax}, specifies the
+module that defines the language in which the program is written, in this case
+MiniJava.
+Based on this @emph{#lang} line, Racket hands the text of the program over to
+the MiniJava reader, which produces a syntax object representing an abstract syntax tree.
 @(figure*
   "typecheck-mod-beg"
   "Typechecking the abstract syntax tree"
   @typecheck-mod-beg)
 
-Once a MiniJava program has been read to produce an abstract syntax tree, the type checking phase is
-implemented as a whole-module transformation. @Figure-ref{typecheck-mod-beg} shows the definition of @racket[module-begin]
-which performs type checking and translates the abstract syntax tree into parenthesized MiniJava. This module exports
-the definiton of @racket[module-begin] as @racket[#%module-begin], the @racket[#%module-begin] form is one of Racket's
-core forms which is implicitly added around the body of a program during expansion. Replacing Racket's definition of
-@racket[#%module-begin] allows for complete control over the expansion of the module, this allows a whole-module view of
-a program which cannot be accomplished with traditional macros. In our type checker, the
-@racket[module-begin] form simply calls a function, @racket[typecheck-program], which traverses the abstract syntax
-performing type checking and producing the parenthesized form of the MiniJava program. The resulting syntax from the
-type checking function is then spliced into the body of @emph{#lang racket}'s @racket[#%module-begin], allowing Racket's expander
-to take over the rest of the compilation pipeline.
+In general, Racket hands the reader's result to a language's
+@racket[#%module-begin] macro, which can perform module-level processing.
+This whole-module view gives a language complete control over the expansion of
+a module, and enables non-local analysis and transformations---such as type
+checking---which are beyond the reach of traditional macros.
+
+Our MiniJava @racket[#%module-begin] form (shown in @figure-ref{typecheck-mod-beg})
+simply calls a function, @racket[typecheck-program], which typechecks the AST
+and tranlates it to our parenthesized MiniJava. It then splices the resulting
+syntax into the body of @emph{#lang racket}'s @racket[#%module-begin], allowing
+Racket's expander to take over the rest of the compilation pipeline.
 
 @(figure*
   "parenthesized-mj-example"
