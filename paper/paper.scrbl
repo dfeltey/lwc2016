@@ -182,11 +182,13 @@ checking---which are beyond the reach of traditional macros.
 Our MiniJava @racket[#%module-begin] form (shown in @figure-ref{typecheck-mod-beg})
 simply calls a function, @racket[typecheck-program], which typechecks the AST
 and tranlates it to an untyped, prefix, parenthesized version of MiniJava.
-Constructs in this parenthesized MiniJava are implemented as Racket macros,
-which ultimately compile down to pass explicit method tables implemented with
-Racket vectors.
+@; Constructs in this parenthesized MiniJava are implemented as Racket macros.
+@; , which ultimately compile down to pass explicit method tables implemented with
+@; Racket vectors.
 
-The @racket[#%module-begin] macro then splices the resulting syntax into the
+
+@; The @racket[#%module-begin] macro
+It then splices the resulting syntax into the
 body of @emph{#lang racket}'s @racket[#%module-begin].
 This allows Racket's expander to take over the rest of the compilation pipeline
 and expand the macros mentioned in the previous paragraph into ordinary Racket
@@ -207,7 +209,8 @@ code, with Racket conditionals, Racket variables, etc.
 @; Furthermore, type information has been stripped away from definitions, but has
 @; been propagated to @racket[send] forms.
 
-Despite a superficial resemblence to Racket, parenthesized MiniJava has MiniJava semantics.
+@; Despite a superficial resemblence to Racket, parenthesized MiniJava has MiniJava semantics.
+Constructs in parenthesized MiniJava are implemented as Racket macros.
 Consider the @racket[while] construct used in @figure-ref["parenthesized-mj-example"].
 Racket does not have a @racket[while] form that MiniJava could reuse;
 @racket[while] must therefore be implemented as part of MiniJava.
@@ -244,50 +247,59 @@ those that appear at macro use sites.
 @;; this leaves an example to return to later on
 @;; reuse racket variable binding or conditional for the MiniJava forms (linguistic reuse)
 @subsection{Inter-Macro Communication}
-Macros provide a powerful way of specifying the translation from parenthesized MiniJava forms into Racket, but isolated
-macro definitions are not expressive enough to transform every MiniJava expression into Racket. The creation of object instances
-using @racket[new],for example, cannot be implemented as a stand-alone macro definition. The @racket[new] form requires information
+Isolated macro definitions are not sufficient to transform every MiniJava
+expression into Racket. The @racket[new] form, for example, requires information
 about the class being isntantiated in order to construct an instance with the correct number of fields and a reference to the class's
-method table. In this subsection, we present a pattern of communication between macro definitions that allows the definition of macros
-like @racket[new].
+method table.
+@; In this subsection, we present a pattern of communication between macro
+@; definitions that allows the definition of macros like @racket[new].
+This requires @emph{communication} between the macros that implement class
+definition and class instantiation.
 
-After a parenthesized MiniJava program is produced, Racket's expander takes over and expands class definitions.
-For example, the @racket[Parity] class defined in @figure-ref{parenthesized-mj-example} compiles into the Racket
-code in @figure-ref{mj-parity-compiled}. When the @racket[define-class] form expands it produces
-three definitions. The first definition is the run-time method table which  is shared by all instances of
-the @racket[Parity] class. The second definition is the constructor that creates instances of the @racket[Parity]
-class. Finally, the third definition is bound using Racket's @racket[define-syntax] form to static information
-about the @racket[Parity] class.
+To make this concrete, consider the expansion of the @racket[Parity] class from
+our running example, which is shown in @figure-ref{mj-parity-compiled}.
+At this point, MiniJava forms have been compiled away to ordinary Racket code,
+which uses vectors to represent objects and method tables.
+The @racket[define-class] form for the @racket[Parity] class expanded to three
+definitions: the run-time method table shared by all @racket[Parity] instances,
+the constructor that creates instances, and a syntax definition of static
+information about the @racket[Parity] class.
 
-In the previous subsection, we used Racket's @racket[define-syntax] form to define a new macro that implements
-MiniJava's @racket[while] statement. In general, however, the @racket[define-syntax] form creates a @emph{transformer}
-binding. Transformer bindings include macros, as in the definition of @racket[while], but more specifically the
-@racket[define-syntax] form creates bindings whose values are available at expansion time. This allows the use of the
-@racket[define-syntax] to store static information that can be accessed at compile time using the @racket[syntax-local-value]
-procedure. This allows for macros to expand into definitions using @racket[define-syntax] which can be used as a communication
-channel between distinct macros that can be consulted to determine their expansion.
+So far, we have seen Racket's @racket[define-syntax] form used for macro definitions.
+In general, however, @racket[define-syntax] creates @emph{transformer}
+bindings, which include not only macros, but also arbitrary bindings whose
+values are available at expansion time.
 
-@Figure-ref{mj-new} gives an example of a macro which consults static information in order to expand. In this case
-the @racket[new] macro accesses the static information bound to the class identifier passed in and looks up the constructor
-field of the @racket[static-class-info] record. In the case of the expression @racket[(new Parity)], the use of the
-@racket[new] macro contains a reference to the identifier @racket[#'Parity]. Using @racket[syntax-local-value], the
-@racket[new] macro accesses the static information in the @racket[static-class-info] record bound using @racket[define-syntax]
-to the @racket[Parity] identifier. The @racket[new] macro uses this information to expand into a call to the @racket[Parity:constructor]
-function to create a new instance of the class.
+This allows @racket[define-class] to store static information that can be
+accessed at compile time by other macros using the @racket[syntax-local-value] procedure.
+The implementation of @racket[new] (shown in @figure-ref{mj-new}) can then use
+this channel of communication to get access to the name of the constructor,
+bound by @racket[define-class], and use it in its own expansion.
 
-Another use of this static information occurs in the @racket[send] macro. The typed elaboration of a MiniJava program
-produced by our lexer, parser, and type checker annotates @racket[send] method calls with the name of the class to which 
-the method belongs. In this case the @racket[send] macro uses the static information to resolve method calls into
-the correct indices in the class's method table. @Figure-ref{mj-parity-compiled} shows the result of this
-expansion within the functions stored in @racket[Parity:method-table].
+@; @Figure-ref{mj-new} gives an example of a macro which consults static information in order to expand. In this case
+@; the @racket[new] macro accesses the static information bound to the class identifier passed in and looks up the constructor
+@; field of the @racket[static-class-info] record. In the case of the expression @racket[(new Parity)], the use of the
+@; @racket[new] macro contains a reference to the identifier @racket[#'Parity]. Using @racket[syntax-local-value], the
+@; @racket[new] macro accesses the static information in the @racket[static-class-info] record bound using @racket[define-syntax]
+@; to the @racket[Parity] identifier. The @racket[new] macro uses this information to expand into a call to the @racket[Parity:constructor]
+@; function to create a new instance of the class.
 
-This communication pattern between macros also exemplifies the distinction between Racket's run-time and compile-time phases.
-The @racket[new] macro must call the @racket[syntax-local-value] function at compile-time in order to query the static information
-needed. In general, this means that arbitrary code, including side-effecting code, may need to run at compile time in order to
-expand a syntactic form. Racket addresses
+The @racket[send] macro, used for method calls, also makes use of this technique.
+Our MiniJava type checker annotates @racket[send] forms with the name of
+the class which it attributes to the receiver.
+The @racket[send] macro uses the static information bound to that class name to
+determine the correct index into the class's method table.
+The bodies of the methods stored in @racket[Parity:method-table], in
+@figure-ref{mj-parity-compiled}, show the results of this expansion.
+
+This technique highlights the distinction between Racket's run-time and compile-time phases.
+The @racket[new] macro must call @racket[syntax-local-value] at compile-time to
+access static class information.
+In general, this means that arbitrary, possibly even side-effecting, code may
+need to run at compile time to expand a syntactic form. Racket addresses
 the issue of mingling compile time code with run-time code through a phase distinction that makes explicit
-the execution time of a piece of code. This is necessary in order to support a tower of linguistic abstractions
-that can easily build upon one another to create new languages.
+the execution time of a piece of code. This is necessary to support a tower of linguistic abstractions
+that can build upon one another to create more and more sophisticated new languages.
 
 @;; class definitions compiling to define-syntax stuff ..
 @;; using define-syntax to store the compile time method table info, etc ...

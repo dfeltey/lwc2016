@@ -86,11 +86,11 @@
   (vector Parity:method-table))
 
 (define-syntax Parity
-     (static-class-info
-      Parity:static-method-info
-      #'Parity:method-table
-      #'Parity:constructor
-      0))
+  (static-class-info
+   Parity:static-method-info
+   #'Parity:method-table
+   #'Parity:constructor
+   0))
 >>
    ))
 
