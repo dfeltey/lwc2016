@@ -197,40 +197,47 @@ code, with Racket conditionals, Racket variables, etc.
   "The parenthesized version of the MiniJava example"
   parenthesized-mj-example)
 @subsection{Language Constructs as Macros}
-Once the type checker produces a parenthesized MiniJava program, the next stage of the pipeline is the translation to
-Racket through macro expansion. This section describes the implementation of MiniJava language features as Racket macros.
+@; Once the type checker produces a parenthesized MiniJava program, the next stage of the pipeline is the translation to
+@; Racket through macro expansion.
 
-The result of lexing, parsing, and type checking the program in @figure-ref{mj-syntax} produces the parenthesized
-MiniJava program in @figure-ref{parenthesized-mj-example}. Programs in the parenthesized MiniJava language have a
-similar structure to those written in MiniJava's concrete syntax. The two languages share the same basic operators
-with the key differences being that the syntax of parenthesized MiniJava is fully prefixed and type information has
-been stripped away except for method calls using the @racket[send] form which have been annotated with type information.
+@; Programs in the parenthesized MiniJava language---such as the translation of
+@; @figure-ref{mj-syntax} shown in @figure-ref{parenthesized-mj-example}---use
+@; the same basic operators as those written in MiniJava's concrete syntax, but
+@; use a fully prefixed syntax.
+@; Furthermore, type information has been stripped away from definitions, but has
+@; been propagated to @racket[send] forms.
 
-Although the parenthesized MiniJava language appears more similar to Racket than MiniJava does, its semantics is still
-that of MiniJava. Consider the @racket[while] construct used in @figure-ref["mj-syntax" "parenthesized-mj-example"].
-Because Racket does not have a @racket[while] form, it must be implemented as part of MiniJava. The @racket[while] expression
-in @figure-ref{parenthesized-mj-example} cannot be directly implemented as a function since its body may never run and
-a function would evaluate all of its arguments. To support this translation of @racket[while] loops, we must define
-@racket[while] as a macro.
+Despite a superficial resemblence to Racket, parenthesized MiniJava has MiniJava semantics.
+Consider the @racket[while] construct used in @figure-ref["parenthesized-mj-example"].
+Racket does not have a @racket[while] form that MiniJava could reuse;
+@racket[while] must therefore be implemented as part of MiniJava.
 
-The implementation of the @racket[while] form is shown in @figure-ref{mj-while-macro}. The definition of @racket[while]
-uses @racket[syntax-parse] which provides a powerful mechanism for defining new syntactic extensions via pattern matching
-and templating.The definition of @racket[while] contains a single
-pattern to match, @racket[(while test body ...)], which indicates that the @racket[while] macro expects to see the identifier
-@racket[while] followed by a test expression and any number of body expressions. The pattern matching mechanism binds
-@racket[test] and @racket[body] for use within syntax templates, e.g. the expression contained within @racket[#'(⋯)].
-The expression @racket[#'expr] is equivalent to @racket[(@#,racket[syntax] expr)] and is similar to the @racket[quote] form that Racket
-inherits from Lisp. The key difference between @racket[quote] and @racket[syntax] is that the latter produces a syntax object
-rather than a datum and supports interpolation as seen in the @racket[while] definition to support copying pattern variables
-into a syntax template.
+@; The @racket[while] expression
+@; in @figure-ref{parenthesized-mj-example} cannot be directly implemented as a function since its body may never run and
+@; a function would evaluate all of its arguments. To support this translation of @racket[while] loops, we must define
+@; @racket[while] as a macro.
 
-The @racket[while] macro is an example of the kind of linguistic reuse found in the implementation of many
-Racket macros. The @racket[while] form relies on Racket's built in conditional expressions, @racket[when], and Racket's
-@racket[letrec] form in order to implement MiniJava's @racket[while] statement. Furthermore, this example makes use of
-Racket's hygienic macro system preventing the @racket[letrec]-bound variable, @racket[loop], from conflicting with uses
-of a similarly named variable that appears in the syntax of the @racket[while] form. Racket's hygienic macro system eases
-the job of macro writers, allowing them to write new macros without worrying that their use of binding forms will conflict with
-variables that appear in the use of a macro.
+As @figure-ref{mj-while-macro} shows, @racket[while] is implemented as a macro which
+uses @racket[syntax-parse], a powerful pattern matcher for defining syntactic extensions.
+This macro contains a single pattern, @racket[(while test body ...)], which
+indicates that it expects to see the identifier @racket[while] followed by a
+test expression and any number of body expressions.
+The pattern matcher binds @racket[test] and @racket[body] for use within syntax
+templates, e.g. expressions contained within @racket[#'⋯] (or @racket[(@#,racket[syntax] ⋯)]).
+The @racket[syntax] form is similar to the @racket[quote] form that Racket
+inherits from Lisp, with the key differences that the former produces a syntax object
+instead of a datum, and supports interpolation.
+This interpolation features is used in @racket[while]'s implementation to
+support copying pattern variables into a syntax template.
+
+The @racket[while] macro is an example of the kind of linguistic reuse found in
+the implementation of many Racket macros:
+it expands to Racket's built-in conditional expressions, @racket[when], and Racket's
+@racket[letrec] form.
+Furthermore, it relies hygiene to prevent the @racket[letrec]-bound variable, @racket[loop], from conflicting with uses
+of identically-named variables in the source syntax of @racket[while] forms. Racket's hygienic macro system eases
+the job of macro writers, allowing them to write macros without worrying that their bindings will conflict with
+those that appear at macro use sites.
 
 @;; while in Java to while in Racket ..
 @;; discuss the implementation of the parenthesized while form (without the syntax parameter mess)

@@ -195,7 +195,6 @@
 (define-syntax (while stx)
   (syntax-parse stx
     [(while test body ...)
-     (define temp (generate-temporary 'loop))
      #`(let/ec local-break
          (syntax-parameterize ([break (λ (stx) #'(local-break))])
            (letrec ([loop (λ () (when test body ... (loop)))])

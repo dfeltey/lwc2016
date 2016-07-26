@@ -63,7 +63,6 @@
 (define-syntax (while stx)
   (syntax-parse stx
     [(while test body ...)
-     (define temp (generate-temporary 'loop))
      #`(letrec ([loop (λ () (when test body ... (loop)))])
          (loop))]))
 >>
