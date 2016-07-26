@@ -55,7 +55,7 @@ outside the body of @racket[while] loops, as one would expect.
 
 @section{Impact}
 Beyond the changes to parenthesized MiniJava discussed previously, implementing @racket[break] requires
-changes to the the MiniJava lexer, parser, and type checker.
+changes to our MiniJava lexer, parser, and type checker.
 We extend the lexer to recognize the @racket[break] keyword and produce a corresponding token.
 Similarly, we modify the parser to produce abstract syntax representing a use of @racket[break].
 The type checking rule added for @racket[break] always succeeds and produces a use of the @racket[break]

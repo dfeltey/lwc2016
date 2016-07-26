@@ -28,7 +28,7 @@ the key @racket['refactor] to a list containing the source position and span of 
 statement: the @emph{condition}, the @emph{then} branch, and the @emph{else} branch.
 @Figure-ref{refactor-prop} shows this extension.
 
-Our tool is implemented as a plugin for DrRacket@~cite[drracket] which processes a program's fully-expanded syntax to find syntax objects with the @racket['refactor] syntax property attached.
+We implement our tool as a plugin for DrRacket@~cite[drracket] which processes a program's fully-expanded syntax to find syntax objects with the @racket['refactor] syntax property attached.
 These locations are where the refactoring may apply. When a user applies the refactoring, the tool rewrites the conditional within the editor's buffer.
 
 @section{Variants}
@@ -37,7 +37,7 @@ A variant on this refactoring would be to transform expressions that use @racket
 In addition, it is worth noting that the implementation of our refactoring tool is not MiniJava specific.
 By parameterizing the refactoring rule over negation syntax, the tool generalizes across languages.
 To support the refactoring, a language simply needs to attach the relevant syntax property to its conditional form.
-As a proof of concept, we extended Racket's @racket[if] in this fashion.
+As a proof of concept, we alos extend Racket's @racket[if] in this fashion.
 
 @section{Usability}
 @(figure*
@@ -64,9 +64,9 @@ has single-branch @racket[if] statements, the tool would have to distinguish the
 
 @section{Uses and Examples}
 Several tools built on top of Racket and DrRacket use syntax properties to facilitate communication between tools and language implementations.
-Specific examples include Racket's check-syntax utility, Typed Racket's type tool-tips, and Racket's feature-specific profiler.
+Specific examples include Racket's check-syntax utility, Typed Racket's type tool-tips, and Racket's feature-specific profiler@~cite[fsp].
 
 @section{Effort}
-The implementation of the @racket[if] restructuring tool required under 200 lines of code, including the small changes made to
+The implementation of the @racket[if] restructuring tool requires under 200 lines of code, including the small changes made to
 the MiniJava implementation. The implementation took approximately one day, assuming a basic understanding of the DrRacket plug-in system.
 

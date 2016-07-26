@@ -209,3 +209,10 @@
                               "Bruce Duba")
             #:location (proceedings-location lfp #:pages '(151 161))
             #:date 1986))
+(define fsp
+  (make-bib
+   #:title "Feature-Specific Profiling"
+   #:author (authors "Vincent St-Amour" "Leif Andersen" "Matthias Felleisen")
+   #:location (proceedings-location "International Conference on Compiler Construction"
+                                     #:pages '(49 68))
+   #:date 2015))

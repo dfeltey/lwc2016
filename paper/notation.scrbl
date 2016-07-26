@@ -26,11 +26,11 @@ notation. In addition the implementation requires that every state allow every t
 
 @section{Implementation}
 
-Implementing this extension required changes to each phase of the MiniJava implementation.  First,
-we extend the lexer with a new class of tokens for 2-dimensional tables, which are recognized by the
-@emph{#2dstate-machine} prefix. For this token the lexer uses Racket's existing 2d syntax parser, to
+Implementing this extension requires changes to each phase of our MiniJava implementation.  First,
+we extend the lexer with a new class of tokens for 2-dimensional tables, which begin with the token
+@emph{#2dstate-machine}. For this token, the lexer uses Racket's existing 2d syntax parser to
 find the bounds of the table and break it into separate cells.  The original parser then handles the
-contents of each cell. After a 2d table is parsed, lexing resumes as usual.
+contents of each cell. After parsing a  2d table, lexing resumes as usual.
 
 After parsing, each table is a syntax object that corresponds to an invocation of the
 @racket[2dstate-machine] macro. We then extend the following phases to recognize these objects and
@@ -50,9 +50,9 @@ difficult to use outside DrRacket.
 @section{Impact}
 
 In addition to the aforementioned changes to the lexer, our use of the 2d parser depends on one of
-its private API's, therefore we copied its implementation.  From there each phase was extended to
+its private API's, therefore we copy its implementation.  From there each phase is extended to
 recognize and pass along the state machine to Racket's macro expander and the macro
-@racket[2dstate-machine] was added to compile the state machines.
+@racket[2dstate-machine] is added to compile the state machines.
 
 @section{Composability}
 
