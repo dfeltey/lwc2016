@@ -239,8 +239,9 @@ we must therefore implement @racket[while] as part of MiniJava.
 @; a function would evaluate all of its arguments. To support this translation of @racket[while] loops, we must define
 @; @racket[while] as a macro.
 
-As @figure-ref{mj-while-macro} shows, @racket[while] is implemented as a macro which
-uses @racket[syntax-parse], a powerful pattern matcher for defining syntactic extensions@~cite[fortifying-macros].
+Our implementation of MiniJava's @racket[while], in @figure-ref{mj-while-macro}, uses Racket's @racket[define-syntax] form to bind @racket[while] as a macro.
+The @racket[define-syntax] form enables the definition of macros as functions which consume and produce syntax objects.
+The @racket[while] macro uses @racket[syntax-parse], a powerful pattern matcher for defining syntactic extensions@~cite[fortifying-macros].
 This macro contains a single pattern, @racket[(while test body ...)], which
 indicates that it expects to see the identifier @racket[while] followed by a
 test expression and any number of body expressions.
@@ -249,7 +250,7 @@ templates, e.g. expressions contained within @racket[#'⋯] (or @racket[(@#,rack
 The @racket[syntax] form is similar to the @racket[quote] form that Racket
 inherits from Lisp, with the key differences that the former produces a syntax object
 instead of a datum, and supports interpolation.
-This interpolation features is used in @racket[while]'s implementation to
+This interpolation feature is used in @racket[while]'s implementation to
 support copying pattern variables into a syntax template.
 
 The @racket[while] macro is an example of the kind of linguistic reuse found in
