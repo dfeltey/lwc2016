@@ -5,6 +5,7 @@
           "bib.rkt"
           "mj-examples.rkt"
           scriblib/figure
+          (only-in scribble/core style) scribble/latex-properties
           (only-in scribble/manual racket racketblock hash-lang)
           (only-in racket/format ~a))
 
@@ -39,7 +40,13 @@
 @;; - use `our` instead of `the` when referring to MiniJava impl
 
 
-@title{Languages The Racket Way}
+@(define extra-tex-code
+   (bytes-append #"\\usepackage{pslatex}\n"
+                 #"\\usepackage{inconsolata}\n"))
+
+@title[#:style (style #f (list (tex-addition extra-tex-code)))]{
+  Languages The Racket Way
+}
 
 @abstract{
 Racket provides a wealth of features to assist language designers, including
@@ -103,7 +110,7 @@ Assembly@~cite[mcilroy] and Lisp@~cite[lisp-macros] macro systems,
 it has changed so much that it is nearly unrecognizable as a
 descendant of them@~cite[scopes]. Instead, it is better to approach the
 Racket macro system as a domain-specific language
-for writing an extensible compiler. Racket macro
+for writing an extensible compiler front-end. Racket macro
 programmers start from the compiler for some initial
 language and add new constructs to it, writing declarations
 that say how the new constructs compile into existing ones;
@@ -146,9 +153,10 @@ syntax. Modules provide namespace control, allowing programmers to rename and re
 languages that are not just supersets of Racket.
  
 These facilities, along with a rich core library, allow programmers to implement entirely new
-languages on top of Racket. A notable example of this is Typed Racket@~cite[cthf-sfp-2007]@~cite[thf-popl-2008]@~cite[tr-diss], a gradually-typed sister language of Racket.
-Languages built on top of Racket, however, do not need to share Racket's concrete syntax or even its semantics as demonstrated
-by implementations of Algol 60; Datalog; and Scribble@~cite[scribble], a language for formatting prose, on top of Racket.
+languages on top of Racket. A notable example of this is Typed Racket@~cite[cthf-sfp-2007 thf-popl-2008 tr-diss], a gradually-typed sister language of Racket.
+Languages built on top of Racket, however, do not need to share Racket's concrete syntax or even its semantics, as demonstrated
+by implementations of Algol 60, Datalog, and Scribble@~cite[scribble], a language whose concrete syntax is designed for
+writing prose (and is used to implement this paper).
  
  In the rest of this section we demonstrate several of Racket's features for building languages and their use in our
  implementation of MiniJava.
@@ -171,9 +179,9 @@ by implementations of Algol 60; Datalog; and Scribble@~cite[scribble], a languag
 @;; semantics
 @;; use the module-begin from the typechecker as an example in the prose
 @;; module system, selective exports language is a set of bindings some of which are recognized specifically
-Racket programs must begin with the token @emph{#lang} followed by the name of a module that defines a language.
+Racket programs must begin with the token @tt{#lang} followed by the name of a module that defines a language.
 Through Racket's linguistic dispatch, the language module receives the contents of the program for language-specific processing.
-The @emph{#lang} line at the top of @figure-ref{mj-syntax}, specifies that the program is written in MiniJava.
+The @tt{#lang} line at the top of @figure-ref{mj-syntax} specifies that the program is written in MiniJava.
 As such, Racket hands the text of the program over to
 the MiniJava reader, which produces a syntax object representing an abstract syntax tree.
 As @figure-ref{mj-impl} shows, the MiniJava reader is composed of a lexer and
@@ -199,7 +207,7 @@ and tranlates it to an untyped, prefix, parenthesized version of MiniJava.
 
 @; The @racket[#%module-begin] macro
 It then splices the resulting syntax into the
-body of @emph{#lang racket}'s @racket[#%module-begin].
+body of @tt{#lang racket}'s @racket[#%module-begin].
 This allows Racket's expander to take over the rest of the compilation pipeline
 and expand the macros mentioned in the previous paragraph into ordinary Racket
 code, with Racket conditionals, Racket variables, etc.
@@ -335,7 +343,7 @@ the DrRacket programming environment@~cite[drracket] can present as mouse-over t
 DrRacket knows to look for @racket['mouse-over-tooltips] syntax properties in
 the expansion of programs, and uses their contents for its display.
 
-Similarly, DrRacket's @emph{check syntax} tool, which draws the binding arrows in @figure-ref{tool-tips},
+Similarly, DrRacket's check syntax tool, which draws the binding arrows in @figure-ref{tool-tips},
 uses syntax properties to highlight variable bindings and uses that are present in a
 source program, but absent in its expansion.
 As a concrete example, because MiniJava class fields are compiled away into
@@ -403,9 +411,9 @@ bindings in the source program.
           @item{DSLs defined as a schema, an editor, and generators}
           @item{DSLs can be manipulated with a projectional editor}
           @item{Persisting incomplete or contradictory information in the abstract representation}]
-Racket's communicating macros and @emph{#lang} mechanism enable the free definition of new languages.
+Racket's communicating macros and @tt{#lang} mechanism enable the free definition of new languages.
 Syntax objects comprise an abstract repsentation of programs implemented on top of Racket and can store user specified
-information in syntax properties. Racket's @emph{#lang} feature enables the composition of language readers and
+information in syntax properties. Racket's @tt{#lang} feature enables the composition of language readers and
 bindings which implement the language's semantics, whereas DrRacket's plugin mechanism provides an extensible
 editor for manipulating programs that compile down to Racket. Although, DrRacket does not provide a projectional
 editing mechanism, its plugin mechanism allows extensions to support program editing. Finally, the syntax object
