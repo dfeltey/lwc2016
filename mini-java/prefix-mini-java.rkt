@@ -40,7 +40,7 @@
 
 (define-syntax-rule (define-literals (lit ...))
   (begin (define-syntax lit (syntax-rules ())) ...))
-(define-literals (define-field define-method))
+(define-literals (define-field))
 
 (define-syntax-parameter this (syntax-rules ()))
 
@@ -95,12 +95,12 @@
         (λ (idx)
           (vector-set! method-names idx method-name)
           (if (free-id-set-member? defined-methods method-name)
-              (vector-set! method-stx idx #`(method #,(dict-ref method-mapping method-name)))
+              (vector-set! method-stx idx (dict-ref method-mapping method-name))
               (vector-set! method-stx idx #`(vector-ref #,super-method-table #,idx)))
           new-method-idx)]
        [else
         (vector-set! method-names new-method-idx method-name)
-        (vector-set! method-stx new-method-idx #`(method #,(dict-ref method-mapping method-name)))
+        (vector-set! method-stx new-method-idx (dict-ref method-mapping method-name))
         (add1 new-method-idx)]))
    (values (vector->list method-names)
            (vector->list method-stx)))
@@ -166,13 +166,10 @@
             #'constructor
             #,field-count)))]))
 
-;; for post-processing
-;; `define-method` (and `define-field`) is fixed syntax in `define-class`
-(define-simple-macro (method meth:meth-decl)
-  (lambda (receiver meth.arg-name ...)
-    (syntax-parameterize
-     ([this (make-rename-transformer #'receiver)])
-     meth.body ...)))
+(define-simple-macro (define-method name (arg ...) body ...)
+  (λ (receiver arg ...)
+    (syntax-parameterize ([this (make-rename-transformer #'receiver)])
+      body ...)))
 
 (define-simple-macro (define-local x)
   (define x #f))
