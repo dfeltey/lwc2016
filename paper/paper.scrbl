@@ -101,9 +101,9 @@ of its features in depth to illustrate one approach to language development in R
 @;; brief overview of expansion and syntax objects to set up discussion of syntax properties
 @;; later on, and the built in forms that we can rely on to implement languages
 @;; (such as syntax-parameters which will be discussed later in the evolution section)
-Racket is an untyped, call-by-value programming language in
+Racket is a dynamically typed@~cite[dynamic-typing], call-by-value programming language in
 the Lisp family. One of Racket's most prominent features is
-its powerful hygienic@~cite[hygienic-macros] macro system and it is central to the
+its powerful hygienic macro system@~cite[hygienic-macros] and it is central to the
 consideration of Racket as a language workbench. While the
 macro system is clearly an evolution of the early
 Assembly@~cite[mcilroy] and Lisp@~cite[lisp-macros] macro systems,
@@ -180,8 +180,9 @@ writing prose (and is used to implement this paper).
 @;; use the module-begin from the typechecker as an example in the prose
 @;; module system, selective exports language is a set of bindings some of which are recognized specifically
 Racket programs must begin with the token @tt{#lang} followed by the name of a module that defines a language.
-Through Racket's linguistic dispatch, the language module receives the contents of the program for language-specific processing.
-The @tt{#lang} line at the top of @figure-ref{mj-syntax} specifies that the program is written in MiniJava.
+Racket forwards the program's contents to the language module for language-specific processing, a mechanism we refer to as @emph{linguistic dispatch}.
+@;;Through Racket's linguistic dispatch, the language module receives the contents of the program for language-specific processing.
+The @tt{#lang} line at the top of @figure-ref{mj-syntax}, specifies that the program is written in MiniJava.
 As such, Racket hands the text of the program over to
 the MiniJava reader, which produces a syntax object representing an abstract syntax tree.
 As @figure-ref{mj-impl} shows, the MiniJava reader is composed of a lexer and

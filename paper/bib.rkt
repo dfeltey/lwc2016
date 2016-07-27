@@ -13,8 +13,17 @@
 (define pldi (string-append ACM Conference "Programming Language Design and Implementation"))
 (define scheme-workshop (string-append Workshop "Scheme and Functional Programming"))
 (define popl (string-append ACM Symposium "Principles of Programming Languages"))
+(define esop (string-append "European " Symposium "on Programming"))
 
 (define-cite ~cite citet generate-bibliography)
+
+(define dynamic-typing
+  (make-bib
+   #:title "Dynamic Typing: Syntax and Proof Theory"
+   #:author "Fritz Henglein"
+   #:location (proceedings-location esop #:pages '(197 230))
+   #:date 1992))
+
 
 ;; DrRacket
 (define drracket
