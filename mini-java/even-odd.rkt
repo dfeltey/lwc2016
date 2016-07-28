@@ -1,4 +1,4 @@
-#lang at-exp mini-java
+#lang mini-java
 
 class Main {
  public static void main(String [] args) {
@@ -24,10 +24,10 @@ class Runner {
 }
 
 class Parity {
- public boolean is_even(int n){
-  return (n == 0) || this.is_odd(n - 1);
- }
  public boolean is_odd(int n) {
   return (! (n == 0)) && this.is_even(n - 1);
+ }
+ public boolean is_even(int n){
+  return (n == 0) || this.is_odd(n - 1);
  }
 }

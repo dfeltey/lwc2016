@@ -48,15 +48,19 @@
 
 
 
+
+
+
+
 (define-class Parity
-  (define-method is_even (n)
-    (||
-     (== n 0)
-     (send Parity this is_odd (- n 1))))
   (define-method is_odd (n)
     (&&
      (! (== n 0))
-     (send Parity this is_even (- n 1)))))
+     (send Parity this is_even (- n 1))))
+  (define-method is_even (n)
+    (||
+     (== n 0)
+     (send Parity this is_odd (- n 1)))))
 
 
 

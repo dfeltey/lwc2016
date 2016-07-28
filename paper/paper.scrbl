@@ -124,18 +124,7 @@ The implementation of new languages is made possible by this expressive syntax s
 system@~cite[you-want-it-when]. In Racket, a language is merely a module that declares a reader along with bindings for the language's
 syntax. Modules provide namespace control, allowing programmers to rename and remove bindings and thus create
 languages that are not just supersets of Racket.
- 
-These facilities, along with a rich core library, allow programmers to implement entirely new
-languages on top of Racket. A notable example of this is Typed Racket@~cite[cthf-sfp-2007 thf-popl-2008 tr-diss], a gradually-typed sister language of Racket.
-Languages built on top of Racket, however, do not need to share Racket's concrete syntax or even its semantics, as demonstrated
-by implementations of Algol 60, Datalog, and Scribble@~cite[scribble], a language whose concrete syntax is designed for
-writing prose (and is used to implement this paper).
- 
- In the rest of this section we demonstrate several of Racket's features for building languages and their use in our
- implementation of MiniJava.
 
-
-@subsection{#lang Languages}
 @(figure
   "mj-impl"
   "Structure of the MiniJava implemntation"
@@ -144,6 +133,26 @@ writing prose (and is used to implement this paper).
   "mj-syntax"
   "A sample MiniJava program"
   @mj-simple-example)
+@(figure*
+  "typecheck-mod-beg"
+  "Typechecking the abstract syntax tree"
+  @typecheck-mod-beg)
+
+These facilities, along with a rich core library, allow programmers to implement entirely new
+languages on top of Racket. A notable example of this is Typed Racket@~cite[cthf-sfp-2007 thf-popl-2008 tr-diss], a gradually-typed sister language of Racket.
+Languages built on top of Racket, however, do not need to share Racket's concrete syntax or even its semantics, as demonstrated
+by implementations of Algol 60, Datalog, and Scribble@~cite[scribble], a language whose concrete syntax is designed for
+writing prose (and is used to implement this paper).
+ 
+In the rest of this section we demonstrate several of Racket's features for building languages and their use in our
+implementation of MiniJava. Following the guide of @figure-ref{mj-impl}, in subsection 2.2 we describe the
+lexing, parsing, and type checking process that transforms the MiniJava program in @figure-ref{mj-syntax} into the program
+in the left half of @figure-ref{expansion}. In subsections 2.3 and 2.4 we explain
+the pieces of Racket's macro system that cooperate to translate the program in the left-hand side of @figure-ref{expansion}
+into the program in the right-hand side. Finally, subsection 2.5 illustrates DrRacket's use of fully-expanded
+programs to convey meta-information to programmers.
+
+@subsection[#:tag "lang"]{#lang Languages}
 @;; give the high level overview of the diagram and how each piece fits together ...???
 @;; compare tradition compiler pipeline with #lang mechanism ...
 @;; describe a bit about the #lang mechanism how it allows implementing totally new languages
@@ -160,10 +169,7 @@ As such, Racket hands the text of the program over to
 the MiniJava reader, which produces a syntax object representing an abstract syntax tree.
 As @figure-ref{mj-impl} shows, the MiniJava reader is composed of a lexer and
 parser, as one may find in a standard compiler.
-@(figure*
-  "typecheck-mod-beg"
-  "Typechecking the abstract syntax tree"
-  @typecheck-mod-beg)
+
 
 In general, Racket hands the reader's result to a language's
 @racket[#%module-begin] macro, which can perform module-level processing.
@@ -188,7 +194,7 @@ code, with Racket conditionals, Racket variables, etc.
 
 @(figure*
   "expansion"
-  "Parenthesized MiniJava and its Racket expansion"
+  "The Runner class in parenthesized MiniJava and its Racket expansion"
   expansion-figure)
 @;{@(figure*
   "parenthesized-mj-example"
@@ -207,7 +213,7 @@ code, with Racket conditionals, Racket variables, etc.
 
 @; Despite a superficial resemblence to Racket, parenthesized MiniJava has MiniJava semantics.
 We implement the constructs in parenthesized MiniJava as Racket macros.
-Consider the @racket[while] construct appearing in @figure-ref["parenthesized-mj-example"].
+Consider the @racket[while] construct appearing on line 17 in the left half of @figure-ref{expansion}.
 Racket does not have a @racket[while] form that MiniJava could reuse;
 we must therefore implement @racket[while] as part of MiniJava.
 
@@ -215,6 +221,14 @@ we must therefore implement @racket[while] as part of MiniJava.
 @; in @figure-ref{parenthesized-mj-example} cannot be directly implemented as a function since its body may never run and
 @; a function would evaluate all of its arguments. To support this translation of @racket[while] loops, we must define
 @; @racket[while] as a macro.
+@(figure
+  "mj-while-macro"
+  "Definition of while in parenthesized MiniJava"
+  @mj-while-macro)
+@(figure
+  "mj-new"
+  "The implementation of new in parenthesized MiniJava"
+  @mj-new)
 
 Our implementation of MiniJava's @racket[while], in @figure-ref{mj-while-macro}, uses Racket's @racket[define-syntax] form to bind @racket[while] as a macro.
 The @racket[define-syntax] form enables the definition of macros as functions which consume and produce syntax objects.
@@ -229,6 +243,13 @@ inherits from Lisp, with the key differences that the former produces a syntax o
 instead of a datum, and supports interpolation.
 This interpolation feature is used in @racket[while]'s implementation to
 support copying pattern variables into a syntax template.
+
+@Figure-ref{expansion} shows the parenthesized version of the @racket[Runner] class from
+@figure-ref{mj-syntax} and it's expansion into Racket.
+The @racket[while] form on the left of @figure-ref{expansion} expands into the @racket[letrec] expression,
+spanning lines 17 through 40, on the right.
+As the definition of @racket[while] specifies, the loop's condition becomes the guard to Racket's @racket[when]
+and the body is copied into the body of @racket[when] before further expansion occurs.
 
 The @racket[while] macro is an example of the kind of linguistic reuse found in
 the implementation of many Racket macros:
@@ -254,7 +275,7 @@ This requires @emph{communication} between the macros that implement class
 definition and class instantiation@~cite[mtwt].
 
 To make this concrete, consider the expansion of the @racket[Parity] class from
-our running example, which is shown in @figure-ref{mj-parity-compiled}.
+our running example, which is shown on the right of @figure-ref{expansion} beginning at line 55.
 At this point, MiniJava forms have been compiled away to ordinary Racket code,
 which uses vectors to represent objects and method tables.
 The @racket[define-class] form for the @racket[Parity] class expands to three
@@ -262,7 +283,18 @@ definitions: the run-time method table shared by all @racket[Parity] instances,
 the constructor that creates instances, and a syntax definition of static
 information about the @racket[Parity] class.
 
-So far, we have seen Racket's @racket[define-syntax] form used for macro definitions.
+The first definition, @racket[Parity:runtime-method-table] (@figure-ref{expansion} line 55), is a vector
+storing the methods @racket[is_odd] and @racket[is_even].
+The constructor definition, @racket[Parity:constructor] on line 74, is a function of no arguments for
+creating new instances of the @racket[Parity] class. Because the @racket[Parity] class has no fields,
+its instance vectors only contain a reference to the method table.
+The defintiion of @racket[Parity] on line 77 is the third binding introduced by the expansion of @racket[define-class].
+It is bound, using @racket[define-syntax], to a record, @racket[static-class-info], that stores compile-time information about the class.
+Generally, it constains a reference to the parent class,
+a compile-time table mapping method names to vector offsets, syntax objects referring to the run-time method table and constructor identifiers,
+and the number of fields in the class.
+
+In the previous subsection, we use Racket's @racket[define-syntax] form to define a macro.
 In general, however, @racket[define-syntax] creates @emph{transformer}
 bindings, which include not only macros, but also arbitrary bindings whose
 values are available at expansion time@~cite[mtwt].
@@ -272,6 +304,8 @@ accessed at compile time by other macros using the @racket[syntax-local-value] p
 The implementation of @racket[new] (shown in @figure-ref{mj-new}) can then use
 this channel of communication to get access to the name of the constructor,
 bound by @racket[define-class], and use it in its own expansion.
+Line 15 of @figure-ref{expansion} shows the expansion of @racket[(new Parity)] on the left into a call
+to @racket[Parity:constructor] on the right.
 
 @; @Figure-ref{mj-new} gives an example of a macro which consults static information in order to expand. In this case
 @; the @racket[new] macro accesses the static information bound to the class identifier passed in and looks up the constructor
@@ -286,8 +320,8 @@ Our MiniJava type checker annotates @racket[send] forms with the name of
 the class which it attributes to the receiver.
 The @racket[send] macro uses the static information bound to that class name to
 determine the correct index into the class's method table.
-The bodies of the methods stored in @racket[Parity:method-table], in
-@figure-ref{mj-parity-compiled}, show the results of this expansion.
+The bodies of the methods stored in @racket[Parity:runtime-method-table], in
+@figure-ref{expansion}, show the results of this expansion.
 
 This technique highlights the distinction between Racket's run-time and compile-time phases@~cite[you-want-it-when].
 The @racket[new] macro must call @racket[syntax-local-value] at compile-time to
@@ -317,6 +351,11 @@ Just as transformer bindings allow communication between macros in different
 @emph{locations}, syntax properties enable communication between different
 processing @emph{passes}---including external tools---at the same location@~cite[langs-as-libs].
 
+@(figure
+  "tool-tips"
+  "MiniJava type tool-tips in DrRacket"
+  (scale (bitmap "type-tool-tips.png") .75))
+
 Our implementation of MiniJava uses syntax properties to attach type information to expressions, which 
 the DrRacket programming environment@~cite[drracket] can present as mouse-over tool-tips, as @figure-ref{tool-tips} shows.
 DrRacket knows to look for @racket['mouse-over-tooltips] syntax properties in
@@ -328,7 +367,12 @@ source program, but absent in its expansion.
 As a concrete example, because MiniJava class fields are compiled away into
 vector offsets (as opposed to Racket variables), a
 @racket['disappeared-binding] syntax property records the presence of field
-bindings in the source program.
+bindings in the source program. @Figure-ref{expansion} shows this explicitly,
+the definition of the @racket[check] field on line 12 is absent from the expanded program
+and the reference to @racket[check] on line 20 compiles into the expression @racket[(vector-ref this 1)]
+on line 24 of the expanded program. Despite this, DrRacket uses the @racket['disappeared-binding] property
+to associate the definition and uses of @racket[check] in @figure-ref{tool-tips}.
+
 
 @; @subsection{The Racket Language Workbench}
 @; The previous subsections highlight many features of Racket that make it suitable for use as a language workbench.
@@ -344,20 +388,13 @@ bindings in the source program.
 @; rest of this paper we show three further uses of Racket to design extensions to the base MiniJava language providing solutions
 @; to the 2016 Language Workbench Challenge benchmark problems.
 
-@(figure
-  "mj-while-macro"
-  "Definition of while in parenthesized MiniJava"
-  @mj-while-macro)
 
 @;{@(figure*
   "mj-parity-compiled"
   "The Parity class compiled to Racket"
   @mj-parity-compiled)}
 
-@(figure
-  "mj-new"
-  "The implementation of new in parenthesized MiniJava"
-  @mj-new)
+
 
 
 @;{@(figure*
@@ -365,10 +402,7 @@ bindings in the source program.
   "Adding tool tips to MiniJava programs"
   add-tool-tips)}
 
-@(figure
-  "tool-tips"
-  "MiniJava type tool-tips in DrRacket"
-  (scale (bitmap "type-tool-tips.png") .75))
+
 
 @include-section{notation.scrbl}
 @include-section{evolution.scrbl}
@@ -402,7 +436,7 @@ private modules or rearranging pieces of syntax.}
 This paper introduces the key features that make Racket a language workbench.
 Through lingusitic dispatch and its rich hygienic macro system, Racket allows programmers to easily build new languages and extend existing ones.
 Our MiniJava implementation demonstrates language building the Racket way.
-Our solutions to three benchmark problems showcase how to extend Racket-based languages with new concrete syntax, additional restrictions, and custom tool support.
+Our solutions to three benchmark problems showcase how to extend Racket-based languages with new concrete syntax, additional restrictions, and custom tooling.
 
 Racket's language-building facilites are the result of a gradual evolution over its twenty year history:
 starting from Lisp's macro system; adding hygiene to preserve lexical scope;

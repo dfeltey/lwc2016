@@ -20,7 +20,22 @@
                                        (baseless
                                         ((current-code-tt) num))
                                        (string->symbol num))))))
-  (hb-append 5 (vl-append (blank 0 5) line#s) (vline 1 (pict-height line#s)) code-pict))
+  (define uncropped (hb-append 5 (vl-append (blank 0 5) line#s) (vline 1 (pict-height line#s)) code-pict))
+    (define h (pict-height uncropped))
+    (define-values (_ y0)
+      (lt-find
+       uncropped
+       (find-tag uncropped (string->symbol (~a first-line)))))
+    (define-values (__ y1)
+      (lb-find
+       uncropped
+       (find-tag uncropped (string->symbol (~a last-line)))))
+
+    (inset uncropped
+           0
+           (- y0)
+           0
+           (- y1 h 3)))
 
 (define mj-simple-example
   (scale
@@ -41,12 +56,17 @@
    SCALE-FACTOR))
 
 (define expansion-figure
-  (scale
-   (hc-append
-    10
-    (program->figure* "../mini-java/even-odd-prefix.rkt")
-    (program->figure* "../mini-java/expanded-even-odd.rkt"))
-   .69))
+  (let* ([start 11]
+         [end 84] ;; 53 for just the Runner class ...
+         [lines (list start end)]
+         [buffer 10]
+         [SCALE .75]) ;; would be nice to amke this SCALE-FACTOR
+    (scale
+     (hc-append
+      buffer
+      (program->figure* "../mini-java/even-odd-prefix.rkt" #:lines lines)
+      (program->figure* "../mini-java/expanded-even-odd.rkt" #:lines lines))
+     SCALE)))
 
 (define (extract file [name ""] #:lang [lang "racket"] #:prefix-lang? [prefix? #t])
   (define marker (~a ";; ~~~EXTRACT:" name "~~~"))

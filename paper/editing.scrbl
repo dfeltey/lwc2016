@@ -11,6 +11,10 @@ From the @emph{Editing} category we tackled the @emph{Restructuring} benchmark p
 Specifically, we built a refactoring tool for MiniJava which restructures @racket[if]
 statements by swapping the @emph{then} and @emph{else} branches and negating the condition. 
 
+@(figure*
+  "refactor-use"
+  "Using the refactoring tool in DrRacket"
+  refactoring-pict)
 
 @section{Assumptions}
 We assume that we can modify the implementation of MiniJava to expose additional information
@@ -40,10 +44,6 @@ To support the refactoring, a language simply needs to attach the relevant synta
 As a proof of concept, we alos extend Racket's @racket[if] in this fashion.
 
 @section{Usability}
-@(figure*
-  "refactor-use"
-  "Using the refactoring tool in DrRacket"
-  refactoring-pict)
 As @figure-ref{refactor-use} shows, the @racket[if] refactoring is accessed by right-clicking inside of an @racket[if] statement
 or using a keyboard shortcut. The refactoring tool does not affect the usability of DrRacket or the
 MiniJava language otherwise.

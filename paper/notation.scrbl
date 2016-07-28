@@ -28,7 +28,7 @@ notation. In addition the implementation requires that every state allow every t
 
 Implementing this extension requires changes to each phase of our MiniJava implementation.  First,
 we extend the lexer with a new class of tokens for 2-dimensional tables, which begin with the token
-@emph{#2dstate-machine}. For this token, the lexer uses Racket's existing 2d syntax parser to
+@tt{#2dstate-machine}. For this token, the lexer uses Racket's existing 2d syntax parser to
 find the bounds of the table and break it into separate cells.  The original parser then handles the
 contents of each cell. After parsing a  2d table, lexing resumes as usual.
 
