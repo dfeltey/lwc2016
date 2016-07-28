@@ -2,10 +2,9 @@
 
 (main (System.out.println (send Runner (new Runner) run 10)))
 
-(define-class
-  Runner
+(define-class Runner
+  (define-field check)
   (define-method run (n)
-    (define-local check)
     (define-local current)
     (= check (new Parity))
     (= current 0)
@@ -17,8 +16,7 @@
       (= current (+ current 1))))
     0))
 
-(define-class
-  Parity
+(define-class Parity
   (define-method is_even (n)
     (|| (== n 0) (send Parity this is_odd (- n 1))))
   (define-method is_odd (n)

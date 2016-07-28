@@ -1,4 +1,4 @@
-#lang mini-java
+#lang at-exp mini-java
 
 class Main {
  public static void main(String [] args) {
@@ -7,8 +7,8 @@ class Main {
 }
 
 class Runner {
+ Parity check;
  public int run(int n) {
-  Parity check;                        
   int current;
   check = new Parity();
   current = 0;
