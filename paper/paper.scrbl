@@ -9,36 +9,8 @@
           (only-in scribble/manual racket racketblock hash-lang)
           (only-in racket/format ~a))
 
-@; NOTES:
-@;; Is there anything interesting to discuss about the lexer/parser?
+@; TODO:
 @;; Make sure to list the artifact
-
-
-@;; TODO: citations
-@;;  - MiniJava
-@;;  - Racket manifesto
-@;;  - You want it when
-@;;  - Languages as Libraries
-@;;  - Advanced macrology and impl ts
-@;;  - syntax-parse
-@;;  - typed racket
-@;;  - scribble/ algol60/datalog docs
-@;;  - syntax parameters
-@;;  - sets of scopes?
-@;;  - Racket TR1
-@;;  - readtables??? docs???
-@;;  - dave herman blog post
-@;;  - Visual Studio Code, Lnaguage server protocol
-@;;  - check-syntax
-@;;  - feature specific profiling
-
-
-@;; FIXME: consistency
-@;; - emph for Notation/Editing/ ...
-@;; fix use of address
-@;; - tenses
-@;; - use `our` instead of `the` when referring to MiniJava impl
-
 
 @(define extra-tex-code
    (bytes-append #"\\usepackage{pslatex}\n"
@@ -46,6 +18,7 @@
 
 @title[#:style (style #f (list (tex-addition extra-tex-code)))]{
   Languages The Racket Way
+  @subtitle{Submission to the 2016 Language Workbench Challenge}
 }
 
 @abstract{
@@ -57,14 +30,14 @@ Building upon this implementation of MiniJava, we demonstrate the use of Racket
 as a language workbench for building and extending languages.
 }
 
-@authorinfo["Daniel Feltey" "Northwestern University" "" #;"daniel.feltey@eecs.northwestern.edu"]
-@authorinfo["Spencer P. Florence" "Northwestern University" "" #;"spencer.florence@eecs.northwestern.edu"]
-@authorinfo["Vincent St-Amour" "Northwestern University" "" #;"stamourv@eecs.northwestern.edu"]
-@authorinfo["Tim Knutson" "University of Utah" "" #;"tkkemo@gmail.com"]
-@authorinfo["Ryan Culpepper" "Northeastern University" "" #;"ryanc@ccs.neu.edu"]
-@authorinfo["Matthew Flatt" "University of Utah" "" #;"mflatt@cs.utah.edu"]
-@authorinfo["Robert Bruce Findler" "Northwestern University" "" #;"robby@eecs.northwestern.edu"]
-@authorinfo["Matthias Felleisen" "Northeastern University" "" #;"matthias@ccs.neu.edu"]
+@authorinfo["Daniel Feltey" "Northwestern University" "daniel.feltey@eecs.northwestern.edu"]
+@authorinfo["Spencer P. Florence" "Northwestern University" "spencer.florence@eecs.northwestern.edu"]
+@authorinfo["Tim Knutson" "University of Utah" "tkkemo@gmail.com"]
+@authorinfo["Vincent St-Amour" "Northwestern University" "stamourv@eecs.northwestern.edu"]
+@authorinfo["Ryan Culpepper" "Northeastern University" "ryanc@ccs.neu.edu"]
+@authorinfo["Matthew Flatt" "University of Utah" "mflatt@cs.utah.edu"]
+@authorinfo["Robert Bruce Findler" "Northwestern University" "robby@eecs.northwestern.edu"]
+@authorinfo["Matthias Felleisen" "Northeastern University" "matthias@ccs.neu.edu"]
 
 
 @section[#:tag "intro"]{Introduction}
@@ -214,9 +187,13 @@ and expand the macros mentioned in the previous paragraph into ordinary Racket
 code, with Racket conditionals, Racket variables, etc.
 
 @(figure*
+  "expansion"
+  "Parenthesized MiniJava and its Racket expansion"
+  expansion-figure)
+@;{@(figure*
   "parenthesized-mj-example"
   "The parenthesized version of the MiniJava example"
-  parenthesized-mj-example)
+  parenthesized-mj-example)}
 @subsection{Language Constructs as Macros}
 @; Once the type checker produces a parenthesized MiniJava program, the next stage of the pipeline is the translation to
 @; Racket through macro expansion.
@@ -372,10 +349,10 @@ bindings in the source program.
   "Definition of while in parenthesized MiniJava"
   @mj-while-macro)
 
-@(figure*
+@;{@(figure*
   "mj-parity-compiled"
   "The Parity class compiled to Racket"
-  @mj-parity-compiled)
+  @mj-parity-compiled)}
 
 @(figure
   "mj-new"

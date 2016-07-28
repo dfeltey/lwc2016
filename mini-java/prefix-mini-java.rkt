@@ -18,6 +18,11 @@
                      "state-machine-classes.rkt"))
 
 (provide (all-defined-out)
+         (for-syntax make-immutable-free-id-table)
+         (except-out (all-from-out racket)
+                     public extends = ==
+                     length eqv? vector-length
+                     else class not make-vector)
          2dstate-machine
          #%module-begin #%app
          #%datum true false < + - *
@@ -51,7 +56,8 @@
 ;; ~~~EXTRACT:break-param~~~
 
 (begin-for-syntax
-
+  (provide static-class-info)
+  
  (define-syntax-class var-decl
    #:literals (define-field)
    (pattern (define-field name:id)))

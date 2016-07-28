@@ -17,7 +17,7 @@
 (module literals racket
   (require "prefix-mini-java.rkt")
   (provide (all-defined-out))
-  (define-literals (class public static void
+  (define-literals (class public static
                      String int boolean int-array
                      extends return else)))
 (require (for-template (submod "." literals)))

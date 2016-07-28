@@ -1,10 +1,26 @@
 #lang racket
-(require pict pict/code)
+(require pict pict/code unstable/gui/pict)
 (provide (all-defined-out))
 
 (require (for-syntax syntax/parse))
 
-(define SCALE-FACTOR 0.83)
+(define SCALE-FACTOR 0.85)
+
+(define (program->figure* path #:lines [line-nums 'all])
+  (define lines (string-split (file->string path) "\n" #:trim? #f))
+  (define first-line (if (eq? line-nums 'all) 1 (first line-nums)))
+  (define last-line (if (eq? line-nums 'all) (length lines) (second line-nums)))
+  (define new-prog (apply ~a #:separator "\n" lines))
+  (define code-pict (codeblock-pict new-prog))
+  (define line#s (apply vl-append
+                        (build-list (length lines)
+                                    (lambda (a)
+                                      (define num (~a (add1 a)))
+                                      (tag-pict
+                                       (baseless
+                                        ((current-code-tt) num))
+                                       (string->symbol num))))))
+  (hb-append 5 (vl-append (blank 0 5) line#s) (vline 1 (pict-height line#s)) code-pict))
 
 (define mj-simple-example
   (scale
@@ -17,6 +33,20 @@
    (codeblock-pict
     (port->string (open-input-file "../mini-java/even-odd-prefix.rkt")))
    SCALE-FACTOR))
+
+(define expanded-even-odd
+  (scale
+   (codeblock-pict
+    (port->string (open-input-file "../mini-java/expanded-even-odd.rkt")))
+   SCALE-FACTOR))
+
+(define expansion-figure
+  (scale
+   (hc-append
+    10
+    (program->figure* "../mini-java/even-odd-prefix.rkt")
+    (program->figure* "../mini-java/expanded-even-odd.rkt"))
+   .69))
 
 (define (extract file [name ""] #:lang [lang "racket"] #:prefix-lang? [prefix? #t])
   (define marker (~a ";; ~~~EXTRACT:" name "~~~"))
