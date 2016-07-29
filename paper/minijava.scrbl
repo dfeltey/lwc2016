@@ -70,14 +70,24 @@ elaborates this AST into a parenthesized variant of MiniJava in a
 conventional manner. The choice of type elaboration over checking allows
 the injection of type annotations that help implement efficient method
 calls. These first two steps are implemented via the @tt{minijava}
-language (@secref{sub:lang}). 
+language. 
 
 Once a MiniJava program has been elaborated into parenthesized form, the
 regular expansion process takes over. Step 3 indicates how parenthesize
 MiniJava programs are rewritten into plain @tt{#lang racket}
 constructs. This is articulated with a (relatively small) suite of
 rewriting rules that map classes, method calls, and so on into functional
-Racket constructs (@secref{macros}, but also @secref{comm}).
+Racket constructs. 
+
+As indicated in the preceding section, the implementation of @tt{minijava}
+consists of a reader module, which implements steps 1 and 2, and a language
+module, which implements the syntactic translation. The former employs
+Racket's lexing and parsing libraries. While lexing and parsing libraries
+require no explanation, the type checking needs some discussion
+(@secref{sub:lang}).  The language module consists of syntax rewriting
+rules and any functions in the target code that Racket does not provide
+already (@secref{macros}, but also @secref{comm}). Both of these modules
+are implemented in the ordinary @tt{racket} language.
 
 Finally, step 4 indicates that the existing Racket language elaborates the
 program into core Racket. The latter is known as @tt{#%kernel}. This step
@@ -91,27 +101,13 @@ the expanded syntax and its editor, which plug-in tools can exploit to
 implement an ecosystem for a language such as MiniJava. 
 
 @; -----------------------------------------------------------------------------
-@section[#:tag "sub:lang"]{@tt{#lang minijava}: Parsing and Type Elaboration}
-
-As indicated in the preceding section, the implementation of @tt{minijava}
-consists of a reader module, which implements steps 1 and 2, and a language
-module, which implements the syntactic translation. The former employs
-Racket's lexing and parsing libraries. The latter consists of syntax
-rewriting rules and any functions in the target code that Racket does not
-provide already. It is implemented in the ordinary @tt{racket} language.
-
 @figure*["fig:typecheck-mod-beg" "Typechecking the abstract syntax tree"]{
  @typecheck-mod-beg}
 
-Racket programs must begin with the token @tt{#lang} followed by the name
-of a module that defines a language.  Racket forwards the program's
-contents to the language module for language-specific processing, a
-mechanism we refer to as @emph{linguistic dispatch}.  The @tt{#lang} line
-at the top of @figure-ref{fig:mj-syntax}, specifies that the program is
-written in MiniJava.  As such, Racket hands the text of the program over to
-the MiniJava reader, which produces a syntax object representing an
-abstract syntax tree.  As @figure-ref{fig:mj-impl} shows, the MiniJava reader
-is composed of a lexer and parser, as one may find in a standard compiler.
+@section[#:tag "sub:lang"]{@tt{#lang minijava}: Parsing and Type Elaboration}
+
+Racket's @tt{#lang} mechanism 
+
 
 In general, Racket hands the reader's result to a language's
 @racket[#%module-begin] macro, which can perform module-level processing.
