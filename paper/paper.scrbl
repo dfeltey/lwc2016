@@ -42,6 +42,7 @@ use of Racket as a language workbench for building and extending languages.
 
 @include-section{intro.scrbl}
 @include-section{racket.scrbl}
+@include-section{minijava.scrbl}
 @include-section{notation.scrbl}
 @include-section{evolution.scrbl}
 @include-section{editing.scrbl}
