@@ -7,9 +7,9 @@
 ;; ~~~EXTRACT:typecheck-mod-beg~~~
 (provide (all-from-out (submod "typecheck.rkt" literals))
          (except-out (all-from-out "prefix-mini-java.rkt") #%module-begin)
-         (rename-out [module-begin #%module-begin]))
+         (rename-out [mj-module-begin #%module-begin]))
 
-(define-syntax (module-begin stx)
+(define-syntax (mj-module-begin stx)
   (syntax-parse stx
     [(_ class ...)
      (define post-typechecking (typecheck-program #'(class ...)))

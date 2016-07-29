@@ -292,7 +292,7 @@ class StateMachineRunner {
               (rest lst))]))))
 (define explanations
   (list "Lexing + Parsing"
-        "Type Checking"
+        "Type Elaboration"
         "Macro Expansion"
         "More Macro Expansion"))
 

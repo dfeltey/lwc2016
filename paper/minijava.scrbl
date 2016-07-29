@@ -12,113 +12,106 @@
 
 @title[#:tag "sec:minijava"]{MiniJava via Racket}
 
+The Racket language proper consists of a module-oriented, untyped
+functional language in the spirit of Lisp and Scheme and the syntax system
+introduced in the preceding section. In contrast, MiniJava
+(@secref{sub:minijava}) is a simplistic class-based object-oriented
+programming language in the spirit of Java. Using Racket's syntax system,
+it is nevertheless possible to create a realistic implementation of
+MiniJava with a relatively small effort---thanks to linguistic reuse.
 
+@figure-here["fig:mj-syntax" "A sample MiniJava program"]{
+ @mj-simple-example}
 
-In this section, we discuss the use of Racket as a language workbench using our implementation
-of MiniJava as a guiding example. Additionally, this section provides the necessary background for presenting
-our solutions to the benchmark problems. We begin with a high-level overview of Racket then discuss several
-of its features in depth to illustrate one approach to language development in Racket.
+This section provides an overview of the MiniJava implementation
+(@secref{sub:overview}) followed by a presentation of the individual
+building blocks. Where necessary, the section also explains Racket features
+on a technical basis.
 
-@section[#:tag "racket-overview"]{An Overview of Racket and its Macro System}
-@;; brief overview of expansion and syntax objects to set up discussion of syntax properties
-@;; later on, and the built in forms that we can rely on to implement languages
-@;; (such as syntax-parameters which will be discussed later in the evolution section)
-Racket is a dynamically typed@~cite[dynamic-typing], call-by-value programming language in
-the Lisp family. One of Racket's most prominent features is
-its powerful hygienic macro system@~cite[hygienic-macros] and it is central to the
-consideration of Racket as a language workbench. While the
-macro system is clearly an evolution of the early
-Assembly@~cite[mcilroy] and Lisp@~cite[lisp-macros] macro systems,
-it has changed so much that it is nearly unrecognizable as a
-descendant of them@~cite[scopes]. Instead, it is better to approach the
-Racket macro system as a domain-specific language
-for writing an extensible compiler front-end. Racket macro
-programmers start from the compiler for some initial
-language and add new constructs to it, writing declarations
-that say how the new constructs compile into existing ones;
-perhaps existing cases in the initial language, but also
-perhaps constructs in yet some other language. As an example,
-Racket has a hierarchy of feature-poor (but error-message
-rich) teaching languages that are built using macros on top
-of the basic Racket programming language. These languages
-consist of macros that compile into regular Racket, but
-using scoping declarations provided by Racket's module
-system to completely hide access to the more powerful
-constructs in Racket proper.
+@; -----------------------------------------------------------------------------
+@section[#:tag "sub:minijava"]{MiniJava}
 
-Whereas a typical compiler's front end parses a textual program into
-an abstract syntax tree of meaningful nodes, Racket separates the
-process into two passes: the @emph{reader} and the
-@emph{expander}. The reader turns a textual program into a syntax tree
-of uninterpreted nodes. The expander rewrites instances of derived
-syntactic forms until none remain; the resulting @emph{fully-expanded}
-syntax tree uses only the syntax of core Racket, a programming
-language that looks like a lambda calculus with conditionals, local
-binding forms, and many primitive functions. The expander does not
-know the binding structure or even the expression structure of derived
-syntactic forms @emph{a priori}; rather, it discovers it as it
-works. To contrast expansion with function evaluation, where the
-arguments to the function are evaluated before the function is
-applied, the expansion process happens outside-in: the expander finds
-the outermost expression that is a derived form, rewrites it using the
-associated transformation rule, and continues.
+@Figure-ref{fig:mj-syntax} displays a MiniJava program. Like any Java
+program, it consists of a series of class definitions, one of them
+designated as the ``main'' class. Classes have public and private methods
+and fields. Each of the latter comes with type signatures, where types are
+the names of classes. The body of a method may use the familiar statements
+of an imperative language: assignments, @tt{if} conditionals, and
+@tt{while} loops. MiniJava expressions are also the familiar ones from
+Java.  
 
-The tree-based representation that the reader produces and the expander processes is called a @emph{syntax object}.
-Syntax objects@~cite[syntactic-abstraction-in-scheme] are rich data structures that
-combine a symbolic representation of a program with a number of properties. Properties on syntax objects
-include original source locations, lexical binding information, as well as arbitrary data that
-programmers may attach and access using Racket's @racket[syntax-property] procedure.
+MiniJava lacks many of Java's sophisticated features: inheritance, abstract
+classes, interfaces, packages, etc. The goal is to help students in
+introductory courses, not to model the complexities of a real-world
+language.
 
-The implementation of new languages is made possible by this expressive syntax system along with Racket's module
-system@~cite[you-want-it-when]. In Racket, a language is merely a module that declares a reader along with bindings for the language's
-syntax. Modules provide namespace control, allowing programmers to rename and remove bindings and thus create
-languages that are not just supersets of Racket.
+@; -----------------------------------------------------------------------------
+@section[#:tag "sub:overview"]{From MiniJava to Core Racket: an Overview}
 
-@(figure
-  "mj-impl"
-  "Structure of the MiniJava implemntation"
-  @pipeline-diagram)
-@(figure
-  "mj-syntax"
-  "A sample MiniJava program"
-  @mj-simple-example)
-@(figure*
-  "typecheck-mod-beg"
-  "Typechecking the abstract syntax tree"
-  @typecheck-mod-beg)
+Whereas a typical compiler's front end parses a textual program into an
+abstract syntax tree of meaningful nodes, an incremental Racket
+implementation separates this process into two distinct steps: the reader
+and the expander. The @emph{reader} turns a textual program into a syntax
+object. The @emph{expander} uses a suite of rewriting rules to elaborate
+this syntax object into Racket's kernel syntax. This latter phase
+conceptually employs a tower of languages, and the elaboration gradually
+turns a program of one level into a language of the next lower level. In
+reality, the layers of this tower are not separated through sharp
+boundaries, and the intermediate programs may never exist in a pure form. 
 
-These facilities, along with a rich core library, allow programmers to implement entirely new
-languages on top of Racket. A notable example of this is Typed Racket@~cite[cthf-sfp-2007 thf-popl-2008 tr-diss], a gradually-typed sister language of Racket.
-Languages built on top of Racket, however, do not need to share Racket's concrete syntax or even its semantics, as demonstrated
-by implementations of Algol 60, Datalog, and Scribble@~cite[scribble], a language whose concrete syntax is designed for
-writing prose (and is used to implement this paper).
- 
-In the rest of this section we demonstrate several of Racket's features for building languages and their use in our
-implementation of MiniJava. Following the guide of @figure-ref{mj-impl}, in @secref["lang"] we describe the
-lexing, parsing, and type checking process that transforms the MiniJava program in @figure-ref{mj-syntax} into the program
-in the left half of @figure-ref{expansion}. In sections 2.3 and 2.4 we explain
-the pieces of Racket's macro system that cooperate to translate the program in the left-hand side of @figure-ref{expansion}
-into the program in the right-hand side. Finally, @secref["drracket"] illustrates DrRacket's use of fully-expanded
-programs to convey meta-information to programmers.
+@figure-here["fig:mj-impl" "Structure of the MiniJava implemntation"]{
+ @pipeline-diagram}
 
-@section[#:tag "lang"]{@tt{#lang} Languages}
-@;; give the high level overview of the diagram and how each piece fits together ...???
-@;; compare tradition compiler pipeline with #lang mechanism ...
-@;; describe a bit about the #lang mechanism how it allows implementing totally new languages
-@;; uses #lang to find the lexer/parser/typechecking ...
-@;; compare with TR/scribble/algol60 etc, languages implemented in Racket with totally different
-@;; semantics
-@;; use the module-begin from the typechecker as an example in the prose
-@;; module system, selective exports language is a set of bindings some of which are recognized specifically
-Racket programs must begin with the token @tt{#lang} followed by the name of a module that defines a language.
-Racket forwards the program's contents to the language module for language-specific processing, a mechanism we refer to as @emph{linguistic dispatch}.
-@;;Through Racket's linguistic dispatch, the language module receives the contents of the program for language-specific processing.
-The @tt{#lang} line at the top of @figure-ref{mj-syntax}, specifies that the program is written in MiniJava.
-As such, Racket hands the text of the program over to
-the MiniJava reader, which produces a syntax object representing an abstract syntax tree.
-As @figure-ref{mj-impl} shows, the MiniJava reader is composed of a lexer and
-parser, as one may find in a standard compiler.
+@Figure-ref{fig:mj-impl} presents the overall pipeline of the MiniJava
+implementation in Racket. Step 1 turns the Java-like syntax into a syntax
+object, a combination of the symbolic source program and syntax properties;
+this object roughly corresponds to an abstract syntax tree (AST).  Step 2
+elaborates this AST into a parenthesized variant of MiniJava in a
+conventional manner. The choice of type elaboration over checking allows
+the injection of type annotations that help implement efficient method
+calls. These first two steps are implemented via the @tt{minijava}
+language (@secref{sub:lang}). 
 
+Once a MiniJava program has been elaborated into parenthesized form, the
+regular expansion process takes over. Step 3 indicates how parenthesize
+MiniJava programs are rewritten into plain @tt{#lang racket}
+constructs. This is articulated with a (relatively small) suite of
+rewriting rules that map classes, method calls, and so on into functional
+Racket constructs (@secref{macros}, but also @secref{comm}).
+
+Finally, step 4 indicates that the existing Racket language elaborates the
+program into core Racket. The latter is known as @tt{#%kernel}. This step
+is well-established and does not deserve any attention. 
+
+In contrast, the integration of @tt{#lang minijava} with DrRacket deserves
+a thorough explanation (@secref{sub:drracket}). Essentially, the pipeline
+of @figure-ref{fig:mj-impl} preserves essential properties across the
+various transformations. In turn, DrRacket implements a protocol between
+the expanded syntax and its editor, which plug-in tools can exploit to
+implement an ecosystem for a language such as MiniJava. 
+
+@; -----------------------------------------------------------------------------
+@section[#:tag "sub:lang"]{@tt{#lang minijava}: Parsing and Type Elaboration}
+
+As indicated in the preceding section, the implementation of @tt{minijava}
+consists of a reader module, which implements steps 1 and 2, and a language
+module, which implements the syntactic translation. The former employs
+Racket's lexing and parsing libraries. The latter consists of syntax
+rewriting rules and any functions in the target code that Racket does not
+provide already. It is implemented in the ordinary @tt{racket} language.
+
+@figure*["fig:typecheck-mod-beg" "Typechecking the abstract syntax tree"]{
+ @typecheck-mod-beg}
+
+Racket programs must begin with the token @tt{#lang} followed by the name
+of a module that defines a language.  Racket forwards the program's
+contents to the language module for language-specific processing, a
+mechanism we refer to as @emph{linguistic dispatch}.  The @tt{#lang} line
+at the top of @figure-ref{fig:mj-syntax}, specifies that the program is
+written in MiniJava.  As such, Racket hands the text of the program over to
+the MiniJava reader, which produces a syntax object representing an
+abstract syntax tree.  As @figure-ref{fig:mj-impl} shows, the MiniJava reader
+is composed of a lexer and parser, as one may find in a standard compiler.
 
 In general, Racket hands the reader's result to a language's
 @racket[#%module-begin] macro, which can perform module-level processing.
@@ -126,20 +119,14 @@ This whole-module view gives a language complete control over the expansion of
 a module, and enables non-local analysis and transformations---such as type
 checking@~cite[langs-as-libs]---which are beyond the reach of traditional macros.
 
-Our MiniJava @racket[#%module-begin] form (shown in @figure-ref{typecheck-mod-beg})
+Our MiniJava @racket[#%module-begin] form (shown in @figure-ref{fig:typecheck-mod-beg})
 simply calls a function, @racket[typecheck-program], which typechecks the AST
 and translates it to an untyped, prefix parenthesized version of MiniJava.
-@; Constructs in this parenthesized MiniJava are implemented as Racket macros.
-@; , which ultimately compile down to pass explicit method tables implemented with
-@; Racket vectors.
 
-
-@; The @racket[#%module-begin] macro
-It then splices the resulting syntax into the
-body of @tt{#lang racket}'s @racket[#%module-begin].
-This allows Racket's expander to take over the rest of the compilation pipeline
-and expand the program into ordinary Racket
-code that uses Racket conditionals, Racket variables, etc.
+It then splices the resulting syntax into the body of @tt{#lang racket}'s
+@racket[#%module-begin].  This allows Racket's expander to take over the
+rest of the compilation pipeline and expand the program into ordinary
+Racket code that uses Racket conditionals, Racket variables, etc.
 
 @(figure*
   "expansion"
@@ -149,18 +136,10 @@ code that uses Racket conditionals, Racket variables, etc.
   "parenthesized-mj-example"
   "The parenthesized version of the MiniJava example"
   parenthesized-mj-example)}
-@section[#:tag "macros"]{Language Constructs as Macros}
-@; Once the type checker produces a parenthesized MiniJava program, the next stage of the pipeline is the translation to
-@; Racket through macro expansion.
 
-@; Programs in the parenthesized MiniJava language---such as the translation of
-@; @figure-ref{mj-syntax} shown in @figure-ref{parenthesized-mj-example}---use
-@; the same basic operators as those written in MiniJava's concrete syntax, but
-@; use a fully prefixed syntax.
-@; Furthermore, type information has been stripped away from definitions, but has
-@; been propagated to @racket[send] forms.
+@; -----------------------------------------------------------------------------
+@section[#:tag "macros"]{@tt{#lang minnijava}: Language Constructs}
 
-@; Despite a superficial resemblence to Racket, parenthesized MiniJava has MiniJava semantics.
 To get a sense of how macro-based expansion works, lets start with a straightforward one:
 the @racket[while] macro. A use of it appears on line 7 in the left half of @figure-ref{expansion}.
 
@@ -200,7 +179,7 @@ This interpolation feature is used in @racket[while]'s implementation to
 support copying pattern variables into a syntax template.
 
 @Figure-ref{expansion} shows the parenthesized version of the @racket[Runner] class from
-@figure-ref{mj-syntax} and it's expansion into Racket.
+@figure-ref{fig:mj-syntax} and it's expansion into Racket.
 The @racket[while] form on the left of @figure-ref{expansion} expands into the @racket[letrec] expression,
 spanning lines 7 through 25 on the right.
 As the definition of @racket[while] specifies, the loop's condition becomes the guard to Racket's @racket[when]
@@ -222,7 +201,10 @@ at the definition of the macro, not at the use of the macro@~cite[macros-that-wo
 @;; discuss the implementation of the parenthesized while form (without the syntax parameter mess)
 @;; this leaves an example to return to later on
 @;; reuse racket variable binding or conditional for the MiniJava forms (linguistic reuse)
+
+@; -----------------------------------------------------------------------------
 @section[#:tag "comm"]{Inter-Macro Communication}
+
 Isolated macro definitions are not sufficient to transform every MiniJava
 expression into Racket. The @racket[new] form, for example, requires information
 about the class being instantiated in order to construct an instance with the correct number of fields and a reference to the class's
@@ -306,11 +288,9 @@ that can build upon one another to create more and more sophisticated new langua
 @;; class definitions compiling to define-syntax stuff ..
 @;; using define-syntax to store the compile-time method table info, etc ...
 @;; maybe use the `new` macro as the example here since it is simpler than `send`
-@section[#:tag "drracket"]{DrRacket Integration}
-@;; tooling/tool-tips with type info ... using syntax properties (screen shot)
-@;; more than just communication (with compiler and) between our macros, also communicate with tools
-@;; Talk about syntax properties a little bit with the example of
-@;; type info attached as tool-tips, this sets up well for the refactoring later
+
+@; -----------------------------------------------------------------------------
+@section[#:tag "sub:drracket"]{DrRacket Integration}
 
 Transformer bindings are but one of the communication mechanisms available to
 Racket macros@~cite[mtwt].
