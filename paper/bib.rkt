@@ -239,3 +239,11 @@
             #:date 1991
             #:author (authors "William Clinger" "Jonathan Rees")
             #:location (proceedings-location popl)))
+
+(define sk-dissertation
+  (make-bib
+   #:title "Linguistic Reuse"
+   #:author "Shriram Krishnamurthi"
+   #:location (dissertation-location #:institution "Rice University"
+                                     #:degree "Ph.D.")
+   #:date 2000))
