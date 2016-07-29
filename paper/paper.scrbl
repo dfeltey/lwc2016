@@ -63,7 +63,7 @@ implementing a refactoring tool for MiniJava programs that preserves syntactic a
 @;;   show the typechecking module-begin impl
 @;; - expand the program to use the even class in a main class (use while and new)
 @;; - demonstrate syntactic extension with MiniJava's while macro
-@;; - talk about compile time information/define-syntax with the implementation of new
+@;; - talk about compile-time information/define-syntax with the implementation of new
 @;; Then the refactoring and break sections can talk about syntax properties and syntax parameters
 
 In this section, we discuss the use of Racket as a language workbench using our implementation
@@ -311,7 +311,7 @@ a transformer function. In general, however, @racket[define-syntax] can bind ide
 arbitrary values, which are then available at expansion time@~cite[mtwt].
 
 This allows @racket[define-class] to store static information that can be
-accessed at compile time by other macros using the @racket[syntax-local-value] procedure.
+accessed at compile-time by other macros using the @racket[syntax-local-value] procedure.
 In general, if a macro has access to the identifier bound by @racket[define-syntax], then it
 can pass that identifier to @racket[syntax-local-value] to look up the value.
 The implementation of @racket[new] (shown in @figure-ref{mj-new}) uses
@@ -344,19 +344,19 @@ The bodies of the methods stored in @racket[Parity:runtime-method-table], in
 Line 44 of @figure-ref{expansion} shows a method call to @racket[is_even] on the left
 and the @racket[let*] expression it transforms into on the right. The @racket[1] on
 line 45 is computed by using @racket[syntax-local-value] to get the @racket[static-class-info]
-(as with @racket[new]) and then looking up @racket[is_even] in the table on line 60.
+(as with @racket[new]) and then looking up @racket[is_even] in the table on line 59.
 
 This technique highlights the distinction between Racket's run-time and compile-time phases@~cite[you-want-it-when].
 The @racket[new] and @racket[send] macros must call @racket[syntax-local-value] at compile-time to
 access static class information.
 In general, this means that arbitrary, possibly even side-effecting, code may
-need to run at compile time to expand a syntactic form. Racket addresses
-the issue of mingling compile time code with run-time code through a phase distinction that makes explicit
+need to run at compile-time to expand a syntactic form. Racket addresses
+the issue of mingling compile-time code with run-time code through a phase distinction that makes explicit
 the execution time of a piece of code. This is necessary to support a tower of linguistic abstractions
 that can build upon one another to create more and more sophisticated new languages.
 
 @;; class definitions compiling to define-syntax stuff ..
-@;; using define-syntax to store the compile time method table info, etc ...
+@;; using define-syntax to store the compile-time method table info, etc ...
 @;; maybe use the `new` macro as the example here since it is simpler than `send`
 @subsection[#:tag "drracket"]{DrRacket Integration}
 @;; tooling/tool-tips with type info ... using syntax properties (screen shot)
@@ -403,7 +403,7 @@ to associate the definition and uses of @racket[check] in @figure-ref{tool-tips}
 @; problems in a domain specific fashion. The ability to define macros that can query compile-time state in addition to
 @; their arguments allows for complex extensions to the language and one powerful communication channel for implementing
 @; cooperating macros. Access to the full Racket programming language at both compile-time and run-time allows for expressive
-@; extensions to the compiler that do not limit the programmer. Being able to run arbitrary code at compile time allows a
+@; extensions to the compiler that do not limit the programmer. Being able to run arbitrary code at compile-time allows a
 @; number of approaches to language implementation. Finally, syntax objects and their attached syntax
 @; properties allow for yet another communication channel between languages and the tools that process them.
 

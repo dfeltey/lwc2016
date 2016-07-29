@@ -41,7 +41,7 @@ A variant on this refactoring would be to transform expressions that use @racket
 In addition, it is worth noting that the implementation of our refactoring tool is not MiniJava specific.
 By parameterizing the refactoring rule over negation syntax, the tool generalizes across languages.
 To support the refactoring, a language simply needs to attach the relevant syntax property to its conditional form.
-As a proof of concept, we alos extend Racket's @racket[if] in this fashion.
+As a proof of concept, we also extend Racket's @racket[if] in this fashion.
 
 @section{Usability}
 As @figure-ref{refactor-use} shows, the @racket[if] refactoring is accessed by right-clicking inside of an @racket[if] statement
