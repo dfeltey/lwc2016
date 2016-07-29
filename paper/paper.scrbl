@@ -180,7 +180,7 @@ checking@~cite[langs-as-libs]---which are beyond the reach of traditional macros
 
 Our MiniJava @racket[#%module-begin] form (shown in @figure-ref{typecheck-mod-beg})
 simply calls a function, @racket[typecheck-program], which typechecks the AST
-and tranlates it to an untyped, prefix, parenthesized version of MiniJava.
+and translates it to an untyped, prefix parenthesized version of MiniJava.
 @; Constructs in this parenthesized MiniJava are implemented as Racket macros.
 @; , which ultimately compile down to pass explicit method tables implemented with
 @; Racket vectors.
@@ -448,7 +448,7 @@ to associate the definition and uses of @racket[check] in @figure-ref{tool-tips}
           @item{DSLs can be manipulated with a projectional editor}
           @item{Persisting incomplete or contradictory information in the abstract representation}]
 Racket's communicating macros and @tt{#lang} mechanism enable the free definition of new languages.
-Syntax objects comprise an abstract repsentation of programs implemented on top of Racket and can store user specified
+Syntax objects comprise an abstract representation of programs implemented on top of Racket and can store user specified
 information in syntax properties. Racket's @tt{#lang} feature enables the composition of language readers and
 bindings which implement the language's semantics, whereas DrRacket's plugin mechanism provides an extensible
 editor for manipulating programs that compile down to Racket. Although, DrRacket does not provide a projectional
@@ -457,11 +457,11 @@ representation may persist incomplete or contradictory information due to macro 
 private modules or rearranging pieces of syntax.}
 
 This paper introduces the key features that make Racket a language workbench.
-Through lingusitic dispatch and its rich hygienic macro system, Racket allows programmers to easily build new languages and extend existing ones.
+Through linguistic dispatch and its rich hygienic macro system, Racket allows programmers to easily build new languages and extend existing ones.
 Our MiniJava implementation demonstrates language building the Racket way.
 Our solutions to three benchmark problems showcase how to extend Racket-based languages with new concrete syntax, additional restrictions, and custom tooling.
 
-Racket's language-building facilites are the result of a gradual evolution over its twenty year history:
+Racket's language-building facilities are the result of a gradual evolution over its twenty year history:
 starting from Lisp's macro system; adding hygiene to preserve lexical scope;
 introducing syntax objects to encapsulate hygiene, then extending those to
 carry arbitrary meta-information; and finally integrating with Racket's module

@@ -60,7 +60,7 @@ We extend the lexer to recognize the @racket[break] keyword and produce a corres
 Similarly, we modify the parser to produce abstract syntax representing a use of @racket[break].
 The type checking rule added for @racket[break] always succeeds and produces a use of the @racket[break]
 syntax parameter in parenthesized MiniJava. Overall, these changes are small and independent of the rest of
-our MiniJava implementaion.
+our MiniJava implementation.
 
 @section{Composability}
 Our addition of @racket[break] to MiniJava integrates seamlessly with our solutions to the other two benchmark problems.
@@ -68,7 +68,7 @@ This implementation would compose well with other instances of the @emph{Beyond-
 @; with the possible exception of other extensions which also modify the MiniJava @racket[while] macro.
 
 @section{Limitations}
-Implementing language restrictions using syntax parameters neccesitates a language that compiles to a set of macros.
+Implementing language restrictions using syntax parameters necessitates a language that compiles to a set of macros.
 An alternate implementation of MiniJava that directly produced fully-expanded Racket programs would not be able to
 use this strategy.
 

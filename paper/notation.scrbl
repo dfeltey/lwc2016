@@ -67,9 +67,10 @@ To compose with the @emph{check syntax} tool and enable reasoning about state na
 
 Convenient usage of the tabular notation is limited to DrRacket.
 
-Racket's 2d parser relies on @emph{read tables}
-@note{Racket's read tables descend from Common Lisp@~cite[commonlisp] and MacLISP@~cite[readtables], a modern Racket-specific treatment of read tables is found at
- http://docs.racket-lang.org/reference/readtables.html?q=readtables}
+Racket's 2d parser relies on
+@emph{read tables}@note{Racket's read tables descend from Common
+ Lisp@~cite[commonlisp] and MacLISP@~cite[readtables], a modern Racket-specific treatment of read tables is found at
+ @url{http://docs.racket-lang.org/reference/readtables.html?q=readtables}}
 to extend the reader. MiniJava's reader does not support
 read tables, which led to using one of the 2d parser's internal APIs.
 
