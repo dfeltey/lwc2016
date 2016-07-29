@@ -201,7 +201,7 @@ code that uses Racket conditionals, Racket variables, etc.
   "parenthesized-mj-example"
   "The parenthesized version of the MiniJava example"
   parenthesized-mj-example)}
-@subsection{Language Constructs as Macros}
+@subsection[#:tag "macros"]{Language Constructs as Macros}
 @; Once the type checker produces a parenthesized MiniJava program, the next stage of the pipeline is the translation to
 @; Racket through macro expansion.
 
@@ -274,7 +274,7 @@ at the definition of the macro, not at the use of the macro@~cite[macros-that-wo
 @;; discuss the implementation of the parenthesized while form (without the syntax parameter mess)
 @;; this leaves an example to return to later on
 @;; reuse racket variable binding or conditional for the MiniJava forms (linguistic reuse)
-@subsection{Inter-Macro Communication}
+@subsection[#:tag "comm"]{Inter-Macro Communication}
 Isolated macro definitions are not sufficient to transform every MiniJava
 expression into Racket. The @racket[new] form, for example, requires information
 about the class being instantiated in order to construct an instance with the correct number of fields and a reference to the class's
