@@ -1,72 +1,62 @@
 #lang racket
-(require pict pict/code unstable/gui/pict)
+(require pict pict/code "setup.rkt")
 (provide (all-defined-out))
 
 (require (for-syntax syntax/parse))
 
-(define SCALE-FACTOR 0.85)
-
 (define (program->figure* path #:lines [line-nums 'all])
+  ;; this function uses 'codeblock-pict' on each line individually
+  ;; this works because there are no tokens that span multiple lines
+  ;; in the input; it is advantages because it means that no cropping
+  ;; is required (and the cropping is hard to get right)
+  (define (tt s) ((current-code-tt) s))
   (define lines (string-split (file->string path) "\n" #:trim? #f))
+  (define hash-lang-line
+    (for/first ([l (in-list lines)]
+                #:when (regexp-match? #rx"#lang" l))
+      l))
   (define first-line (if (eq? line-nums 'all) 1 (first line-nums)))
   (define last-line (if (eq? line-nums 'all) (length lines) (second line-nums)))
-  (define new-prog (apply ~a #:separator "\n" lines))
-  (define code-pict (codeblock-pict new-prog))
-  (define line#s (apply vl-append
-                        (build-list (length lines)
-                                    (lambda (a)
-                                      (define num (~a (add1 a)))
-                                      (tag-pict
-                                       (baseless
-                                        ((current-code-tt) num))
-                                       (string->symbol num))))))
-  (define uncropped (hb-append 5 (vl-append (blank 0 5) line#s) (vline 1 (pict-height line#s)) code-pict))
-    (define h (pict-height uncropped))
-    (define-values (_ y0)
-      (lt-find
-       uncropped
-       (find-tag uncropped (string->symbol (~a first-line)))))
-    (define-values (__ y1)
-      (lb-find
-       uncropped
-       (find-tag uncropped (string->symbol (~a last-line)))))
-
-    (inset uncropped
-           0
-           (- y0)
-           0
-           (- y1 h 3)))
+  (define digits (string-length (~a (- last-line first-line))))
+  (define first-gap #f)
+  (define lines-with-numbers
+    (apply
+     vl-append
+     (for/list ([line (in-list lines)]
+                [i (in-naturals 1)]
+                #:when (<= first-line i last-line))
+       (define gap (tt "  "))
+       (unless first-gap (set! first-gap gap))
+       (hbl-append (tt (~r #:min-width digits (+ 1 (- i first-line))))
+                   gap
+                   (codeblock-pict (string-append hash-lang-line "\n" line)
+                                   #:keep-lang-line? #f)))))
+  (define-values (x _) (cc-find lines-with-numbers first-gap))
+  (pin-over lines-with-numbers
+            x 0
+            (frame (blank 0 (pict-height lines-with-numbers)))))
 
 (define mj-simple-example
-  (scale
-   (codeblock-pict
-    (port->string (open-input-file "../mini-java/even-odd.rkt")))
-   SCALE-FACTOR))
+  (codeblock-pict
+   (port->string (open-input-file "../mini-java/even-odd.rkt"))))
 
 (define parenthesized-mj-example
-  (scale
-   (codeblock-pict
-    (port->string (open-input-file "../mini-java/even-odd-prefix.rkt")))
-   SCALE-FACTOR))
+  (codeblock-pict
+   (port->string (open-input-file "../mini-java/even-odd-prefix.rkt"))))
 
 (define expanded-even-odd
-  (scale
-   (codeblock-pict
-    (port->string (open-input-file "../mini-java/expanded-even-odd.rkt")))
-   SCALE-FACTOR))
+  (codeblock-pict
+   (port->string (open-input-file "../mini-java/expanded-even-odd.rkt"))))
 
 (define expansion-figure
-  (let* ([start 11]
-         [end 84] ;; 53 for just the Runner class ...
+  (let* ([start 10]
+         [end 76]
          [lines (list start end)]
-         [buffer 10]
-         [SCALE .75]) ;; would be nice to amke this SCALE-FACTOR
-    (scale
-     (hc-append
-      buffer
-      (program->figure* "../mini-java/even-odd-prefix.rkt" #:lines lines)
-      (program->figure* "../mini-java/expanded-even-odd.rkt" #:lines lines))
-     SCALE)))
+         [buffer 10])
+    (hc-append
+     buffer
+     (program->figure* "../mini-java/even-odd-prefix.rkt" #:lines lines)
+     (program->figure* "../mini-java/expanded-even-odd.rkt" #:lines lines))))
 
 (define (extract file [name ""] #:lang [lang "racket"] #:prefix-lang? [prefix? #t])
   (define marker (~a ";; ~~~EXTRACT:" name "~~~"))
@@ -90,37 +80,30 @@
     [(_ name file (~or (~optional (~seq #:lang lang))
                        (~optional (~seq #:keep-lang-line? keep?))) ...)
      #`(define name
-         (scale
-          (codeblock-pict
-           #:keep-lang-line? #,(or (attribute keep?) #'#t)
-           (extract file 'name #,@(if (attribute lang) #'(#:lang lang) #'())))
-          SCALE-FACTOR))]))
+         (codeblock-pict
+          #:keep-lang-line? #,(or (attribute keep?) #'#t)
+          (extract file 'name #,@(if (attribute lang) #'(#:lang lang) #'()))))]))
 
 (define-extract mj-new "../mini-java/prefix-mini-java.rkt" #:keep-lang-line? #f)
 (define-extract typecheck-mod-beg "../mini-java/infix-mini-java.rkt" #:keep-lang-line? #f)
 (define-extract add-tool-tips "../mini-java/typecheck.rkt" #:keep-lang-line? #f)
 
 (define refactor-impl
-  (scale
-   (codeblock-pict
-    (string-append
-     (extract "../editing/property.rkt" 'refactor-prop)
-     "\n"
-     (extract "../mini-java/prefix-mini-java.rkt" 'refactor-if #:prefix-lang? #f)))
-   SCALE-FACTOR))
+  (codeblock-pict
+   (string-append
+    (extract "../editing/property.rkt" 'refactor-prop)
+    "\n"
+    (extract "../mini-java/prefix-mini-java.rkt" 'refactor-if #:prefix-lang? #f))))
 
 (define break-impl
-  (scale
-   (codeblock-pict
-    (string-append
-     (extract "../mini-java/prefix-mini-java.rkt" 'break-param)
-     "\n\n"
-     (extract "../mini-java/prefix-mini-java.rkt" 'while+break #:prefix-lang? #f)))
-   SCALE-FACTOR))
+  (codeblock-pict
+   (string-append
+    (extract "../mini-java/prefix-mini-java.rkt" 'break-param)
+    "\n\n"
+    (extract "../mini-java/prefix-mini-java.rkt" 'while+break #:prefix-lang? #f))))
 
 (define mj-while-macro
-  (scale
-   (codeblock-pict #:keep-lang-line? #f
+  (codeblock-pict #:keep-lang-line? #f
    #<<>>
 #lang racket
 (define-syntax (while stx)
@@ -132,10 +115,10 @@
                           (loop)))])
          (loop))]))
 >>
-  ) SCALE-FACTOR))
+  ))
 
 (define mj-parity-compiled
-  (scale (codeblock-pict
+  (codeblock-pict
    #<<>>
 #lang racket
 
@@ -158,10 +141,10 @@
    #'Parity:constructor
    0))
 >>
-   ) SCALE-FACTOR))
+   ))
 
 (define mj-send-macro
-  (scale (codeblock-pict
+  (codeblock-pict
    #:keep-lang-line? #f
    #<<>>
 #lang racket
@@ -178,7 +161,7 @@
               [method          (vector-ref rt-method-table method-index)])
          (method receiver-val arg ...))]))
 >>
-  ) SCALE-FACTOR))
+  ))
 
 (define 2d-state-machine-text
   #<<>>
@@ -209,12 +192,13 @@ class StateMachineRunner {
   )
 
 (define 2d-state-machine
-  (scale (codeblock-pict
-   #:keep-lang-line? #f
-   2d-state-machine-text) SCALE-FACTOR))
+  ;; very sad parameterize; Inconsolata appears not to have ╬ ╗ ╣ and friends
+  (parameterize ([current-code-font '(bold . modern)])
+    (codeblock-pict
+     #:keep-lang-line? #f
+     2d-state-machine-text)))
 
 (define 2d-state-exped
-  (scale
    (code
    (define-class Receiver
      (define-field state)
@@ -235,8 +219,7 @@ class StateMachineRunner {
           (set! state 0)]
          [(1)
           (System.out.println 3)
-          (set! state 0)]))))
-   SCALE-FACTOR))
+          (set! state 0)])))))
 
 
 

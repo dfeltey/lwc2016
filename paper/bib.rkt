@@ -225,3 +225,17 @@
    #:location (proceedings-location "International Conference on Compiler Construction"
                                      #:pages '(49 68))
    #:date 2015))
+
+(define syntactic-abstraction-in-scheme
+  (make-bib #:title "Syntactic Abstraction in Scheme"
+            #:author (authors "R. Kent Dybvig" "Robert Hieb" "Carl Bruggeman")
+            #:date 1992
+            #:location (journal-location "Lisp and Symbolic Computation"
+                                         #:volume 5
+                                         #:number 4)))
+
+(define macros-that-work
+  (make-bib #:title "Macros that Work"
+            #:date 1991
+            #:author (authors "William Clinger" "Jonathan Rees")
+            #:location (proceedings-location popl)))

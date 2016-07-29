@@ -7,7 +7,6 @@
 
 
 
-
 (define-class Runner
   (define-field check)
   (define-method run (n)
@@ -15,18 +14,13 @@
     (= check (new Parity))
     (= current 0)
     (while (< current n)
-     (compound
       (if
        (send Parity check is_even current)
        (compound
         (System.out.println current))
        (compound))
-      (= current (+ current 1))))
+      (= current (+ current 1)))
     0))
-
-
-
-
 
 
 
@@ -61,12 +55,6 @@
     (||
      (== n 0)
      (send Parity this is_odd (- n 1)))))
-
-
-
-
-
-
 
 
 

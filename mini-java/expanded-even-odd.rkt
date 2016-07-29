@@ -3,10 +3,9 @@
 (define (main-method)
   (displayln
    (let* ([receiver-val (Runner:constructor)]
-          [rt-method-table (vector-ref receiver-val 0)]
-          [method-index 0]
-          [method (vector-ref rt-method-table method-index)])
-     (method receiver-val 10))))
+          [meth-table (vector-ref receiver-val 0)]
+          [meth (vector-ref meth-table 0)])
+     (meth receiver-val 10))))
 
 (define Runner:runtime-method-table
   (vector
@@ -14,29 +13,24 @@
      (define current #f)
      (vector-set! this 1 (Parity:constructor))
      (set! current 0)
-     (letrec
-         ([loop
-           (λ ()
-             (when (< current n)
-               (begin
-                 (if
-                  (let* ([receiver-val
-                          (vector-ref this 1)]
-                         [rt-method-table
-                          (vector-ref
-                           receiver-val
-                           0)]
-                         [method-index 1]
-                         [method
-                          (vector-ref
-                           rt-method-table
-                           method-index)])
-                    (method receiver-val current))
-                  (begin (displayln current) (void))
-                  (void))
-                 (set! current (+ current 1))
-                 (void))
-               (loop)))])
+     (letrec ([loop
+               (λ ()
+                 (when (< current n)
+                   (if (let* ([receiver
+                               (vector-ref this 1)]
+                              [meth-table
+                               (vector-ref
+                                receiver
+                                0)]
+                              [meth
+                               (vector-ref
+                                meth-table
+                                1)])
+                         (meth receiver current))
+                       (displayln current)
+                       (void))
+                   (set! current (+ current 1))
+                   (loop)))])
        (loop))
      0)))
 
@@ -56,20 +50,14 @@
   (vector
    (λ (this n)
      (and (! (== n 0))
-          (let* ([receiver-val this]
-                 [rt-method-table (vector-ref receiver-val 0)]
-                 [method-index 1]
-                 [method (vector-ref rt-method-table
-                                     method-index)])
-            (method receiver-val (- n 1)))))
+          (let* ([meth-table (vector-ref this 0)]
+                 [meth (vector-ref meth-table 1)])
+            (meth this (- n 1)))))
    (λ (this n)
      (or (== n 0)
-         (let* ([receiver-val this]
-                [rt-method-table (vector-ref receiver-val 0)]
-                [method-index 0]
-                [method (vector-ref rt-method-table
-                                    method-index)])
-           (method receiver-val (- n 1)))))))
+         (let* ([meth-table (vector-ref this 0)]
+                [meth (vector-ref meth-table 0)])
+           (meth this (- n 1)))))))
 
 (define (Parity:constructor)
   (vector Parity:runtime-method-table))
