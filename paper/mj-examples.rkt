@@ -1,62 +1,97 @@
 #lang racket
-(require pict pict/code "setup.rkt")
+(require pict pict/code "setup.rkt"
+         racket/runtime-path)
 (provide (all-defined-out))
 
 (require (for-syntax syntax/parse))
 
-(define (program->figure* path #:lines [line-nums 'all])
+(define (program->figure* paths #:first-line first-line #:last-line last-line
+                          #:buffer [buffer 10])
   ;; this function uses 'codeblock-pict' on each line individually
   ;; this works because there are no tokens that span multiple lines
   ;; in the input; it is advantages because it means that no cropping
   ;; is required (and the cropping is hard to get right)
   (define (tt s) ((current-code-tt) s))
-  (define lines (string-split (file->string path) "\n" #:trim? #f))
-  (define hash-lang-line
-    (for/first ([l (in-list lines)]
-                #:when (regexp-match? #rx"#lang" l))
-      l))
-  (define first-line (if (eq? line-nums 'all) 1 (first line-nums)))
-  (define last-line (if (eq? line-nums 'all) (length lines) (second line-nums)))
+  (define liness (for/list ([p (in-list paths)])
+                   (define all-lines (file->lines p))
+                   (define desired-lines
+                     (for/list ([l (in-list all-lines)]
+                                [i (in-naturals 1)]
+                                #:when (<= first-line i last-line))
+                       l))
+                   (unless (= (length desired-lines)
+                              (+ (- last-line first-line) 1))
+                     (error 'program->figure*
+                            "didn't find lines from ~a to ~a in ~a"
+                            first-line last-line p))
+                   (widen desired-lines)))
+  (define hash-lang-lines
+    (for/list ([p (in-list paths)])
+      (call-with-input-file p
+        (λ (port)
+          (for/first ([l (in-list (port->lines port))]
+                      #:when (regexp-match? #rx"#lang" l))
+            l)))))
   (define digits (string-length (~a (- last-line first-line))))
-  (define first-gap #f)
+  (define first-gaps #f)
   (define lines-with-numbers
     (apply
      vl-append
-     (for/list ([line (in-list lines)]
-                [i (in-naturals 1)]
-                #:when (<= first-line i last-line))
-       (define gap (tt "  "))
-       (unless first-gap (set! first-gap gap))
-       (hbl-append (tt (~r #:min-width digits (+ 1 (- i first-line))))
-                   gap
-                   (codeblock-pict (string-append hash-lang-line "\n" line)
-                                   #:keep-lang-line? #f)))))
-  (define-values (x _) (cc-find lines-with-numbers first-gap))
-  (pin-over lines-with-numbers
-            x 0
-            (frame (blank 0 (pict-height lines-with-numbers)))))
+     (for/list ([lines (in-list (transpose liness))]
+                [i (in-naturals 1)])
+       (define gaps (build-list (length lines) (λ (_) (tt "  "))))
+       (unless first-gaps (set! first-gaps gaps))
+       (apply
+        hbl-append
+        buffer
+        (for/list ([line (in-list lines)]
+                   [gap (in-list gaps)]
+                   [hash-lang-line (in-list hash-lang-lines)])
+          (hbl-append
+           (tt (~r #:min-width digits i))
+           gap
+           (codeblock-pict (string-append hash-lang-line "\n" line)
+                           #:keep-lang-line? #f)))))))
+  (for/fold ([p lines-with-numbers])
+            ([first-gap (in-list first-gaps)])
+    (define-values (x _) (cc-find lines-with-numbers first-gap))
+    (pin-over p
+              x 0
+              (frame (blank 0 (pict-height lines-with-numbers))))))
 
+(define (widen ls)
+  (define widest (apply max (map string-length ls)))
+  (for/list ([l (in-list ls)])
+    (string-append l (make-string (- widest (string-length l)) #\space))))
+(define (transpose l) (apply map list l))
+
+(module+ test
+  (require rackunit)
+  (check-equal? (widen '("" "1" "12345" "123"))
+                '("     "
+                  "1    "
+                  "12345"
+                  "123  ")))
+
+(define-runtime-path even-odd-prefix.rkt "../mini-java/even-odd-prefix.rkt")
+(define-runtime-path expanded-even-odd.rkt "../mini-java/expanded-even-odd.rkt")
+(define-runtime-path even-odd.rkt "../mini-java/even-odd.rkt")
 (define mj-simple-example
   (codeblock-pict
-   (port->string (open-input-file "../mini-java/even-odd.rkt"))))
+   (port->string (open-input-file even-odd.rkt))))
 
 (define parenthesized-mj-example
   (codeblock-pict
-   (port->string (open-input-file "../mini-java/even-odd-prefix.rkt"))))
+   (port->string (open-input-file even-odd-prefix.rkt))))
 
 (define expanded-even-odd
   (codeblock-pict
-   (port->string (open-input-file "../mini-java/expanded-even-odd.rkt"))))
+   (port->string (open-input-file expanded-even-odd.rkt))))
 
 (define expansion-figure
-  (let* ([start 10]
-         [end 76]
-         [lines (list start end)]
-         [buffer 10])
-    (hc-append
-     buffer
-     (program->figure* "../mini-java/even-odd-prefix.rkt" #:lines lines)
-     (program->figure* "../mini-java/expanded-even-odd.rkt" #:lines lines))))
+  (program->figure* (list even-odd-prefix.rkt expanded-even-odd.rkt)
+                    #:first-line 10
+                    #:last-line 72))
 
 (define (extract file [name ""] #:lang [lang "racket"] #:prefix-lang? [prefix? #t])
   (define marker (~a ";; ~~~EXTRACT:" name "~~~"))
@@ -84,23 +119,27 @@
           #:keep-lang-line? #,(or (attribute keep?) #'#t)
           (extract file 'name #,@(if (attribute lang) #'(#:lang lang) #'()))))]))
 
-(define-extract mj-new "../mini-java/prefix-mini-java.rkt" #:keep-lang-line? #f)
-(define-extract typecheck-mod-beg "../mini-java/infix-mini-java.rkt" #:keep-lang-line? #f)
-(define-extract add-tool-tips "../mini-java/typecheck.rkt" #:keep-lang-line? #f)
+(define-runtime-path prefix-mini-java.rkt "../mini-java/prefix-mini-java.rkt")
+(define-runtime-path infix-mini-java.rkt "../mini-java/infix-mini-java.rkt")
+(define-runtime-path typecheck.rkt "../mini-java/typecheck.rkt")
+(define-extract mj-new prefix-mini-java.rkt #:keep-lang-line? #f)
+(define-extract typecheck-mod-beg infix-mini-java.rkt #:keep-lang-line? #f)
+(define-extract add-tool-tips typecheck.rkt #:keep-lang-line? #f)
 
+(define-runtime-path property.rkt "../editing/property.rkt")
 (define refactor-impl
   (codeblock-pict
    (string-append
-    (extract "../editing/property.rkt" 'refactor-prop)
+    (extract property.rkt 'refactor-prop)
     "\n"
-    (extract "../mini-java/prefix-mini-java.rkt" 'refactor-if #:prefix-lang? #f))))
+    (extract prefix-mini-java.rkt 'refactor-if #:prefix-lang? #f))))
 
 (define break-impl
   (codeblock-pict
    (string-append
-    (extract "../mini-java/prefix-mini-java.rkt" 'break-param)
+    (extract prefix-mini-java.rkt 'break-param)
     "\n\n"
-    (extract "../mini-java/prefix-mini-java.rkt" 'while+break #:prefix-lang? #f))))
+    (extract prefix-mini-java.rkt 'while+break #:prefix-lang? #f))))
 
 (define mj-while-macro
   (codeblock-pict #:keep-lang-line? #f
