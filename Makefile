@@ -1,4 +1,4 @@
-all: the-paper
+all: paper/paper.pdf
 
-the-paper: paper/paper.scrbl paper/notation.scrbl paper/evolution.scrbl paper/editing.scrbl paper/mj-examples.rkt
+paper/paper.pdf: paper/paper.scrbl paper/notation.scrbl paper/evolution.scrbl paper/editing.scrbl paper/mj-examples.rkt
 	(cd paper; raco make -v paper.scrbl && scribble --pdf paper.scrbl; cd ..)
