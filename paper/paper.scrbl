@@ -42,7 +42,7 @@ the Racket ecosystem thus makes up a true language workbench.
 This paper demonstrates Racket's capabilities with an implementation of
 the the 2016 Language Workbench Challenge. Building on a concise
 implementation of MiniJava, it shows how it is easy it is to add new
-notation, add new constructs, and create IDE tools.
+notation, constrain constructs, and create IDE tools.
 
 }
 

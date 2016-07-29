@@ -13,19 +13,11 @@
 
 @title[#:tag "racket-lwc"]{The Racket Language Workbench}
 
-@;; Sections
-@;; - #lang/module-begin talk about the pipeline and typechecking
-@;;   show the typechecking module-begin impl
-@;; - expand the program to use the even class in a main class (use while and new)
-@;; - demonstrate syntactic extension with MiniJava's while macro
-@;; - talk about compile-time information/define-syntax with the implementation of new
-@;; Then the refactoring and break sections can talk about syntax properties and syntax parameters
-
 Racket promotes a language-oriented view of problem solving. To this end,
 it enables programmers to quickly build many different languages so that
-they can solve each aspect on its own linguistic terms. Indeed, the first
-line of every single module in a Racket application must specify its
-implementation language. 
+they can solve each aspect of a problem on its own linguistic
+terms. Indeed, the first line of every single module in a Racket
+application must specify its implementation language.
 
 To support this language-development idiom, Racket fully embraces the
 idea of linguistic reuse@~cite[sk-dissertation]. According to this view,
@@ -36,15 +28,14 @@ Racket ecosystem. Basically a language is a Racket component that provides
 certain services; a module's language specification (the first line) simply
 points to a component that implements a language@~cite[you-want-it-when].
 
-A plain Racket module that exports certain construct is the simplest
+A plain Racket module that exports specific construct is the simplest
 language component. A sophisticated variant consists of modules that
 implement a reader---a lexer and parser for any imaginable unicode-based
 notation---and a semantics module. In principle, both of these modules have
 complete control over the body of a client module. Conventions dictate a
 certain organization, however.
 
-In principle, a programmer can implement a Racket language in several
-different ways: 
+Hence, a programmer can implement a Racket language in several different ways: 
 @;
 @itemlist[
 
@@ -70,9 +61,8 @@ Deriving one language from another means creating a translation of new
 linguistic constructs into those of the ``parent'' language and a run-time
 library. By transitivity, all other elements of the run-time system (the
 vm, the jit compiler, the garbage collector, etc.) are inherited from the
-primitive core of Racket. We refer to the syntactic aspect as
-@defterm{syntax elaboration} and consider it the critical part of language
-derivation. 
+primitive core of Racket. We consider the syntax translation the critical
+part of language derivation.
 
 Technically, the derivation works as follows. A language module may export
 a subset of the constructs and functions of some base language, which
@@ -91,16 +81,17 @@ which include properties of the source syntax as well as those specified by
 a language implementor @~cite[syntactic-abstraction-in-scheme].
 
 Like the Lisp macro system of lore, Racket's syntax object system allows
-the specification of rewriting rules on syntax objects. Unlike Lisp or
-Scheme macros, Racket's rewriting rules provide sophisticated services. For
-example, they automatically propagate source information so that they can
-report error in terms of the original @emph{source notation}. Similarly,
-the rules almost automatically enforce context-free and some
-context-sensitive constraints so that error messages use the
+the specification of rewriting rules on syntax objects. An elaborator uses
+these rules to translate a module from any language into Racket core syntax
+on an incremental basis. Unlike Lisp or Scheme macros, Racket's rewriting
+rules provide sophisticated services. For example, they automatically
+propagate source information so that they can report error in terms of the
+original @emph{source notation}. Similarly, the rules almost automatically
+enforce context-free constraints so that error messages use the
 @emph{concepts} of the surface language@~cite[fortifying-macros]. Lastly,
 these rewriting rules can also articulate transformations on complete
 modules and on existing linguistic constructs---giving them the expressive
-power to track context-sensitive modules and to assign new meaning to old
-words. The implementation of MiniJava illustrates all these ideas (and
+power to track context-sensitive constraints and to assign new meaning to
+old words. The implementation of MiniJava illustrates all these ideas (and
 more) quite well, and it is time to switch from abstract explanations to
 concrete examples.
