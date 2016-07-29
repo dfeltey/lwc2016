@@ -76,7 +76,7 @@ feature that already exists in the base language.
 A Racket programmer uses the @defterm{syntax object system} to create new
 linguistic constructs. From far enough away, this system is the
 great-grandson of Scheme and Lisp's hygienic macro system@~cite[lisp-macros
-hygienic-macros]. The system represents syntactic terms via syntax object,
+hygienic-macros macros-that-work]. The system represents syntactic terms via syntax object,
 which include properties of the source syntax as well as those specified by
 a language implementor @~cite[syntactic-abstraction-in-scheme].
 
