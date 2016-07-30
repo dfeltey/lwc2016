@@ -198,7 +198,7 @@
 ;; ~~~EXTRACT:while+break~~~
 (define-syntax (while stx)
   (syntax-parse stx
-    [(while test body ...)
+    [(while test:expr body ...)
      #`(let/ec local-break
          (syntax-parameterize ([break (λ (stx) #'(local-break))])
            (letrec ([loop (λ ()

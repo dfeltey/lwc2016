@@ -1,5 +1,5 @@
-#lang racket
-(require pict pict/code "setup.rkt"
+#lang at-exp racket
+(require pict pict/code "setup.rkt" 
          racket/runtime-path)
 (provide (all-defined-out))
 
@@ -147,7 +147,7 @@
 #lang racket
 (define-syntax (while stx)
   (syntax-parse stx
-    [(while test body ...)
+    [(while test:expr body ...)
      #`(letrec ([loop (λ ()
                         (when test
                           body ...
@@ -297,7 +297,7 @@ class StateMachineRunner {
   (list "Lexing + Parsing"
         "Type Elaboration"
         "Macro Expansion"
-        "More Macro Expansion"))
+        "racket to #%kernel Expansion"))
 
 (define the-x 20)
 (define (find-bot pict find)

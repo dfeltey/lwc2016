@@ -247,3 +247,12 @@
    #:location (dissertation-location #:institution "Rice University"
                                      #:degree "Ph.D.")
    #:date 2000))
+
+
+(define classes-and-mixins 
+  (make-bib
+    #:title "Classes and Mixins"
+    #:author (authors "Matthew Flatt" "Shriram Krishnamurthi" "Matthias Felleisen")
+    #:location (proceedings-location popl)
+    ;; pages="171--183",
+    #:date 1998))

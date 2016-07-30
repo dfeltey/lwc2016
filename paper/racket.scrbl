@@ -59,27 +59,28 @@ certain situations, and on occasion, as in the case of MiniJava, an
 implementation may borrow elements from several approaches.
 
 Deriving one language from another means creating a translation of new
-linguistic constructs into those of the ``parent'' language and a run-time
-library. By transitivity, all other elements of the run-time system (the
-vm, the jit compiler, the garbage collector, etc.) are inherited from the
-primitive core of Racket. We consider the syntax translation the critical
-part of language derivation.
+linguistic constructs into those of the base (or ``parent'') language and a
+run-time library. By transitivity, all other elements of the run-time
+system (the vm, the jit compiler, the garbage collector, etc.) are
+inherited from the primitive core of Racket. We consider the syntax
+translation the critical part of language derivation.
 
 Technically, the derivation works as follows. A language module may export
 a subset of the constructs and functions of some base language, which
-implicitly subtracts features from a language; it may export additional
+implicitly subtracts features from that language; it may export additional
 features and functions, which adds new capabilities; and it may
-re-interpret existing features, say, function application or @racket[if]
-statements.  The re-interpretation is accomplished by defining a new
-construct or function in a module and exporting it under the name of a
-feature that already exists in the base language. 
+re-interpret existing features, say, function applications or conditionals.
+The re-interpretation is accomplished by defining a new construct or
+function in a module and exporting it under the name of a feature that
+already exists in the base language.
 
 A Racket programmer uses the @defterm{syntax object system} to create new
 linguistic constructs. From far enough away, this system is the
 great-grandson of Scheme and Lisp's hygienic macro system@~cite[lisp-macros
-hygienic-macros macros-that-work]. The system represents syntactic terms via syntax object,
-which include properties of the source syntax as well as those specified by
-a language implementor @~cite[syntactic-abstraction-in-scheme].
+hygienic-macros macros-that-work]. The system represents syntactic terms
+via syntax objects, which include properties of the source syntax as well
+as those specified by a language implementor
+@~cite[syntactic-abstraction-in-scheme].
 
 Like the Lisp macro system of lore, Racket's syntax object system allows
 the specification of rewriting rules on syntax objects. An elaborator uses
