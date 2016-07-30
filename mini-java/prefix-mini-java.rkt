@@ -225,9 +225,9 @@
 ;; ~~~EXTRACT:mj-new~~~
 (define-syntax (new stx)
   (syntax-parse stx
-    [(new the-class)
-     #`(#,(static-class-info-constructor-id
-           (syntax-local-value #'the-class)))]))
+    [(new the-class:id)
+     #`[#,(static-class-info-constructor-id
+           (syntax-local-value #'the-class))]]))
 ;; ~~~EXTRACT:mj-new~~~
 
 (define-syntax 2dstate-machine
