@@ -53,7 +53,8 @@ within or outside of the Racket ecosystem;}
 ]
 @;
 Racket strongly encourages this last approach, because it delivers results
-more quickly than the others. But, all of these approaches are useful in
+more quickly than the others without while remaining as general as any of the others.
+But, all of these approaches are useful in
 certain situations, and on occasion, as in the case of MiniJava, an
 implementation may borrow elements from several approaches.
 
