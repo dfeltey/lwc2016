@@ -111,7 +111,7 @@ Racket's @tt{#lang} mechanism wraps the entire content of a module
 object, called ``module begin.'' A language-implementation module may
 therefore export its own module-begin constructor and thus take over the
 interpretation of an entire module at once. The elaboration process uses
-the rewriting rule for a ''module begin'' to perform module-level
+the rewriting rule for a ``module begin'' to perform module-level
 computations. The result of the elaboration must defer to a ``module
 begin'' construction of some other language.
 
