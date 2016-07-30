@@ -266,8 +266,10 @@ class StateMachineRunner {
 ;; MiniJava implementation phase diagram
 (define (make-lang-box txt [w 165] [h 20])
     (cc-superimpose
-     (text txt)
+     (pipeline-text txt)
      (rounded-rectangle w h)))
+(define (pipeline-text str) (text str "Times New Roman"))
+
 (define MJ
   (make-lang-box "MiniJava"))
 (define AST
@@ -310,17 +312,18 @@ class StateMachineRunner {
             ([pair (in-list pairs)]
              [explanation (in-list explanations)]
              [i (in-naturals 1)])
-    (define count (text (~a (number->string i) ".   ")))
+    (define count (pipeline-text (~a (number->string i) ".   ")))
     (define count-width (pict-width count))
     (match-define (cons top bot) pair)
-    (define txt (text explanation))
-    (define adjustment (/ (- (pict-width txt)count-width) 2))
+    (define txt (pipeline-text explanation))
+    (define adjustment (/ (- (pict-width txt) count-width) 2))
     (pin-arrow-line 5 diagram
                     top find-bot
                     bot find-top
                     #:line-width 1
                     #:label (hc-append count txt)
                     #:x-adjust-label adjustment)))
+
 (define pipeline+mj-example
   (hc-append  20 pipeline-diagram
              mj-simple-example))
