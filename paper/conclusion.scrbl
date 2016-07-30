@@ -12,13 +12,11 @@
 
 @title[#:tag "sec:conclusion"]{Conclusion}
 
-This paper introduces the key features that make Racket a language
-workbench.  Through linguistic dispatch and its rich hygienic macro system,
-Racket allows programmers to easily build new languages and extend existing
-ones.  Our MiniJava implementation demonstrates language building the
-Racket way.  Our solutions to three benchmark problems showcase how to
-extend Racket-based languages with new concrete syntax, additional
-restrictions, and custom tooling.
+This paper introduces the key elements of the Racket language workbench via
+the MiniJava sample language and three benchmark challenges. Racket's
+linguistic reuse capabilities allows programmers to easily build new
+languages and then extend and adapt them.  Indeed, Racket's unique approach
+to linguistic reuse extends to its ecosystem.
 
 Racket's language-building facilities are the result of a gradual evolution
 over its twenty year history: starting from Lisp's macro system; adding

@@ -23,7 +23,7 @@ about conditional statements.
 @section{Implementation}
 @(figure
   "refactor-prop"
-  "The syntax property used to implement the refactoring tool"
+  "A syntax property for the refactoring tool"
   refactor-impl)
 
 Our restructuring tool relies on source location information for conditionals, which it gets from our MiniJava implementation.
@@ -59,8 +59,11 @@ The only caveat, however, is that refactoring within the state-machine notation 
 tabular syntax.
 
 @section{Limitations}
-This refactoring only makes sense for conditionals with exactly two branches. In a language like full Java, which also
-has single-branch @racket[if] statements, the tool would have to distinguish these cases to determine where the refactoring applies.
+
+This refactoring only makes sense for conditionals with exactly two
+branches. In a language such as Java, which also has single-branch
+@racket[if] statements, the tool would distinguish these cases to
+determine where the refactoring applies.
 
 @section{Uses and Examples}
 Several tools built on top of Racket and DrRacket use syntax properties to facilitate communication between tools and language implementations.

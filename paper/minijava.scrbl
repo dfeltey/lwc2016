@@ -5,7 +5,7 @@
           "setup.rkt"
           "bib.rkt"
           "mj-examples.rkt"
-          scriblib/figure
+          scriblib/figure scriblib/footnote
           (only-in scribble/core style) scribble/latex-properties
           (only-in scribble/manual racket racketblock hash-lang)
           (only-in racket/format ~a))
@@ -216,7 +216,7 @@ the class. In short, the Racket form that defines a MiniJava class much
 expression. Naturally, Racket comes with an effective communication
 channels for distinct macros for just this purpose@~cite[mtwt].
 
-To make this idea even more concrete, consider line 5 of
+To make this idea concrete, consider line 5 of
 @figure-ref{expansion}. It shows how our implementation of MiniJava
 elaborates 
 @;
@@ -242,8 +242,9 @@ definition looks just like the one for @racket[while] from
 pattern that consists of the literal @tt{new} and an identifier that
 specifies a class. The template constructs uses @racket[#:escape + [ ⋯] ]
 to construct an application, using brackets for emphasis instead of plain
-parentheses. @; THIS OUGHT TO BE FOOTNOTED TO SAY [ ... ] IS ( ... )
-A close look now reveals an unusual concept, however, specifically the
+parentheses.@note{Racket uses @code{[ ... ]} and @code{( ... )}
+interchangeably.} A close look now reveals an unusual concept, however,
+specifically the 
 @racket[#:escape + #, ⋯] 
 or
 @;
@@ -255,7 +256,7 @@ itself. The question is what this computation affects and how it works.
 
 To this end, we turn our attention to the expansion of the @racket[Parity]
 class from our running example. It is shown in @figure-ref{expansion}
-beginning at line 40.  MiniJava forms are compiled away to ordinary Racket
+at line 40.  MiniJava forms are compiled away to ordinary Racket
 code, which uses vectors to represent objects and method
 tables. Critically, though, the @racket[define-class] form for the
 @racket[Parity] class expands to three definitions: 
@@ -283,22 +284,15 @@ reference to the method table.  The third definition, that of
 surprising and unusual manner. 
 
 While the preceding section employs @racket[define-syntax] to bind
-syntax-transforming functions to a name, here it binds a variable to an
-ordinary value, specifically, 
-@; THIS OUGHT TO BE A FOOTNOTE BUT I FORGOT HOW THEY ARE WRITTEN IN 'SIGPLAN'
-@;{ ... is a special kind of binding form, it is not
-used to define macros only. The expander specially recognizes that
-@racket[while] is bound to a function and that is what triggers the macro
-expansion of @racket[while] forms, but @racket[define-syntax] can bind
-variable to other values too.}
-@;
-a record. The record constructor, @racket[static-class-info], is a function
-of five values. Its instances thus store compile-time information about the
-class: an identifier bound to the parent class information (or @racket[#f]
-if there is no parent class); a table mapping method names to vector
-offsets;  a syntax object referring to the run-time method table; a syntax
-object that points to the constructor; and a count of the fields in the
-class. 
+syntax-transforming functions to a name,@note{The syntax system specially
+recognizes that @racket[while] is bound to a function.} here it binds a
+variable to an ordinary value, specifically, a record. The record
+constructor, @racket[static-class-info], is a function of five values. Its
+instances thus store compile-time information about the class: an
+identifier bound to the parent class information (or @racket[#f] if there
+is no parent class); a table mapping method names to vector offsets; a
+syntax object referring to the run-time method table; a syntax object that
+points to the constructor; and a count of the fields in the class.
 
 Now that @racket[Parity] is compile-time bound to information, other macro
 computations may retrieve this information. Technically, these macros must
