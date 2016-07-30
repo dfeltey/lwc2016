@@ -9,10 +9,29 @@
 @title[#:tag "notation"]{Notation: Tabular Notation}
 
 In the @emph{Notation} category, we tackle the problem of @emph{Tabular Notation} by extending MiniJava with a
-syntax for specifying state machines, as seen in @figure-ref["2d-state-machine"].  A state machine
-compiles into a class, whose name is in the top left cell.  The top row lists the state names.  The
-left column lists the transition methods, whose bodies are in the inner cells, followed by the next
-state.
+syntax for specifying state machines, as seen in @figure-ref["2d-state-machine"].
+The syntax is purely textual; users produce the unicode characters representing a
+two-dimensional grid, and our MiniJava implementation understands it as an
+alternative notation for a class that implements the corresponding
+state machine.
+
+The first row in the table specifies the names of the states (in this case,
+@racket[wait_0] and @racket[wait_1]). The first column specifies the names of the input
+symbols (in this case @racket[zero] and @racket[one]). The cells in the middle portion of the
+diagram specify what happens in the given state when receiving the given symbol; each
+cell contains some arbitrary MiniJava code that runs for its effect, followed by the name
+of a new state to transition to. For example,
+when in the @racket[wait_0] state, if the @racket[zero] input comes, then the state machine
+will print out @tt{0} and transition to the @racket[wait_1] state.
+
+The state machine is reified as a MiniJava class, named by the contents of the upper-left
+cell (@racket[Receiver] in this case). The inputs to the state machine are reified as nullary
+methods on the class. The @racket[StateMachineRunner] class in @figure-ref["2d-state-machine"]
+creates a state machine and supplies it with four inputs.
+
+One of the primary difficulties with this style of tabular notation is editing it.
+To support that DrRacket has a few special keybindings, documented here:
+@url{http://docs.racket-lang.org/drracket/Keyboard_Shortcuts.html#(idx._(gentag._219._(lib._scribblings/drracket/drracket..scrbl)))}.
 
 @(figure*
   "2d-state-machine"

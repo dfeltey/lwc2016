@@ -205,17 +205,6 @@
 (define 2d-state-machine-text
   #<<>>
 #lang mini-java
-class StateMachineRunner {
-    public int doTheThing() {
-        Receiver r;
-        r = new Receiver();
-        System.out.println(r.one());
-        System.out.println(r.zero());
-        System.out.println(r.zero());
-        System.out.println(r.one());
-        return 0;
-    }
-}
 
 #2dstate-machine
 ╔══════════╦══════════════════════════════════╦══════════════════════════════════╗
@@ -227,6 +216,18 @@ class StateMachineRunner {
 ║   one    ║       System.out.println(2);     ║       System.out.println(3);     ║
 ║          ║              wait_0              ║              wait_0              ║
 ╚══════════╩══════════════════════════════════╩══════════════════════════════════╝
+
+class StateMachineRunner {
+    public int doTheThing() {
+        Receiver r;
+        r = new Receiver();
+        System.out.println(r.one());
+        System.out.println(r.zero());
+        System.out.println(r.zero());
+        System.out.println(r.one());
+        return 0;
+    }
+}
 >>
   )
 
@@ -234,7 +235,7 @@ class StateMachineRunner {
   ;; very sad parameterize; Inconsolata appears not to have ╬ ╗ ╣ and friends
   (parameterize ([current-code-font '(bold . modern)])
     (codeblock-pict
-     #:keep-lang-line? #f
+     #:keep-lang-line? #t
      2d-state-machine-text)))
 
 (define 2d-state-exped
