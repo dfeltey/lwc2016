@@ -17,7 +17,7 @@ present here the result of tackling the problem of @emph{Tabular Notation}
 from the @emph{Notation} category. Specifically, we explain how to add
 tabular notation to MiniJava for specifying state machines via tables. 
 
-@Figure-ref["2d-state-machine"] presents an example. The syntax is purely
+@Figure-ref["2d-state-machine"] presents an example state machine. The syntax is purely
 textual, relying on Racket's Unicode integration. A programmer produces the
 table outline with Unicode characters.
 In the context of MiniJava, the table represents a two-dimensional grid of
@@ -74,10 +74,9 @@ would dispatch on two scrutinees, one selecting a row, the other a column.
 
 @section{Usability}
 
-DrRacket provides special support for inputting and editing this tabular syntax.@note{See
-@url{http://docs.racket-lang.org/drracket/Keyboard_Shortcuts.html#(idx._(gentag._219._(lib._scribblings/drracket/drracket..scrbl)))}
-for documentation.} It is
-difficult to use outside of DrRacket.
+DrRacket provides special support for inputting and editing this tabular syntax.@note{See DrRacket's manual for more:
+@url{http://docs.racket-lang.org/drracket/Keyboard_Shortcuts.html#(idx._(gentag._219._(lib._scribblings/drracket/drracket..scrbl)))}}
+It is difficult to use outside of DrRacket.
 
 @section{Impact}
 
@@ -116,7 +115,8 @@ forms are used in the implementation of Redex@~cite[redex-book].
 @section{Effort}
 
 Adding the 2d capabilities to the existing parser took 1-2 hours. The
-remaining work required about 140 lines of code and took 2-3 hours.
+remaining work required about 140 lines of code and took 2-3 hours. Work on
+editing support for the tabular notation is ongoing.
 
 @;; Maybe leave this out
 @;; @section{Other Comments}

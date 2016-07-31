@@ -93,7 +93,8 @@
                     #:first-line 10
                     #:last-line 72))
 
-(define (extract file [name ""] #:lang [lang "racket"] #:prefix-lang? [prefix? #t])
+(define (extract file [name ""] #:lang [lang "racket"] #:prefix-lang? [prefix? #t]
+                 #:line-prefix [line-prefix ""])
   (define marker (~a ";; ~~~EXTRACT:" name "~~~"))
   (define-values (_1 _2 lines)
     (for/fold ([done? #f]
@@ -105,7 +106,7 @@
         [(equal? marker line) (values keep? (not keep?) lines)]
         [keep? (values done? keep? (cons line lines))]
         [else (values done? keep? lines)])))
-  (string-join (reverse lines)
+  (string-join (reverse (map (λ (line) (string-append line-prefix line)) lines))
                "\n"
                #:before-first (or (and prefix? (string-append "#lang " lang "\n"))
                                   "")))
@@ -130,7 +131,11 @@
 (define refactor-impl
   (codeblock-pict
    (string-append
-    (extract property.rkt 'refactor-prop)
+    "#lang racket\n"
+    "\n"
+    "(begin-for-syntax\n"
+    (extract property.rkt 'refactor-prop #:prefix-lang? #f #:line-prefix " ")
+    ")\n"
     "\n"
     (extract prefix-mini-java.rkt 'refactor-if #:prefix-lang? #f))))
 

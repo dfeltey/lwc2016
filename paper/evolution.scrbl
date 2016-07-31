@@ -8,7 +8,7 @@
    (s:section #:tag (string-append "evolution:" title) title))
 @title[#:tag "evolution"]{Evolution and Reuse: Beyond-Grammar Restrictions}
 This section presents our solution to the @emph{Beyond-Grammar Restrictions} benchmark problem in the @emph{Evolution} category.
-Our solution extends MiniJava with a @racket[break] keyword that is only valid within @racket[while] loops.
+Our solution extends MiniJava with a @racket[break] keyword that is valid only within @racket[while] loops.
 The implementation uses Racket's @emph{syntax parameters} to control the meaning of a
 binding depending on its context@~cite[syntax-params].
 
@@ -41,8 +41,12 @@ continuation and break out of the loop.
 
 @section{Variants}
 One variant of this benchmark problem would be to add Java's @racket[super] keyword to MiniJava.
-The @racket[super] keyword, like @racket[break], is only valid in certain
+The @racket[super] keyword, like @racket[break], is valid only in certain
 contexts---in methods of child classes, specifically.
+
+The current implementation always breaks the nearest enclosing loop, but @racket[break]
+could accept a (literal) number as a argument to allow breaking of nested loops from the
+inner loop.
 
 @; Another possible variant is the implementation of named @racket[break] statements.
 @; This would require the addition of a macro to support labels and a way to jump from the expansion of a @racket[break]
@@ -68,13 +72,13 @@ This implementation would compose well with other instances of the @emph{Beyond-
 @; with the possible exception of other extensions which also modify the MiniJava @racket[while] macro.
 
 @section{Limitations}
-Implementing language restrictions using syntax parameters necessitates a language that compiles to a set of macros.
+Implementing language restrictions using syntax parameters necessitates a language that compiles via a set of macros.
 An alternate implementation of MiniJava that directly produced fully-expanded Racket programs would not be able to
 use this strategy.
 
 @section{Uses and Examples}
 Racket uses syntax parameters in many of its core libraries to restrict certain syntactic forms to specific contexts.
-For example, Racket implements the @racket[this] keyword using syntax parameters to ensure that it is only valid within Racket's @racket[class] form.
+For example, Racket implements the @racket[this] keyword using syntax parameters to ensure that it is valid only within Racket's @racket[class] form.
 
 @section{Effort}
 Extending our implementation of MiniJava to support the @racket[break] keyword requires fewer than twenty lines of

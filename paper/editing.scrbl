@@ -36,7 +36,7 @@ We implement our tool as a plugin for DrRacket@~cite[drracket] which processes a
 These locations are where the refactoring may apply. When a user applies the refactoring, the tool rewrites the conditional within the editor's buffer.
 
 @section{Variants}
-A variant on this refactoring would be to transform expressions that use @racket[&&] into expressions that use @racket[||] by applying De Morgan's law.
+A variant on this refactoring would be to transform between expressions that use @racket[&&] and @racket[||] by applying De Morgan's laws.
 
 In addition, it is worth noting that the implementation of our refactoring tool is not MiniJava specific.
 By parameterizing the refactoring rule over negation syntax, the tool generalizes across languages.
@@ -50,17 +50,17 @@ MiniJava language otherwise.
 
 @section{Impact}
 The refactoring tool proper is a standalone piece of code.
-Otherwise the only changes to our MiniJava implementation were to the @racket[if] macro as discussed earlier.
+Otherwise, the only changes to our MiniJava implementation are to the @racket[if] macro, as discussed earlier.
 
 @section{Composability}
 Our restructuring tool composes automatically with other DrRacket plug-ins.
-Additionally, it does not interfere with our solutions to the other benchmark problems.
-The only caveat, however, is that refactoring within the state-machine notation may break the alignment of the
+Additionally, it does not interfere with our solutions to the other benchmark problems, except
+that refactoring within a state-machine may break the alignment of the
 tabular syntax.
 
 @section{Limitations}
 
-This refactoring only makes sense for conditionals with exactly two
+This refactoring makes sense only for conditionals with exactly two
 branches. In a language such as Java, which also has single-branch
 @racket[if] statements, the tool would distinguish these cases to
 determine where the refactoring applies.
