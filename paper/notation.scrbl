@@ -19,12 +19,7 @@ tabular notation to MiniJava for specifying state machines via tables.
 
 @Figure-ref["2d-state-machine"] presents an example. The syntax is purely
 textual, relying on Racket's Unicode integration. A programmer produces the
-table outline with unicode characters. One of the primary difficulties with
-this style of tabular notation is editing it.  To support that DrRacket has
-special keybindings.@note{See
-@url{http://docs.racket-lang.org/drracket/Keyboard_Shortcuts.html#(idx._(gentag._219._(lib._scribblings/drracket/drracket..scrbl)))}
-for documentation.}
-
+table outline with Unicode characters.
 In the context of MiniJava, the table represents a two-dimensional grid of
 transitions. Our implementation understands it as an alternative notation
 for a class. This synthesized class implements the corresponding state
@@ -79,7 +74,9 @@ would dispatch on two scrutinees, one selecting a row, the other a column.
 
 @section{Usability}
 
-DrRacket provides special support for inputting and editing this tabular syntax. It is
+DrRacket provides special support for inputting and editing this tabular syntax.@note{See
+@url{http://docs.racket-lang.org/drracket/Keyboard_Shortcuts.html#(idx._(gentag._219._(lib._scribblings/drracket/drracket..scrbl)))}
+for documentation.} It is
 difficult to use outside of DrRacket.
 
 @section{Impact}
