@@ -13,20 +13,19 @@
 @title[#:tag "sec:minijava"]{MiniJava via Racket}
 
 The Racket language proper consists of a module-oriented, untyped
-functional language in the spirit of Lisp and Scheme plus the syntax system
-introduced in the preceding section. In contrast, MiniJava
-(@secref{sub:minijava}) is a simplistic class-based object-oriented
+functional language in the spirit of Lisp and Scheme. In contrast, MiniJava
+(@secref{sub:minijava}) is a class-based, object-oriented
 programming language in the spirit of Java. Using Racket's syntax system,
 it is nevertheless possible to create a realistic implementation of
 MiniJava with a relatively small effort---thanks to linguistic reuse.
-
-@figure-here["fig:mj-syntax" "A sample MiniJava program"]{
- @mj-simple-example}
 
 This section provides an overview of the MiniJava implementation
 (@secref{sub:overview}) followed by a presentation of the individual
 building blocks. Where necessary, the section also explains Racket features
 on a technical basis.
+
+@figure-here["fig:mj-syntax" "A sample MiniJava program"]{
+ @mj-simple-example}
 
 @; -----------------------------------------------------------------------------
 @section[#:tag "sub:minijava"]{MiniJava}
@@ -73,13 +72,13 @@ calls@~cite[classes-and-mixins]. The prefix variant of MiniJava is an
 untyped, parenthesized version of MiniJava.
 
 Once a MiniJava program has been elaborated into prefix form, the
-regular expansion process takes over. Step 3 indicates how parenthesize
+regular expansion process takes over. Step 3 indicates how parenthesized
 MiniJava programs are rewritten into plain @tt{#lang racket}
-constructs. This is articulated with a (relatively small) suite of
+constructs. This transformation is articulated with a (relatively small) suite of
 rewriting rules that map classes, method calls, and so on into functional
 Racket constructs. 
 
-As mentioned in the preceding section, the implementation of @tt{minijava}
+As mentioned in the preceding section, the implementation of @tt{mini-java}
 consists of a reader module, which implements steps 1 and 2, and a language
 module, which implements the syntactic translation of step 3. The former
 employs Racket's lexing and parsing libraries. While lexing and parsing
@@ -93,7 +92,7 @@ Finally, step 4 indicates that the existing Racket language elaborates the
 program into core Racket. The latter is known as @tt{#%kernel}. This step
 is well-established and does not deserve any attention. 
 
-In contrast, the integration of @tt{#lang minijava} with DrRacket deserves
+In contrast, the integration of @tt{#lang mini-java} with DrRacket deserves
 a thorough explanation (@secref{sub:drracket}). Essentially, the pipeline
 of @figure-ref{fig:mj-impl} preserves essential properties across the
 various transformations. In turn, DrRacket implements a protocol between
@@ -104,43 +103,47 @@ implement an ecosystem for a language such as MiniJava.
 @figure*["fig:typecheck-mod-beg" "Typechecking the abstract syntax tree"]{
  @typecheck-mod-beg}
 
-@section[#:tag "sub:lang"]{@tt{#lang minijava}: Parsing and Type Elaboration}
+@section[#:tag "sub:lang"]{@tt{#lang mini-java}: Parsing and Type Elaboration}
 
 Racket's @tt{#lang} reader mechanism wraps the entire content of a module
 (everything below the language specification) into a single syntactic
-object, called ``module begin.'' A language-implementation module may
-therefore export its own module-begin constructor and thus take over the
-interpretation of an entire module at once. The elaboration process uses
-the rewriting rule for a ``module begin'' to perform module-level
-computations. The result of the elaboration must defer to a ``module
-begin'' construction of some other language, usually the base language. 
+object, a @racket[#%module-begin] form. A language-implementation module may
+therefore export its own @racket[#%module-begin] macro and thus take over the
+interpretation of an entire module at once.  The result of a
+@racket[#%module-begin] expansion must be a @racket[#%module-begin] form
+in some other language, usually the base language. 
 
-@Figure-ref{fig:typecheck-mod-beg} shows how @tt{minijava} exploits this
+@Figure-ref{fig:typecheck-mod-beg} shows how @tt{mini-java} exploits this
 mechanism. The module defines a ``module begin''
-construct---@code{mj-module-begin}. Its export specification says that
-@racket[mj-module-begin] becomes the ``module begin'' wrapper for the
-@tt{minijava} language. The one from the underlying prefix MiniJava
-language remains hidden. 
+construct as @racket[mj-module-begin]. The module's export specification says that
+@racket[mj-module-begin] becomes the @racket[#%module-begin] form for the
+@tt{mini-java} language. The implementation of @racket[mj-module-begin]
+expands to a @racket[#%module-begin] that (through an import not shown
+in the future) implements a prefix (as opposed to infix) variant of MiniJava,
+but that @racket[#%module-begin] is hidden from a module that is implemented
+in the @tt{min-java} language.
 
-Our MiniJava @racket[#%module-begin] form proceeds in two steps. First, it
+Before expanding to an underlying @racket[#%module-begin] form, @racket[mj-module-begin]
 hands the list of class definitions (ASTs) to the auxiliary
 @racket[typecheck-program] function. This syntax-level function implements
-an ordinary recursive-descent type elaboration mechanism. The result is a
-prefix MiniJava program. Second, this result is wrapped into the
-imported ``module begin'' mechanism from the prefix MiniJava
-implementation. This latter turns out to be Racket's ``module begin''
-mechanism, meaning the Racket elaborator takes over the 
+an ordinary recursive-descent type elaboration mechanism on a MiniJava variant
+using infix operations, and the result is a
+MiniJava program using prefix forms.
+
+The @racket[#%module-begin] for prefix MiniJava forms turns out to be Racket's usual
+@racket[#%module-begin] form, so Racket's usual elaboration takes over the 
 rest of the compilation pipeline. By linguistic reuse, MiniJava variables
 become Racket variables, MiniJava conditionals become Racket conditionals,
-and only forms without Racket pendant synthesize substantially new code. 
+and only forms without Racket precedents synthesize substantially new code. 
 
 @; -----------------------------------------------------------------------------
 @section[#:tag "macros"]{@tt{#lang minnijava}: Language Constructs}
 
-One such form is MiniJava's @tt{while} construct. A use of it appears on
+One form without a Racket precedent is MiniJava's @tt{while} construct.
+A use of the construct appears on
 line 7 in the left half of @figure-ref{expansion}. The corresponding code
-in the right column of the same figure shows the code that the Racket
-elaborator synthesizes. It uses the relatively simple rewriting rule from
+in the right column of the same figure shows the code that is synthesized
+by elaboration. Elaboration uses the relatively simple rewriting rule from
 @figure-ref{mj-while-macro} to affect this translation. 
 
 @(figure-here
@@ -148,9 +151,8 @@ elaborator synthesizes. It uses the relatively simple rewriting rule from
   "Definition of while in prefix MiniJava"
   @mj-while-macro)
 
-The implementation of MiniJava's @racket[while], in
-@figure-ref{mj-while-macro}, uses Racket's @racket[define-syntax] form to
-bind @racket[while] to a @emph{transformer function}. The latter implement
+The implementation of MiniJava's @racket[while] uses Racket's @racket[define-syntax] form to
+bind @racket[while] to a @emph{transformer function}. The latter implements
 the compilation step for @racket[while] loops; the definition informs
 the macro elaborator that whenever a @tt{while} AST node shows up, it must
 invoke the transformer on the node.
@@ -158,16 +160,16 @@ invoke the transformer on the node.
 The definition of  the @racket[while] transformer function uses
 @racket[syntax-parse], a powerful pattern matcher for defining syntactic
 extensions@~cite[fortifying-macros].  This macro contains a single pattern,
-@racketblock[(while test:expr body ...)], which indicates that it expects
-to see the literal @racket[while] followed by a @racket[test] expression
-and any number of @racket[body] elements. The constraint @racket[:test]
+@racketblock[(while test:expr body ...)] which indicates that it expects
+to see @racket[while] followed by a @racket[test] expression
+and any number of @racket[body] elements. The constraint @racket[:expr]
 forces @racket[test] to be an expression, while @racket[body] could be
-either a definition or an expression. If these constraints are violated
+either a definition or an expression. If the expression constraint is violated,
 @racket[syntax-parse] automatically synthesizes an error message in terms
 of source notation and source concepts. 
 
 The pattern matcher binds @racket[test] and @racket[body] for use within
-the code-generation template. Such a template is specified with @racket[#`⋯] or
+the code-generation template. Such a template is specified with  @racket[#`⋯] or
 @;
 @racketblock[(@#,racket[quasisyntax/loc] ⋯)]
 @; 
@@ -222,12 +224,12 @@ elaborates
 @;
 @racketblock[(new Parity)] 
 @; 
-(left-hand column) into 
+from the left-hand column into 
 @;
 @racketblock[(Parity:constructor)]
 @;
-a call to the constructor for the @racket[Purity] class (right-hand
-column). For this translation, the @racket[new] macro must identify the
+in the right-hand column, which is a call to the constructor for the @racket[Purity]
+class. For this translation, the @racket[new] macro must identify the
 constructor function for the @racket[Parity] class---and avoid all possible
 interference from other definitions.
 
@@ -235,17 +237,16 @@ interference from other definitions.
 @figure-here[ "mj-new" "The implementation of new in prefix MiniJava"]{
   @mj-new}
 
-Our implementation accomplishes with the seemingly simple, but rather
+Our implementation accomplishes this communication with the seemingly simple, but rather
 unusual syntax transformer of @figure-ref{mj-new}. At first glance, this
 definition looks just like the one for @racket[while] from
-@figure-ref{mj-while-macro}. The @racket[syntax-parse] specifies an input
-pattern that consists of the literal @tt{new} and an identifier that
+@figure-ref{mj-while-macro}. The @racket[syntax-parse] form specifies an input
+pattern that consists of @tt{new} and an identifier that
 specifies a class. The template constructs uses @racket[#:escape + [ ⋯] ]
 to construct an application, using brackets for emphasis instead of plain
-parentheses.@note{Racket uses @code{[ ... ]} and @code{( ... )}
+parentheses.@note{Racket uses @tt{[}...@tt{]} and @tt{(}...@tt{)}
 interchangeably.} A close look now reveals an unusual concept, however,
-specifically the 
-@racket[#:escape + #, ⋯] 
+specifically the @racket[#:escape + #,⋯]
 or
 @;
 @racketblock[(@#,racket[unsyntax] ⋯)]
@@ -302,9 +303,9 @@ explains the inner expression in the template of @racket[new] in
 identifier, and @racket[syntax-local-value] uses this identifier to
 retrieve the @racket[static-class-info] record.  Next, the function
 @racket[static-class-info-constructor-id] is simply a field accessor (which
-would be written as the @tt{.constructor_id} suffix in ugly-syntax
+would be written as the @tt{.constructor_id} suffix in infix-notation
 languages) that returns the value of the second-to-last field in the
-record. Here, this value is the syntax representation of the identifier
+record. In this case, the value is the syntax representation of the identifier
 @racket[#'Parity:constructor].
 
 A reader may question why the @racket[new] macro does not just synthesize

@@ -268,7 +268,8 @@ class StateMachineRunner {
     (cc-superimpose
      (pipeline-text txt)
      (rounded-rectangle w h)))
-(define (pipeline-text str) (text str "Times New Roman"))
+(define (pipeline-text str #:font [font "Times New Roman"])
+  (text str font))
 
 (define MJ
   (make-lang-box "MiniJava"))
@@ -297,7 +298,8 @@ class StateMachineRunner {
   (list "Lexing + Parsing"
         "Type Elaboration"
         "Macro Expansion"
-        "racket to #%kernel Expansion"))
+        (hbl-append (pipeline-text "Expansion to ")
+                    (pipeline-text "#%kernel" #:font (current-code-font)))))
 
 (define the-x 20)
 (define (find-bot pict find)
@@ -315,7 +317,9 @@ class StateMachineRunner {
     (define count (pipeline-text (~a (number->string i) ".   ")))
     (define count-width (pict-width count))
     (match-define (cons top bot) pair)
-    (define txt (pipeline-text explanation))
+    (define txt (if (pict? explanation)
+                    explanation
+                    (pipeline-text explanation)))
     (define adjustment (/ (- (pict-width txt) count-width) 2))
     (pin-arrow-line 5 diagram
                     top find-bot

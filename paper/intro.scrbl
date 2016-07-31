@@ -29,7 +29,7 @@ three elements from the 2016 language workbench challenge. First, we
 demonstrate a solution to the @emph{Tabular Notation}
 problem in the @emph{Editing} category by adding
 notation to MiniJava so that programmers can express finite-state machines
-as unicode-based tables (@secref{notation}). Second, we
+as Unicode-based tables (@secref{notation}). Second, we
 solve the @emph{Beyond-Grammar Restrictions} benchmark from the
 @emph{Evolution and Reuse} category
 by showing how to constrain a @racket[break]
