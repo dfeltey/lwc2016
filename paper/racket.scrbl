@@ -23,7 +23,7 @@ To support this language-development idiom, Racket fully embraces the
 idea of linguistic reuse@~cite[sk-dissertation]. According to this view,
 the development of a new language consists of adding, subtracting, and
 re-interpreting constructs and run-time facilities from a base language.
-Indeed, even the installation of a new language takes place within the
+Even the installation of a new language takes place within the
 Racket ecosystem. Basically a language is a Racket component that provides
 certain services; a module's language specification (the first line) simply
 points to a component that implements a language@~cite[you-want-it-when].
