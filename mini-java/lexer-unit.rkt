@@ -7,7 +7,7 @@
          "tokens.rkt"
          "lexer-sig.rkt"
          "parser-sig.rkt"
-         "readtable.rkt")
+         2d/readtable)
 
 (import parser^)
 (export lexer^)
@@ -132,13 +132,14 @@
    ;; Special form for handling 2d syntax pass parse function to handle box contents
    ("#2" (let-values ([(line col pos) (port-next-location input-port)]
                       [(src) (file-path)])
-           (token-2D (dispatch-proc #\2 input-port
-                                    src line col pos
-                                    (λ (input-port _1 _2)
-                                      (cond
-                                        [(eof-object? (peek-char input-port)) eof]
-                                        [else (parse input-port src 'box)]))
-                                    #f))))
+           (token-2D (2d-readtable-dispatch-proc
+                      #\2 input-port
+                      src line col pos
+                      (λ (input-port _1 _2)
+                        (cond
+                          [(eof-object? (peek-char input-port)) eof]
+                          [else (parse input-port src 'box)]))
+                      #f))))
    
    (Operator (let ((l lexeme))
                (cond

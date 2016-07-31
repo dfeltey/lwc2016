@@ -81,9 +81,8 @@ difficult to use outside of DrRacket.
 
 @section{Impact}
 
-In addition to the aforementioned changes to the lexer, our use of the 2d parser depends on one of
-its private API's, therefore we copy its implementation.  From there each phase is extended to
-recognize and pass along the state machine to Racket's macro expander and the macro
+In addition to the aforementioned changes to the lexer, each phase is extended to
+recognize and pass along the state machine and the macro
 @racket[2dstate-machine] is added to compile the state machines.
 
 @section{Composability}
