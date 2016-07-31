@@ -54,14 +54,14 @@ within or outside of the Racket ecosystem;}
 ]
 @;
 Racket strongly encourages this last approach, because it delivers results
-more quickly than the others without while remaining as general as any of the others.
+more quickly while remaining as general as any of the others.
 But, all of these approaches are useful in
 certain situations, and on occasion, as in the case of MiniJava, an
 implementation may borrow elements from several approaches.
 
 Deriving one language from another means creating a translation of new
 linguistic constructs into those of the base (or ``parent'') language and a
-run-time library. By transitivity, all other elements of the run-time
+run-time library. Such derivations inherit other elements of the run-time
 system (the VM, the JIT compiler, the garbage collector, etc.) are
 inherited from the primitive core of Racket. We consider the syntax
 translation the critical part of language derivation.

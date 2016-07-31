@@ -73,7 +73,7 @@ untyped, parenthesized version of MiniJava.
 
 Once a MiniJava program has been elaborated into prefix form, the
 regular expansion process takes over. Step 3 indicates how parenthesized
-MiniJava programs are rewritten into plain @tt{#lang racket}
+MiniJava programs are rewritten into plain @tt{#lang} @tt{racket}
 constructs. This transformation is articulated with a (relatively small) suite of
 rewriting rules that map classes, method calls, and so on into functional
 Racket constructs. 
@@ -144,7 +144,7 @@ A use of the construct appears on
 line 7 in the left half of @figure-ref{expansion}. The corresponding code
 in the right column of the same figure shows the code that is synthesized
 by elaboration. Elaboration uses the relatively simple rewriting rule from
-@figure-ref{mj-while-macro} to affect this translation. 
+@figure-ref{mj-while-macro} to effect this translation. 
 
 @(figure-here
   "mj-while-macro"
@@ -174,7 +174,7 @@ the code-generation template. Such a template is specified with  @racket[#`⋯] 
 @racketblock[(@#,racket[quasisyntax/loc] ⋯)]
 @; 
 This form resembles the @racket[quasiquote] form that Racket inherits from
-Lisp. They differ in that @racket[quasisuntax/loc] produces a syntax object
+Lisp. They differ in that @racket[quasisyntax/loc] produces a syntax object
 instead of an S-expression and that it supports automatic interpolation. With
 interpolation,  macro elaboration splices the substitution value for
 pattern variables into the template---indeed, this is what makes the
@@ -210,12 +210,12 @@ macro.
 
 Isolated macro definitions do not suffice to transform MiniJava into
 Racket. Consider a @racket[new] expression, which instantiates a class.
-The name of the class is not enough to create the object. For example, the
-construction of an object needs to know many slots to allocate for fields
+The name of the class is not enough to create the object. The
+construction of an object also needs to know many slots to allocate for fields
 and how to connect with the ``vtable,'' i.e., the method dispatch table of
 the class. In short, the Racket form that defines a MiniJava class much
 @emph{communicate} with the Racket form that elaborates a @racket[new]
-expression. Naturally, Racket comes with an effective communication
+expression. Racket builds on ordinary lexical scope to provide a communication
 channels for distinct macros for just this purpose@~cite[mtwt].
 
 To make this idea concrete, consider line 5 of
@@ -295,7 +295,7 @@ is no parent class); a table mapping method names to vector offsets; a
 syntax object referring to the run-time method table; a syntax object that
 points to the constructor; and a count of the fields in the class.
 
-Now that @racket[Parity] is compile-time bound to information, other macro
+Now that the variable @racket[Parity] is compile-time bound to information, other macro
 computations may retrieve this information. Technically, these macros must
 use the @racket[syntax-local-value] procedure for this purpose. And that
 explains the inner expression in the template of @racket[new] in
@@ -303,12 +303,12 @@ explains the inner expression in the template of @racket[new] in
 identifier, and @racket[syntax-local-value] uses this identifier to
 retrieve the @racket[static-class-info] record.  Next, the function
 @racket[static-class-info-constructor-id] is simply a field accessor (which
-would be written as the @tt{.constructor_id} suffix in infix-notation
+would be written as a ``@tt{.constructor_id}'' suffix in infix-notation
 languages) that returns the value of the second-to-last field in the
-record. In this case, the value is the syntax representation of the identifier
+record. In this case, the value is the identifier
 @racket[#'Parity:constructor].
 
-A reader may question why the @racket[new] macro does not just synthesize
+A reader may wonder why the @racket[new] macro does not just synthesize
 the name of the object constructor directly from the name of the given
 class. Doing so looks natural, but it may interfere with intermediate
 re-bindings of the class name. Splicing syntax objects into the syntax
