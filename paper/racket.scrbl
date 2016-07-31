@@ -14,28 +14,29 @@
 @title[#:tag "racket-lwc"]{The Racket Language Workbench}
 
 Racket promotes a language-oriented view of problem solving. To this end,
-it enables programmers to quickly build many different languages so that
-they can solve each aspect of a problem on its own linguistic
-terms. Indeed, the first line of every single module in a Racket
-application must specify its implementation language.
+it enables programmers to quickly build a language to solve
+each aspect of a programming problem on its own linguistic
+terms. The first line of every Racket module specifies its
+implementation language, and applications consist of modules that
+are implemented in any number of languages.
 
 To support this language-development idiom, Racket fully embraces the
 idea of linguistic reuse@~cite[sk-dissertation]. According to this view,
 the development of a new language consists of adding, subtracting, and
 re-interpreting constructs and run-time facilities from a base language.
 Even the installation of a new language takes place within the
-Racket ecosystem. Basically a language is a Racket component that provides
-certain services; a module's language specification (the first line) simply
-points to a component that implements a language@~cite[you-want-it-when].
+Racket ecosystem: a language is itself a Racket component that provides
+certain services, and each module's language specification (i.e., the initial @tt{#lang} line)
+simply refers to another module that implements the language@~cite[you-want-it-when].
 
-A plain Racket module that exports specific construct is the simplest
-language component. A sophisticated variant consists of modules that
+A language implementation can be as simple as a plain Racket module that
+exports a specific construct. A more sophisticated language variant consists of modules that
 implement a reader---a lexer and parser for any imaginable unicode-based
-notation---and a semantics module. In principle, both of these modules have
-complete control over the body of a client module. Conventions dictate a
-certain organization, however.
+notation---and a semantics module. By using specific tools and following
+certain conventions, programmers can produce languages that work well
+together.
 
-Hence, a programmer can implement a Racket language in several different ways: 
+More broadly, a programmer can implement a Racket language in several different ways:
 @;
 @itemlist[
 
@@ -61,7 +62,7 @@ implementation may borrow elements from several approaches.
 Deriving one language from another means creating a translation of new
 linguistic constructs into those of the base (or ``parent'') language and a
 run-time library. By transitivity, all other elements of the run-time
-system (the vm, the jit compiler, the garbage collector, etc.) are
+system (the VM, the JIT compiler, the garbage collector, etc.) are
 inherited from the primitive core of Racket. We consider the syntax
 translation the critical part of language derivation.
 
@@ -75,8 +76,8 @@ function in a module and exporting it under the name of a feature that
 already exists in the base language.
 
 A Racket programmer uses the @defterm{syntax object system} to create new
-linguistic constructs. From far enough away, this system is the
-great-grandson of Scheme and Lisp's hygienic macro system@~cite[lisp-macros
+linguistic constructs. This system is a
+descendent of Scheme and Lisp's hygienic macro system@~cite[lisp-macros
 hygienic-macros macros-that-work]. The system represents syntactic terms
 via syntax objects, which include properties of the source syntax as well
 as those specified by a language implementor
@@ -94,6 +95,4 @@ enforce context-free constraints so that error messages use the
 these rewriting rules can also articulate transformations on complete
 modules and on existing linguistic constructs---giving them the expressive
 power to track context-sensitive constraints and to assign new meaning to
-old words. The implementation of MiniJava illustrates all these ideas (and
-more) quite well, and it is time to switch from abstract explanations to
-concrete examples.
+old words.
