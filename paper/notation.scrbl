@@ -15,7 +15,12 @@ Adding notation to our implementation of MiniJava is quite
 straightforward. To illustrate this idea with a rather extreme example, we
 present here the result of tackling the problem of @emph{Tabular Notation}
 from the @emph{Notation} category. Specifically, we explain how to add
-tabular notation to MiniJava for specifying state machines via tables. 
+tabular notation to MiniJava for specifying state machines via tables.
+
+@(figure*
+  "2d-state-machine"
+  "Tabular Notation for State Machines"
+  @2d-state-machine)
 
 @Figure-ref["2d-state-machine"] presents an example state machine. The syntax is purely
 textual, relying on Racket's Unicode integration. A programmer produces the
@@ -43,11 +48,6 @@ of the state machine class. The @racket[StateMachineRunner] class is a
 textual class definition. It refers to the state machine by name and
 creates an instance. Following that, it sends this state machine four
 inputs via method calls. 
-
-@(figure*
-  "2d-state-machine"
-  "Tabular Notation for State Machines"
-  @2d-state-machine)
 
 @section{Assumptions}
 

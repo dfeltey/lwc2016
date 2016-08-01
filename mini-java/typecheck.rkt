@@ -148,7 +148,7 @@
     #:attr extend-types (append (attribute param-types) (attribute local-types))))
     
 (define-splicing-syntax-class param-group
-  (pattern (~seq ty:type-sc name:id)
+  (pattern (ty:type-sc name:id)
            #:attr type (attribute ty.type)))
 
 (define-syntax-class binop

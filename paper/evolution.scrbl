@@ -4,6 +4,12 @@
           scriblib/figure
           "bib.rkt"
           "mj-examples.rkt")
+
+@(figure*
+  "break-impl"
+  "The break syntax parameter and its use in while"
+  break-impl)
+
 @(define (section title)
    (s:section #:tag (string-append "evolution:" title) title))
 @title[#:tag "evolution"]{Evolution and Reuse: Beyond-Grammar Restrictions}
@@ -18,10 +24,6 @@ implement MiniJava constructs, as syntax parameters interact with the expansion
 process.
 
 @section{Implementation}
-@(figure*
-  "break-impl"
-  "The break syntax parameter and its use in while"
-  break-impl)
 Syntax parameters are syntax bindings whose expansion can be controlled by
 macros in their context.
 Specifically, macros (such as @racket[while]) may adjust the meaning of syntax

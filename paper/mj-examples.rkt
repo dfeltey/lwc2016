@@ -73,9 +73,9 @@
                   "12345"
                   "123  ")))
 
-(define-runtime-path even-odd-prefix.rkt "../mini-java/even-odd-prefix.rkt")
-(define-runtime-path expanded-even-odd.rkt "../mini-java/expanded-even-odd.rkt")
-(define-runtime-path even-odd.rkt "../mini-java/even-odd.rkt")
+(define-runtime-path even-odd-prefix.rkt "../examples/even-odd/even-odd-prefix.rkt")
+(define-runtime-path expanded-even-odd.rkt "../examples/even-odd/expanded-even-odd.rkt")
+(define-runtime-path even-odd.rkt "../examples/even-odd/even-odd.rkt")
 (define mj-simple-example
   (codeblock-pict
    (port->string (open-input-file even-odd.rkt))))
@@ -90,8 +90,8 @@
 
 (define expansion-figure
   (program->figure* (list even-odd-prefix.rkt expanded-even-odd.rkt)
-                    #:first-line 10
-                    #:last-line 72))
+                    #:first-line 13
+                    #:last-line 75))
 
 (define (extract file [name ""] #:lang [lang "racket"] #:prefix-lang? [prefix? #t]
                  #:line-prefix [line-prefix ""])

@@ -1,5 +1,8 @@
 #lang s-exp mini-java/prefix-mini-java
 
+(module* main #f
+  (main-method))
+
 (define (main-method)
   (displayln
    (let* ([receiver-val (Runner:constructor)]

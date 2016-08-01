@@ -2,10 +2,10 @@
 
 (require rackunit
          racket
-         "lexer-sig.rkt"
-         "parser-sig.rkt"
-         "lexer-unit.rkt"
-         "parser-unit.rkt"
+         "../mini-java/lexer-sig.rkt"
+         "../mini-java/parser-sig.rkt"
+         "../mini-java/lexer-unit.rkt"
+         "../mini-java/parser-unit.rkt"
          syntax-color/lexer-contract)
 
 (define-compound-unit/infer lexer+parser@

@@ -158,7 +158,7 @@
 
     (MethodDeclarator
      [(Identifier O_PAREN FormalParameterList C_PAREN)
-      `(,$1 ,@(reverse $3))]
+      `(,$1 ,(reverse $3))]
      [(Identifier O_PAREN C_PAREN)
       `(,$1 ())])
     

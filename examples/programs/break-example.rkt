@@ -3,13 +3,13 @@
 class Main {
   public static void main(String [] args) {
     {
-    System.out.println((new Even()).uses_break(13));
-    System.out.println((new Even()).uses_break(31));
+    System.out.println((new Breaker()).uses_break(13));
+    System.out.println((new Breaker()).uses_break(31));
     }
   }
 }
 
-class Even {          
+class Breaker {          
    public int uses_break(int n) {
    int count;
    count = 0;
