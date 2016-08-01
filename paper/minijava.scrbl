@@ -12,7 +12,7 @@
 
 @title[#:tag "sec:minijava"]{MiniJava via Racket}
 
-The Racket language proper consists of a module-oriented, untyped
+The Racket language proper consists of a module-oriented, dynamically typed@~cite[dynamic-typing]
 functional language in the spirit of Lisp and Scheme. In contrast, MiniJava
 (@secref{sub:minijava}) is a class-based, object-oriented
 programming language in the spirit of Java. Using Racket's syntax system,
@@ -32,14 +32,14 @@ on a technical basis.
 
 @Figure-ref{fig:mj-syntax} displays a MiniJava program. Like any Java
 program, it consists of a series of class definitions, one of them
-designated as the ``main'' class. Classes have public and private methods
-and fields. Each of the latter comes with type signatures, where types are
+designated as the ``main'' class. MiniJava classes have public methods
+and fields. Each of the latter comes with a type signature, where types are
 the names of classes plus the usual primitive types (e.g., @tt{int}). The
 body of a method may use the familiar statements of an imperative language:
 assignments, conditionals, and loops. MiniJava expressions are also the
 familiar ones.
 
-MiniJava lacks many of Java's sophisticated features: inheritance, abstract
+MiniJava lacks many of Java's sophisticated features: abstract
 classes, interfaces, packages, etc. The goal is to help students in
 introductory courses, not to model the complexities of a real-world
 language.
@@ -58,9 +58,6 @@ level into a language of the next lower level. In reality, the layers of
 this tower are not separated through sharp boundaries, and the intermediate
 programs may never exist in a pure form.
 
-@figure-here["fig:mj-impl" "Structure of the MiniJava implementation"]{
- @pipeline-diagram}
-
 @Figure-ref{fig:mj-impl} presents the overall pipeline of the MiniJava
 implementation in Racket. Step 1 turns the Java-like syntax into a syntax
 object, a combination of the symbolic source program and syntax properties;
@@ -70,6 +67,9 @@ manner. The choice of type elaboration over checking allows the injection
 of type annotations that help implement efficient method
 calls@~cite[classes-and-mixins]. The prefix variant of MiniJava is an
 untyped, parenthesized version of MiniJava.
+
+@figure-here["fig:mj-impl" "Structure of the MiniJava implementation"]{
+ @pipeline-diagram}
 
 Once a MiniJava program has been elaborated into prefix form, the
 regular expansion process takes over. Step 3 indicates how parenthesized
@@ -121,7 +121,7 @@ construct as @racket[mj-module-begin]. The module's export specification says th
 expands to a @racket[#%module-begin] that (through an import not shown
 in the future) implements a prefix (as opposed to infix) variant of MiniJava,
 but that @racket[#%module-begin] is hidden from a module that is implemented
-in the @tt{min-java} language.
+in the @tt{mini-java} language.
 
 Before expanding to an underlying @racket[#%module-begin] form, @racket[mj-module-begin]
 hands the list of class definitions (ASTs) to the auxiliary
@@ -131,19 +131,19 @@ using infix operations, and the result is a
 MiniJava program using prefix forms.
 
 The @racket[#%module-begin] for prefix MiniJava forms turns out to be Racket's usual
-@racket[#%module-begin] form, so Racket's usual elaboration takes over the 
+@racket[#%module-begin] form, so Racket's usual macro expansion takes over the
 rest of the compilation pipeline. By linguistic reuse, MiniJava variables
 become Racket variables, MiniJava conditionals become Racket conditionals,
 and only forms without Racket precedents synthesize substantially new code. 
 
 @; -----------------------------------------------------------------------------
-@section[#:tag "macros"]{@tt{#lang minnijava}: Language Constructs}
+@section[#:tag "macros"]{@tt{#lang mini-java}: Language Constructs}
 
-One form without a Racket precedent is MiniJava's @tt{while} construct.
+One form without a Racket precedent is MiniJava's @racket{while} construct.
 A use of the construct appears on
 line 7 in the left half of @figure-ref{expansion}. The corresponding code
 in the right column of the same figure shows the code that is synthesized
-by elaboration. Elaboration uses the relatively simple rewriting rule from
+by expansion. Racket's expander uses the relatively simple rewriting rule from
 @figure-ref{mj-while-macro} to effect this translation. 
 
 @(figure-here
@@ -154,7 +154,7 @@ by elaboration. Elaboration uses the relatively simple rewriting rule from
 The implementation of MiniJava's @racket[while] uses Racket's @racket[define-syntax] form to
 bind @racket[while] to a @emph{transformer function}. The latter implements
 the compilation step for @racket[while] loops; the definition informs
-the macro elaborator that whenever a @tt{while} AST node shows up, it must
+the macro expander that whenever a @tt{while} AST node shows up, it must
 invoke the transformer on the node.
 
 The definition of  the @racket[while] transformer function uses
@@ -176,7 +176,7 @@ the code-generation template. Such a template is specified with  @racket[#`⋯] 
 This form resembles the @racket[quasiquote] form that Racket inherits from
 Lisp. They differ in that @racket[quasisyntax/loc] produces a syntax object
 instead of an S-expression and that it supports automatic interpolation. With
-interpolation,  macro elaboration splices the substitution value for
+interpolation,  macro expansion splices the values of
 pattern variables into the template---indeed, this is what makes the
 expression a template. The @racket[/loc] part means that it also moves
 along source-location information. 
@@ -213,14 +213,14 @@ Racket. Consider a @racket[new] expression, which instantiates a class.
 The name of the class is not enough to create the object. The
 construction of an object also needs to know many slots to allocate for fields
 and how to connect with the ``vtable,'' i.e., the method dispatch table of
-the class. In short, the Racket form that defines a MiniJava class much
-@emph{communicate} with the Racket form that elaborates a @racket[new]
+the class. In short, the Racket form that defines a MiniJava class must
+@emph{communicate} with the Racket form that implements a @racket[new]
 expression. Racket builds on ordinary lexical scope to provide a communication
-channels for distinct macros for just this purpose@~cite[mtwt].
+channel for distinct macros for just this purpose@~cite[mtwt].
 
 To make this idea concrete, consider line 5 of
 @figure-ref{expansion}. It shows how our implementation of MiniJava
-elaborates 
+expands
 @;
 @racketblock[(new Parity)] 
 @; 
@@ -228,7 +228,7 @@ from the left-hand column into
 @;
 @racketblock[(Parity:constructor)]
 @;
-in the right-hand column, which is a call to the constructor for the @racket[Purity]
+in the right-hand column, which is a call to the constructor for the @racket[Parity]
 class. For this translation, the @racket[new] macro must identify the
 constructor function for the @racket[Parity] class---and avoid all possible
 interference from other definitions.
@@ -359,7 +359,6 @@ environment; see @figure-ref{tool-tips}. For example, programmers can see
 the type information via tool tips, and they can connect identifiers via
 arrows from bound to binding locations. 
 
-
 @; I THINK THIS IS TOO MUCH DETAIL: 
 
 @;{
@@ -367,8 +366,9 @@ arrows from bound to binding locations.
 shows.  DrRacket knows to look for @racket['mouse-over-tooltips] syntax
 properties in the expansion of programs, and uses their contents for its
 display.
+}
 
-Similarly, DrRacket's check syntax tool, which draws the binding arrows in @figure-ref{tool-tips},
+DrRacket's check syntax tool, which draws the binding arrows in @figure-ref{tool-tips},
 uses syntax properties to highlight variable bindings and uses that are present in a
 source program, but absent in its expansion.
 As a concrete example, because MiniJava class fields are compiled away into
@@ -380,7 +380,7 @@ and the reference to @racket[check] on line 9 compiles into the expression @rack
 on line 11 of the expanded program. Despite this, DrRacket uses the @racket['disappeared-binding] property
 to associate the definition and uses of @racket[check] in
 @figure-ref{tool-tips}.
-}
+
 
 @; @subsection{The Racket Language Workbench}
 @; The previous subsections highlight many features of Racket that make it suitable for use as a language workbench.

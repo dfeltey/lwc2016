@@ -25,7 +25,7 @@ workbench starting with (@secref{sec:minijava}) an implementation of
 MiniJava@~cite[mini-java].
 
 Based on the MiniJava implementation, we present the results of tackling
-three elements from the 2016 language workbench challenge. First, we
+three benchmark problems from the 2016 language workbench challenge. First, we
 demonstrate a solution to the @emph{Tabular Notation}
 problem in the @emph{Editing} category by adding
 notation to MiniJava so that programmers can express finite-state machines
@@ -36,5 +36,5 @@ by showing how to constrain a @racket[break]
 construct in MiniJava so that is is valid only within the scope of
 @racket[while] (@secref{evolution}). Third, we explain how to connect an
 implemented language, such as MiniJava, with DrRacket; specifically, we show
-how to add tools for program restructuring, consistent with the
+how to add tools for program @emph{Restructuring}, consistent with the
 @emph{Editing} benchmark category (@secref{editing}).

@@ -129,7 +129,7 @@
 
 (define-runtime-path property.rkt "../editing/property.rkt")
 (define refactor-impl
-  (codeblock-pict
+  (codeblock-pict #:keep-lang-line? #f
    (string-append
     "#lang racket\n"
     "\n"
@@ -140,7 +140,7 @@
     (extract prefix-mini-java.rkt 'refactor-if #:prefix-lang? #f))))
 
 (define break-impl
-  (codeblock-pict
+  (codeblock-pict #:keep-lang-line? #f
    (string-append
     (extract prefix-mini-java.rkt 'break-param)
     "\n\n"

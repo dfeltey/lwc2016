@@ -9,7 +9,7 @@
 @title[#:tag "editing"]{Editing: Restructuring}
 From the @emph{Editing} category we tackled the @emph{Restructuring} benchmark problem.
 Specifically, we built a refactoring tool for MiniJava which restructures @racket[if]
-statements by swapping the @emph{then} and @emph{else} branches and negating the condition. 
+statements by swapping the @emph{then} and @emph{else} branches and negating the @emph{condition}.
 
 @(figure*
   "refactor-use"
