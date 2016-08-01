@@ -12,7 +12,7 @@
 
 @title[#:tag "sec:minijava"]{MiniJava via Racket}
 
-The Racket language proper consists of a module-oriented, dynamically typed@~cite[dynamic-typing]
+The Racket language proper consists of a module-oriented, untyped
 functional language in the spirit of Lisp and Scheme. In contrast, MiniJava
 (@secref{sub:minijava}) is a class-based, object-oriented
 programming language in the spirit of Java. Using Racket's syntax system,
