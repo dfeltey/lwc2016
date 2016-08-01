@@ -7,10 +7,10 @@
 (define-runtime-path even-odd "../examples/even-odd/even-odd.rkt")
 (define-runtime-path prefix-even-odd "../examples/even-odd/even-odd-prefix.rkt")
 (define-runtime-path expanded-even-odd "../examples/even-odd/expanded-even-odd.rkt")
-(define even-odd-expected-res (file->string even-odd-expected))
-
 (define-runtime-path expected "expected")
 (define-runtime-path even-odd-expected "expected/even-odd.expected")
+(define even-odd-expected-res (file->string even-odd-expected))
+
 (define EXPECTED-SUFFIX ".expected")
 
 (define (check-file path)
