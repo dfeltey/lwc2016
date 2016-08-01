@@ -33,7 +33,7 @@ on a technical basis.
 @Figure-ref{fig:mj-syntax} displays a MiniJava program. Like any Java
 program, it consists of a series of class definitions, one of them
 designated as the ``main'' class. MiniJava classes have public methods
-and fields. Each of the latter comes with a type signature, where types are
+and fields. Each of these comes with a type signature, where types are
 the names of classes plus the usual primitive types (e.g., @tt{int}). The
 body of a method may use the familiar statements of an imperative language:
 assignments, conditionals, and loops. MiniJava expressions are also the
@@ -365,7 +365,7 @@ properties. In the example shown in @figure-ref{tool-tips},
 programmers can see the type information via tool tips (@tt{Parity} in this case),
 and they see binding information via arrows connecting identifiers.
 
-Some of the variables become Racket variables in the fully expanded
+Some MiniJava variables become Racket variables in the fully expanded
 program, e.g., the parameter @racket[n] of the @racket[run]
 method. Others, like @racket[check], are fields and are
 compiled into vector references.
@@ -374,13 +374,9 @@ explicitly: the definition of the @racket[check] field on
 line 2 is absent from the expanded program and the reference
 to @racket[check] on line 9 compiles into the expression 
 @racket[(vector-ref this 1)] on line 11 of the expanded
-program.
-
-To support such variables, MiniJava adds the 
-@racket['disappeared-binding] and @racket['disappeared-use]
-syntax properties to fields and DrRacket consults the property
-to associate the definition and uses of @racket[check], as shown in
-@figure-ref{tool-tips}.
+program. DrRacket's @emph{check syntax} tool nonetheless
+infers the correct binding structure for such variables
+and displays binding arrows accordingly, as @figure-ref{tool-tips} shows.
 
 
 @; @subsection{The Racket Language Workbench}

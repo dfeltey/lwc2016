@@ -90,8 +90,8 @@ The @code{2dstate-machine} form coexists with the solutions to the other benchma
 compose with syntactic extensions to statements. Future extensions using the same tabular notation
 can reuse the majority of the implementation.
 
-To compose with the @emph{check syntax} tool and enable reasoning about state name as bindings, the
-@racket[2dstate-machine] macro uses the @racket['disappeared-binding] syntax property.
+The @racket[2dstate-machine] macro cooperates with DrRacket's @emph{check syntax} tool to
+recognize state names as bindings.
 
 @section{Limitations}
 

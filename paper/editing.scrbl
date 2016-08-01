@@ -67,7 +67,7 @@ determine where the refactoring applies.
 
 @section{Uses and Examples}
 Several tools built on top of Racket and DrRacket use syntax properties to facilitate communication between tools and language implementations.
-Specific examples include Racket's check-syntax utility, Typed Racket's type tool-tips, and Racket's feature-specific profiler@~cite[fsp].
+Specific examples include DrRacket's @emph{check syntax} utility, Typed Racket's type tool-tips, and Racket's feature-specific profiler@~cite[fsp].
 
 @section{Effort}
 The implementation of the @racket[if] restructuring tool requires under 200 lines of code, including the small changes made to

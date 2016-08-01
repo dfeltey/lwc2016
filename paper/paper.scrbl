@@ -3,7 +3,13 @@
 @; =================================
 @; TODO:
 @;; Make sure to list the artifact
-@;; I'd much prefer @racket-lang.org 
+@;; I'd much prefer @racket-lang.org
+@;; test suite for artifact
+@;; Font in state machine figure
+@;; Cursor on binding arrow figure
+@;; codeblock-pict coloring on #lang line
+@;; add require/#lang to figure 3
+@;; window dressing for figure 10 (maybe?)
 @; =================================
 
 @(require pict/code
