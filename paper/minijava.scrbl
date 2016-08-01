@@ -340,45 +340,46 @@ makes explicit the execution time of a piece of code.
 @section[#:tag "sub:drracket"]{DrRacket Integration}
 
 Syntax bindings are but one of the communication mechanisms available to
-Racket macros. Syntax properties provide yet another one. Recall that
+Racket macros. Syntax properties provide another one. Recall that
 Racket's syntax objects are data structures that include symbolic
-representations of program fragments as well as additional @emph{syntax
-properties}.  Macros may attach additional key-value pairs to syntax
+representations of program fragments as well as additional syntax
+properties.  Macros may attach additional key-value pairs to syntax
 objects.  Just as syntax bindings allow communication between distinct
 macros, syntax properties open a communication channel between different
-@emph{processing passes}, including external tools@~cite[langs-as-libs].
+processing passes, including external tools@~cite[langs-as-libs].
 
 @; -----------------------------------------------------------------------------
 @figure-here[ "tool-tips" "MiniJava type tool-tips in DrRacket"]{
- @(scale (bitmap "type-tool-tips.png") .75)}
+ @(scale (bitmap "type-tool-tips.png") .6)}
 
-To illustrate the idea, our implementation of MiniJava uses syntax
-properties to attach type information in addition to source locations to
-syntax objects. These properties can be displayed by the DrRacket programming
-environment; see @figure-ref{tool-tips}. For example, programmers can see
-the type information via tool tips, and they can connect identifiers via
-arrows from bound to binding locations. 
 
-@; I THINK THIS IS TOO MUCH DETAIL: 
+DrRacket's check syntax tool exploits this information to provide a better user experience
+when editing source code. It draws arrows between binding and bound occurrences of
+variables and it renders information in tooltips. To get the binding information
+and tooltip information, it consults syntax properties, as well as just using the
+underlying lexical information in the fully expanded program.
 
-@;{
- to present mouse-over tool-tips, as @figure-ref{tool-tips}
-shows.  DrRacket knows to look for @racket['mouse-over-tooltips] syntax
-properties in the expansion of programs, and uses their contents for its
-display.
-}
+To illustrate the idea, our implementation of MiniJava
+attaches type information to syntax objects via syntax
+properties. In the example shown in @figure-ref{tool-tips},
+programmers can see the type information via tool tips (@tt{Parity} in this case),
+and they see binding information via arrows connecting identifiers.
 
-DrRacket's check syntax tool, which draws the binding arrows in @figure-ref{tool-tips},
-uses syntax properties to highlight variable bindings and uses that are present in a
-source program, but absent in its expansion.
-As a concrete example, because MiniJava class fields are compiled away into
-vector offsets (as opposed to Racket variables), a
-@racket['disappeared-binding] syntax property records the presence of field
-bindings in the source program. @Figure-ref{expansion} shows this explicitly,
-the definition of the @racket[check] field on line 2 is absent from the expanded program
-and the reference to @racket[check] on line 9 compiles into the expression @racket[(vector-ref this 1)]
-on line 11 of the expanded program. Despite this, DrRacket uses the @racket['disappeared-binding] property
-to associate the definition and uses of @racket[check] in
+Some of the variables become Racket variables in the fully expanded
+program, e.g., the parameter @racket[n] of the @racket[run]
+method. Others, like @racket[check], are fields and are
+compiled into vector references.
+@Figure-ref{expansion} shows this
+explicitly: the definition of the @racket[check] field on
+line 2 is absent from the expanded program and the reference
+to @racket[check] on line 9 compiles into the expression 
+@racket[(vector-ref this 1)] on line 11 of the expanded
+program.
+
+To support such variables, MiniJava adds the 
+@racket['disappeared-binding] and @racket['disappeared-use]
+syntax properties to fields and DrRacket consults the property
+to associate the definition and uses of @racket[check], as shown in
 @figure-ref{tool-tips}.
 
 
