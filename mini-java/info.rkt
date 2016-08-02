@@ -1,2 +1,2 @@
 #lang info
-(define name "mini-java")
+(define name "lwc2016-mini-java")
