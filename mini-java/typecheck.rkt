@@ -7,7 +7,7 @@
          syntax/id-table
          syntax/id-set
          racket/dict
-         unstable/error
+         "error.rkt"
          racket/syntax
          (for-template "prefix-mini-java.rkt")
          "state-machine-classes.rkt")
