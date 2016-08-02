@@ -39,7 +39,7 @@
   (check-equal? (run-file even-odd) even-odd-expected-res)
   (check-equal? (run-file prefix-even-odd) even-odd-expected-res)
   (check-equal? (run-file expanded-even-odd) even-odd-expected-res)
-  (for ([file (in-directory programs)]
+  (for ([file (in-directory programs file-exists?)]
         #:when (file-exists? file))
     (check-file file)))
   
