@@ -37,7 +37,7 @@
                      "Paul Steckler"
                      "Matthias Felleisen")
    #:location (journal-location "Journal of Functional Programming"
-                                #:pages '(159 182)
+                                ;; #:pages '(159 182)
                                 #:volume 12
                                 #:number 2)
    #:date 2002))
@@ -48,7 +48,7 @@
   (make-bib #:author "Eric Roberts"
             #:title "An Overview of MiniJava"
             #:location (proceedings-location "SIGCSE"
-                                             #:pages '(1 5)
+                                             ;; #:pages '(1 5)
                                              #:series 32)
             #:date 2001))
 
@@ -73,7 +73,8 @@
    #:title "Composable and Compilable Macros: You Want it When?"
    #:location (proceedings-location
                icfp
-               #:pages '(72 83))
+               ;; #:pages '(72 83)
+               )
    #:date 2002))
 
 (define mtwt
@@ -81,7 +82,7 @@
    #:title "Macros that Work Together: Compile-Time Bindings, Partial Expansion, and Definition Contexts"
    #:author (authors "Matthew Flatt" "Ryan Culpepper" "David Darais" "Robert Bruce Findler")
    #:location (journal-location "Journal of Functional Programming"
-                                #:pages '(181 216)
+                                ;; #:pages '(181 216)
                                 #:volume 22
                                 #:number 2)
    #:date 2012))
@@ -92,7 +93,8 @@
    #:title "Languages as Libraries"
    #:author (authors "Sam Tobin-Hochstadt" "Vincent St-Amour"
                      "Ryan Culpepper" "Matthew Flatt" "Matthias Felleisen")
-   #:location (proceedings-location pldi #:pages '(132 141))
+   #:location (proceedings-location pldi ;; #:pages '(132 141)
+                                    )
    #:date 2011))
 
 ;;  - Advanced macrology and impl ts
@@ -127,7 +129,8 @@
    #:author (authors "Ryan Culpepper" "Matthias Felleisen")
    #:location (proceedings-location
                icfp
-               #:pages '(235 246))
+               ;; #:pages '(235 246)
+               )
    #:date 2010))
 
 ;;  - scribble/ algol60/datalog docs
@@ -172,7 +175,8 @@
   (make-bib
    #:title "An Overview of Common LISP"
    #:author (author-name "Guy L." "Steele" #:suffix "Jr.")
-   #:location (proceedings-location lfp #:pages '(98 107))
+   #:location (proceedings-location lfp ;; #:pages '(98 107)
+                                    )
    #:date 1982))
 
 ;;  - Racket TR1
@@ -216,14 +220,16 @@
                               "Daniel P. Friedman"
                               "Matthias Felleisen"
                               "Bruce Duba")
-            #:location (proceedings-location lfp #:pages '(151 161))
+            #:location (proceedings-location lfp ;; #:pages '(151 161)
+                                             )
             #:date 1986))
 (define fsp
   (make-bib
    #:title "Feature-Specific Profiling"
    #:author (authors "Vincent St-Amour" "Leif Andersen" "Matthias Felleisen")
    #:location (proceedings-location "International Conference on Compiler Construction"
-                                     #:pages '(49 68))
+                                    ;; #:pages '(49 68)
+                                    )
    #:date 2015))
 
 (define syntactic-abstraction-in-scheme
