@@ -8,11 +8,11 @@
 (define Workshop "Wksp. ")
 (define Symposium "Sym. ")
 (define icfp
-  "Intl. Conference on Functional Programming")
+  (string-append "Intl. " Conference "on Functional Programming"))
 (define lfp "LISP and Functional Programming")
-(define pldi (string-append ACM Conference "Programming Language Design and Implementation"))
+(define pldi (string-append Conference "Programming Language Design and Implementation"))
 (define scheme-workshop (string-append Workshop "Scheme and Functional Programming"))
-(define popl (string-append ACM Symposium "Principles of Programming Languages"))
+(define popl (string-append Symposium "Principles of Programming Languages"))
 (define esop (string-append "European " Symposium "on Programming"))
 
 (define-cite ~cite citet generate-bibliography)
@@ -49,7 +49,7 @@
             #:title "An Overview of MiniJava"
             #:location (proceedings-location "SIGCSE"
                                              ;; #:pages '(1 5)
-                                             #:series 32)
+                                             )
             #:date 2001))
 
 ;;  - Racket manifesto
@@ -166,18 +166,20 @@
 (define readtables
   (make-bib
    #:title "MacLISP Reference Manual, Revision 0"
+   #:is-book? #t
    #:author "David Moon"
-   #:location "M.I.T. Project MAC"
+   #:location (book-location #:publisher "MIT Project MAC")
    #:date 1974
-   #:url "http://www.softwarepreservation.org/projects/LISP/MIT/Moon-MACLISP_Reference_Manual-Apr_08_1974.pdf"))
+   ;; #:url "http://www.softwarepreservation.org/projects/LISP/MIT/Moon-MACLISP_Reference_Manual-Apr_08_1974.pdf"
+   ))
 
 (define commonlisp
-  (make-bib
-   #:title "An Overview of Common LISP"
-   #:author (author-name "Guy L." "Steele" #:suffix "Jr.")
-   #:location (proceedings-location lfp ;; #:pages '(98 107)
-                                    )
-   #:date 1982))
+  (make-bib #:title "Common Lisp: the language"
+                        #:is-book? #t
+                        #:author (author-name "Guy L." "Steele" #:suffix "Jr.")
+                        #:location (book-location #:publisher "Digital Press"
+                                                  #:edition "Second")
+                        #:date "1994"))
 
 ;;  - Racket TR1
 (define plt-tr1
@@ -202,7 +204,7 @@
   (make-bib #:author "Timothy P. Hart"
             #:title "MACRO Definitions for LISP"
             #:date 1963
-            #:location (techrpt-location #:institution "MIT" #:number "57")))
+            #:location (techrpt-location #:institution "MIT" #:number "AIM-057")))
 
 ;; redex book
 (define redex-book
