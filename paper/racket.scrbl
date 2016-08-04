@@ -62,7 +62,7 @@ implementation may borrow elements from several approaches.
 Deriving one language from another means creating a translation of new
 linguistic constructs into those of the base (or ``parent'') language and a
 run-time library. Such derivations inherit other elements of the run-time
-system (the VM, the JIT compiler, the garbage collector, etc.). We consider the syntax
+system (the VM, the JIT compiler, the garbage collector, etc.). We consider construct
 translation the critical part of language derivation.
 
 Technically, the derivation works as follows. A language module may export

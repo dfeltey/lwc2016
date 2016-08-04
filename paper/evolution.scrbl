@@ -35,7 +35,7 @@ a shadowing binding for it.
 @Figure-ref{break-impl} shows the definition of @racket[break], as well as an
 extended version of @racket[while] which cooperates with it.
 Originally, @racket[break] is bound to a transformer which always raises a
-syntax error, which statically rules out any use of @racket[break] outside of
+syntax error, which statically rules out uses of @racket[break] outside of
 @racket[while].
 The definition of @racket[while] adjusts the meaning of @racket[break] (using
 @racket[syntax-parameterize]) within its body to instead call an escape
@@ -47,8 +47,7 @@ The @racket[super] keyword, like @racket[break], is valid only in certain
 contexts---in methods of child classes, specifically.
 
 The current implementation always breaks the nearest enclosing loop, but @racket[break]
-could accept a (literal) number as a argument to allow breaking of nested loops from the
-inner loop.
+could accept a (literal) number as a argument to allow breaking of nested loops.
 
 @; Another possible variant is the implementation of named @racket[break] statements.
 @; This would require the addition of a macro to support labels and a way to jump from the expansion of a @racket[break]

@@ -118,10 +118,10 @@ mechanism. The module defines a ``module begin''
 construct as @racket[mj-module-begin]. The module's export specification says that
 @racket[mj-module-begin] becomes the @racket[#%module-begin] form for the
 @tt{mini-java} language. The implementation of @racket[mj-module-begin]
-expands to a @racket[#%module-begin] that (through an import not shown
-in the future) implements a prefix (as opposed to infix) variant of MiniJava,
+expands to a @racket[#%module-begin] that (through an import not shown in the
+figure) implements our prefix variant of MiniJava,
 but that @racket[#%module-begin] is hidden from a module that is implemented
-in the @tt{mini-java} language.
+in the surface @tt{mini-java} language, which instead sees @racket[mj-module-begin].
 
 Before expanding to an underlying @racket[#%module-begin] form, @racket[mj-module-begin]
 hands the list of class definitions (ASTs) to the auxiliary
@@ -139,7 +139,7 @@ and only forms without Racket precedents synthesize substantially new code.
 @; -----------------------------------------------------------------------------
 @section[#:tag "macros"]{@tt{#lang mini-java}: Language Constructs}
 
-One form without a Racket precedent is MiniJava's @racket{while} construct.
+One form without a Racket precedent is MiniJava's @racket[while] construct.
 A use of the construct appears on
 line 7 in the left half of @figure-ref{expansion}. The corresponding code
 in the right column of the same figure shows the code that is synthesized
@@ -154,7 +154,7 @@ by expansion. Racket's expander uses the relatively simple rewriting rule from
 The implementation of MiniJava's @racket[while] uses Racket's @racket[define-syntax] form to
 bind @racket[while] to a @emph{transformer function}. The latter implements
 the compilation step for @racket[while] loops; the definition informs
-the macro expander that whenever a @tt{while} AST node shows up, it must
+the macro expander that whenever a @racket[while] AST node shows up, it must
 invoke the transformer on the node.
 
 The definition of  the @racket[while] transformer function uses
@@ -353,7 +353,7 @@ processing passes, including external tools@~cite[langs-as-libs].
  @(scale (bitmap "type-tool-tips.png") .6)}
 
 
-DrRacket's check syntax tool exploits this information to provide a better user experience
+DrRacket's @emph{check syntax} tool exploits this information to provide a better user experience
 when editing source code. It draws arrows between binding and bound occurrences of
 variables and it renders information in tooltips. To get the binding information
 and tooltip information, it consults syntax properties, as well as just using the
@@ -363,7 +363,7 @@ To illustrate the idea, our implementation of MiniJava
 attaches type information to syntax objects via syntax
 properties. In the example shown in @figure-ref{tool-tips},
 programmers can see the type information via tool tips (@tt{Parity} in this case),
-and they see binding information via arrows connecting identifiers.
+and see binding information via arrows connecting identifiers.
 
 Some MiniJava variables become Racket variables in the fully expanded
 program, e.g., the parameter @racket[n] of the @racket[run]

@@ -36,9 +36,9 @@ We implement our tool as a plugin for DrRacket@~cite[drracket] which processes a
 These locations are where the refactoring may apply. When a user applies the refactoring, the tool rewrites the conditional within the editor's buffer.
 
 @section{Variants}
-A variant on this refactoring would be to transform between expressions that use @racket[&&] and @racket[||] by applying De Morgan's laws.
+A variant on this refactoring would be to transform between expressions that use @racket[&&] and @racket[||] using De Morgan's laws.
 
-In addition, it is worth noting that the implementation of our refactoring tool is not MiniJava specific.
+In addition, it is worth noting that the implementation of our refactoring tool is not MiniJava-specific.
 By parameterizing the refactoring rule over negation syntax, the tool generalizes across languages.
 To support the refactoring, a language simply needs to attach the relevant syntax property to its conditional form.
 As a proof of concept, we also extend Racket's @racket[if] in this fashion.

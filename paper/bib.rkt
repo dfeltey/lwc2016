@@ -171,7 +171,7 @@
 (define commonlisp
   (make-bib
    #:title "An Overview of Common LISP"
-   #:author "Guy L. Steele, Jr."
+   #:author (author-name "Guy L." "Steele" #:suffix "Jr.")
    #:location (proceedings-location lfp #:pages '(98 107))
    #:date 1982))
 
