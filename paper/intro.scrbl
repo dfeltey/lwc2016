@@ -41,9 +41,9 @@ implemented language, such as MiniJava, with DrRacket; specifically, we show
 how to add tools for program @emph{Restructuring}, consistent with the
 @emph{Editing} benchmark category (@secref{editing}).
 
-Our MiniJava implementation with all of the extensions is available as a Racket package@note{@url{http://pkgs.racket-lang.org}}.
-In the prerelease@note{@url{https://plt.eecs.northwestern.edu/snapshots/}} version
+Our MiniJava implementation with all of the extensions is available as a Racket package.@note{@url{http://pkgs.racket-lang.org}}
+Using the pre-release@note{@url{https://plt.eecs.northwestern.edu/snapshots/}} version
 of Racket, run @centered{@tt{raco pkg install lwc2016}} to install it.
 To view a selection of sample MiniJava programs and experiment with the language extensions,
-select the "Open Require Path…" option under the @tt{File} menu in DrRacket and type
+select the "Open Require Path…" entry under the "File" menu in DrRacket and type
 @tt{lwc2016/examples/programs/}.
