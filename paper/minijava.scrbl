@@ -134,7 +134,7 @@ The @racket[#%module-begin] for prefix MiniJava forms turns out to be Racket's u
 @racket[#%module-begin] form, so Racket's usual macro expansion takes over the
 rest of the compilation pipeline. By linguistic reuse, MiniJava variables
 become Racket variables, MiniJava conditionals become Racket conditionals,
-and only forms without Racket precedents synthesize substantially new code. 
+and only forms without Racket analogs synthesize substantially new code.
 
 @; -----------------------------------------------------------------------------
 @section[#:tag "macros"]{@tt{#lang mini-java}: Language Constructs}
@@ -211,7 +211,7 @@ macro.
 Isolated macro definitions do not suffice to transform MiniJava into
 Racket. Consider a @racket[new] expression, which instantiates a class.
 The name of the class is not enough to create the object. The
-construction of an object also needs to know many slots to allocate for fields
+construction of an object also needs to know how many slots to allocate for fields
 and how to connect with the ``vtable,'' i.e., the method dispatch table of
 the class. In short, the Racket form that defines a MiniJava class must
 @emph{communicate} with the Racket form that implements a @racket[new]
@@ -350,7 +350,7 @@ processing passes, including external tools@~cite[langs-as-libs].
 
 @; -----------------------------------------------------------------------------
 @figure-here[ "tool-tips" "MiniJava type tool-tips in DrRacket"]{
- @(scale (bitmap "type-tool-tips.png") .6)}
+ @(scale (bitmap "type-tool-tips-cursor.png") .6)}
 
 
 DrRacket's @emph{check syntax} tool exploits this information to provide a better user experience

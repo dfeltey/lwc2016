@@ -30,7 +30,7 @@ certain services, and each module's language specification (i.e., the initial @t
 simply refers to another module that implements the language@~cite[you-want-it-when].
 
 A language implementation can be as simple as a plain Racket module that
-exports a specific construct. A more sophisticated language variant consists of modules that
+exports specific constructs. A more sophisticated language variant consists of modules that
 implement a reader---a lexer and parser for any imaginable Unicode-based
 notation---and a semantics module. By using specific tools and following
 certain conventions, programmers can produce languages that work well

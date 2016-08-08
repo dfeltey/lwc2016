@@ -339,6 +339,7 @@ class StateMachineRunner {
 (define refactoring-pict
   (scale
    (hc-append
-    (bitmap "refactoring.png")
-    (bitmap "after-refactor.png"))
-   .6))
+    20
+    (bitmap "dr-refactoring-cursor.png")
+    (bitmap "dr-after-refactor.png"))
+   .5))

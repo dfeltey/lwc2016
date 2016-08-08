@@ -19,7 +19,7 @@ tabular notation to MiniJava for specifying state machines via tables.
 
 @(figure*
   "2d-state-machine"
-  "Tabular Notation for State Machines"
+  "Tabular notation for state machines"
   @2d-state-machine)
 
 @Figure-ref["2d-state-machine"] presents an example state machine. The syntax is purely
