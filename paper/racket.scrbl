@@ -16,11 +16,13 @@
 Racket promotes a language-oriented view of problem solving. To this end,
 it enables programmers to quickly build languages to solve
 each aspect of a programming problem on its own linguistic terms.
-Racket programmers may then combine modules implemented in any number of languages into larger applications.
-The first line of every Racket module specifies its
-implementation language. The Racket ecosystem then performs
-@emph{linguistic dispatch}, i.e., it sends the module's contents
-to its language's implementation.
+As such, Racket programs are composed of a number of modules, each implemented
+in the language that is most suited for the module's task.
+To represent this module--language mapping, the first line of each module
+specifies the language in which it is written.
+The Racket ecosystem relies on this mapping for @emph{linguistic dispatch},
+i.e., to invoke the appropriate language's implementation with the
+uninterpreted module as its input.
 
 To support this language-development idiom, Racket fully embraces the
 idea of @emph{linguistic reuse}@~cite[sk-dissertation]. According to this view,
