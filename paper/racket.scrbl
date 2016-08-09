@@ -13,16 +13,18 @@
 
 @title[#:tag "racket-lwc"]{The Racket Language Workbench}
 
-Racket promotes a language-oriented view of problem solving. To this end,
-it enables programmers to quickly build languages to solve
+Racket promotes a language-oriented view of problem solving.
+Using Racket, programmers can quickly build languages to solve
 each aspect of a programming problem on its own linguistic terms.
 As such, Racket programs are composed of a number of modules, each implemented
-in the language that is most suited for the module's task.
-To represent this module--language mapping, the first line of each module
+in the language that is best suited for the module's task.
+To represent this module→language mapping, the first line of each module
 specifies the language in which it is written.
-The Racket ecosystem relies on this mapping for @emph{linguistic dispatch},
-i.e., to invoke the appropriate language's implementation with the
-uninterpreted module as its input.
+The Racket ecosystem relies on this mapping for @emph{linguistic dispatch}:
+a mechanism by which a language publishes its
+implementation and linguistic meta-information---syntax coloring,
+indentation, static analysis, etc.---to
+tailor the user experience for programs written in that language.
 
 To support this language-development idiom, Racket fully embraces the
 idea of @emph{linguistic reuse}@~cite[sk-dissertation]. According to this view,
