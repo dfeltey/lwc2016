@@ -24,7 +24,7 @@ The Racket ecosystem relies on this mapping for @emph{linguistic dispatch}:
 a mechanism by which a language publishes its
 implementation and linguistic meta-information---syntax coloring,
 indentation, static analysis, etc.---to
-tailor the user experience for programs written in that language.
+customize execution and user experience for programs written in that language.
 
 To support this language-development idiom, Racket fully embraces the
 idea of @emph{linguistic reuse}@~cite[sk-dissertation]. According to this view,
