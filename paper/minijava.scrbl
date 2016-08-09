@@ -108,7 +108,7 @@ implement an ecosystem for a language such as MiniJava.
 Racket's @tt{#lang} reader mechanism wraps the entire content of a module
 (everything below the language specification) into a single syntactic
 object, a @racket[#%module-begin] form. A language-implementation module may
-therefore export its own @racket[#%module-begin] macro and thus take over the
+therefore opt in to linguistic dispatch by exporting its own @racket[#%module-begin] macro and thus take over the
 interpretation of an entire module at once.  The result of a
 @racket[#%module-begin] expansion must be a @racket[#%module-begin] form
 in some other language, usually the base language. 
