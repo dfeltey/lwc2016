@@ -32,7 +32,7 @@ on a technical basis.
 
 @Figure-ref{fig:mj-syntax} displays a MiniJava program. Like any Java
 program, it consists of a series of class definitions, one of them
-designated as the ``main'' class. MiniJava classes have public methods
+designated as the ``main'' class. Classes have public methods
 and fields. Each of these comes with a type signature, where types are
 the names of classes plus the usual primitive types (e.g., @tt{int}). The
 body of a method may use the familiar statements of an imperative language:
