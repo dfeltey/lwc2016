@@ -6,7 +6,7 @@
           "bib.rkt"
           "mj-examples.rkt"
           scriblib/figure
-          (only-in scribble/core style) scribble/latex-properties
+          (only-in scribble/core style element) scribble/latex-properties
           (only-in scribble/manual racket racketblock hash-lang)
           (only-in racket/format ~a))
 
@@ -28,3 +28,8 @@ guiding principle of generalizing language features---lexical scope,
 modules, etc.---and giving programmers full access to them---on equal
 footing with Racket's authors---led us to a powerful tool for building and
 extending languages@~cite[manifesto].
+
+@(define (raw-latex . args)
+  (element (style "relax" '(exact-chars))
+           args))
+@raw-latex{\newpage}
