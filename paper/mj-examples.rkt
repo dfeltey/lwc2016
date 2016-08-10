@@ -237,11 +237,9 @@ class StateMachineRunner {
   )
 
 (define 2d-state-machine
-  ;; very sad parameterize; Inconsolata appears not to have ╬ ╗ ╣ and friends
-  (parameterize ([current-code-font '(bold . modern)])
-    (codeblock-pict
-     #:keep-lang-line? #t
-     2d-state-machine-text)))
+  (codeblock-pict
+   #:keep-lang-line? #t
+   2d-state-machine-text))
 
 (define 2d-state-exped
    (code
