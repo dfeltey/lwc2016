@@ -12,6 +12,11 @@
 
 (define-runtime-path context-table.rkt "context-table.rkt")
 
+(define refactor-text<%>
+  (interface ()
+    refactor-callback
+    refactor-key-callback))
+
 (define tool@
   (unit (import drracket:tool^)
         (export drracket:tool-exports^)
@@ -20,7 +25,7 @@
         (define (phase2) (void))
 
         (define make-refactor-text%
-          (mixin (racket:text<%>) ()
+          (mixin (racket:text<%>) (refactor-text<%>)
             (inherit begin-edit-sequence end-edit-sequence
                      insert delete)
 
@@ -118,7 +123,8 @@
           (send keymap add-function
                 "swap if branches"
                 (λ (obj evt)
-                  (send obj refactor-key-callback)))
+                  (when (is-a? obj refactor-text<%>)
+                    (send obj refactor-key-callback))))
           (keymap:send-map-function-meta keymap "=" "swap if branches"))
 
         (keymap:add-to-right-button-menu/before
@@ -126,7 +132,7 @@
            (λ (menu editor event)
              (old menu editor event)
              (define-values (pos text) (send editor get-pos/text event))
-             (when (and pos (is-a? text text%))
+             (when (and pos (is-a? text refactor-text<%>))
                (send editor refactor-build-popup-menu menu pos text)))))
 
         (add-refactor-keybindings (drracket:rep:get-drs-bindings-keymap))
