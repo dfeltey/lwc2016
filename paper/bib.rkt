@@ -17,6 +17,14 @@
 
 (define-cite ~cite citet generate-bibliography)
 
+(define scherlis+scott
+  (make-bib
+   #:title "First Steps Towards Inferential Programming"
+   #:author (authors "William L. Scherlis" "Dana S. Scott")
+   #:location (techrpt-location #:institution "Carnegie Mellon University"
+                                #:number "CMU-CS-83-142")
+   #:date 1983))
+
 (define dynamic-typing
   (make-bib
    #:title "Dynamic Typing: Syntax and Proof Theory"
