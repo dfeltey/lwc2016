@@ -151,6 +151,11 @@ by expansion. Racket's expander uses the relatively simple rewriting rule from
   "Definition of while in prefix MiniJava"
   @mj-while-macro)
 
+@(figure*
+  "expansion"
+  "The Runner class in prefix-parenthesized MiniJava and its Racket expansion"
+  expansion-figure)
+
 The implementation of MiniJava's @racket[while] uses Racket's @racket[define-syntax] form to
 bind @racket[while] to a @emph{transformer function}. The latter implements
 the compilation step for @racket[while] loops; the definition informs
@@ -180,11 +185,6 @@ interpolation,  macro expansion splices the values of
 pattern variables into the template---indeed, this is what makes the
 expression a template. The @racket[/loc] part means that it also moves
 along source-location information. 
-
-@(figure*
-  "expansion"
-  "The Runner class in prefix-parenthesized MiniJava and its Racket expansion"
-  expansion-figure)
 
 @Figure-ref{expansion} shows the prefix version of the @racket[Runner] class from
 @figure-ref{fig:mj-syntax} and its expansion into Racket.
