@@ -46,7 +46,7 @@ One variant of this benchmark problem would be to add Java's @racket[super] keyw
 The @racket[super] keyword, like @racket[break], is valid only in certain
 contexts---in methods of child classes, specifically.
 
-The current implementation always breaks the nearest enclosing loop, but @racket[break]
+This MiniJava implementation always breaks the nearest enclosing loop, but @racket[break]
 could accept a (literal) number as a argument to allow breaking of nested loops.
 
 @; Another possible variant is the implementation of named @racket[break] statements.
