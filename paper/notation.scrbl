@@ -94,8 +94,7 @@ The @racket[2dstate-machine] macro cooperates with DrRacket's @emph{check syntax
 recognize state names as bindings.
 
 @section{Limitations}
-
-Convenient usage of the tabular notation is limited to DrRacket.
+Convenient usage of the 2d syntax is limited to DrRacket.
 
 Racket's 2d parser relies on
 @emph{read tables}@note{Racket's read tables descend from Common

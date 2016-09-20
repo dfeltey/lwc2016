@@ -75,7 +75,8 @@ This implementation would compose well with other instances of the @emph{Beyond-
 @section{Limitations}
 Implementing language restrictions using syntax parameters necessitates a language that compiles via a set of macros.
 An alternate implementation of MiniJava that directly produced fully-expanded Racket programs would not be able to
-use this strategy.
+use this strategy. Our use of syntax parameters relies on the nested shape of Racket's syntax.
+The @racket[syntax-parameterize] form only adjusts the meaning of forms nested inside of it.
 
 @section{Uses and Examples}
 Racket uses syntax parameters in many of its core libraries to restrict certain syntactic forms to specific contexts.
