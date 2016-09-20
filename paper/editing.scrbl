@@ -18,7 +18,7 @@ statements by swapping the @emph{then} and @emph{else} branches and negating the
 
 @section{Assumptions}
 We assume that we can modify the implementation of MiniJava to expose additional information
-about conditional statements. 
+about conditionals.
 
 @section{Implementation}
 @(figure
