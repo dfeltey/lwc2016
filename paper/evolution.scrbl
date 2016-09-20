@@ -80,7 +80,7 @@ The @racket[syntax-parameterize] form only adjusts the meaning of forms nested i
 
 @section{Uses and Examples}
 Racket uses syntax parameters in many of its core libraries to restrict certain syntactic forms to specific contexts.
-For example, Racket implements the @racket[this] keyword using syntax parameters to ensure that it is valid only within Racket's @racket[class] form.
+For example, Racket implements @racket[this] using syntax parameters to ensure that it is valid only within Racket's @racket[class] form.
 
 @section{Effort}
 Extending our implementation of MiniJava to support the @racket[break] keyword requires fewer than twenty lines of

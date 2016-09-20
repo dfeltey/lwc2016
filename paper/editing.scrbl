@@ -11,6 +11,11 @@ From the @emph{Editing} category we tackled the @emph{Restructuring} benchmark p
 Specifically, we built a refactoring tool for MiniJava which restructures @racket[if]
 statements by swapping the @emph{then} and @emph{else} branches and negating the @emph{condition}.
 
+@(figure
+  "refactor-prop"
+  "A syntax property for the refactoring tool"
+  refactor-impl)
+
 @(figure*
   "refactor-use"
   "Using the refactoring tool in DrRacket"
@@ -21,10 +26,6 @@ We assume that we can modify the implementation of MiniJava to expose additional
 about conditionals.
 
 @section{Implementation}
-@(figure
-  "refactor-prop"
-  "A syntax property for the refactoring tool"
-  refactor-impl)
 
 Our restructuring tool relies on source location information for conditionals, which it gets from our MiniJava implementation.
 To do this, we extended MiniJava's @racket[if] macro to attach a syntax property mapping
