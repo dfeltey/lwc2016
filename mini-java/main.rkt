@@ -32,6 +32,8 @@
   (define (get-info mode default get-default)
     (case mode
       [(color-lexer) (2d-lexer color-lexer)]
+      [(drracket:indentation)
+       (dynamic-require 'scribble/private/indentation 'determine-spaces)]
       [else (get-default mode default)]))
   
   (define (read-syntax name in) (parse in name 'program)))
