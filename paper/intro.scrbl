@@ -18,7 +18,7 @@ Racket really is a programming-language programming
 language@~cite[manifesto]. It provides both unique linguistic
 support@~cite[plt-tr1] for the rapid prototyping of languages as well as an
 ecosystem with unmatched elements@~cite[drracket]. As such, it is a first
-step toward the idea of a language workbench as originally imagined by Bill
+step toward the idea of a language workbench@~cite[evaluating-language-workbenches] as originally imagined by Bill
 Scherlis and Dana Scott in the early 1980s@~cite[scherlis+scott].
 
 After explaining the linguistic elements of language development in Racket

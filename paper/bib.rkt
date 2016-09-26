@@ -17,6 +17,36 @@
 
 (define-cite ~cite citet generate-bibliography)
 
+(define evaluating-language-workbenches
+  (make-bib
+   #:title "Evaluating and comparing language workbenches: Existing results and benchmarks for the future"
+   #:author (authors "Sebastian Erdweg"
+                     "Tijs van der Storm"
+                     "Markus Völter"
+                     "Laurence Tratt"
+                     "Remi Bosman"
+                     "William R. Cook"
+                     "Albert Gerritsen"
+                     "Angelo Hulshout"
+                     "Steven Kelly"
+                     "Alex Loh"
+                     "Gabriël Konat"
+                     "Pedro J. Molina"
+                     "Martin Palatnik"
+                     "Risto Pohjonen"
+                     "Eugen Schindler"
+                     "Klemens Schindler"
+                     "Riccardo Solmi"
+                     "Vlad Vergu"
+                     "Eelco Visser"
+                     "Kevin van der Vlist"
+                     "Guido Wachsmuth"
+                     "Jimi van der Woning")
+   #:location (journal-location "Computer Languages, Systems & Structures"
+                                #:pages '(24 47)
+                                #:volume 44)
+   #:date 2015))
+
 (define scherlis+scott
   (make-bib
    #:title "First Steps Towards Inferential Programming"
