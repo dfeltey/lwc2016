@@ -127,17 +127,64 @@
 #:skip-last? #t)
 
 (play-n
- (λ (n1)
-   (ppict-do
-    my-base-pict
-    #:go (coord .5 .5)
-    (cc-superimpose (scale the-cloud (add1 (* n1 3))) (fade-to-ghost (label "bindings") n1) racket-bindings)
-    #:go (coord .49 .1 'rc)
-    (fade-to-ghost (my-tt "#lang") n1)
-    #:go (coord .51 .1 'lc)
-    (fade-to-ghost (my-tt "racket") n1)
+ (λ (n1 n2)
+   (slide-picts/tags
+    (ppict-do
+     my-base-pict
+     #:go (coord .5 .5)
+     (cc-superimpose (scale the-cloud (add1 (* n1 3)))
+                     (fade-from-ghost (compiler #t) n2)
+                     (fade-to-ghost (label "bindings") n1)
+                     (ghost racket-bindings)
+                     )
+     #:go (coord .49 .1 'rc)
+     (fade-to-ghost (my-tt "#lang") n1)
+     #:go (coord .51 .1 'lc)
+     (fade-to-ghost (my-tt "racket") n1)
+     #:go (coord .5 .1)
+     (fade-from-ghost (titlet "An Open Compiler") n2)
+     )
+    racket-compiler-picts
+    racket-compiler-tags-starts
+    racket-compiler-tags-ends
+    n2))
+ #:skip-last? #t)
 
-   )))
+(play-n
+ (λ (n1)
+   (slide-picts/tags
+    (ppict-do
+     my-base-pict
+     #:go (coord .5 .5)
+     (scale the-cloud 4)
+     #:go (coord .5 .1)
+     (titlet "An Open Compiler")
+     #:go (coord .5 .5)
+     (fade-to-ghost (compiler #t #t) n1)
+     #:go (tile 2 1)
+     (cc-superimpose
+      (fade-from-ghost (file-icon 450 500 "bisque") n1)
+      (vl-append
+       30
+       (tg (ghost (compiler-define #t)) 'defl-e)
+       (tg (ghost (compiler-lambda #t)) 'laml-e)
+       (tg (ghost (compiler-app #t)) 'appl-e)
+       (tg (ghost (compiler-letrec #t)) 'letl-e)
+       (tg (ghost (compiler-if #t)) 'ifl-e)
+       (tg (ghost (compiler-or #t)) 'orl-e)))
+     (ghost (file-icon 450 500 "bisque")))
+    (list (compiler-define #f)
+          (compiler-lambda #f)
+          (compiler-app #f)
+          (compiler-letrec #f)
+          (compiler-if #f)
+          (compiler-or #f))
+    '(defl laml appl letl ifl orl)
+    '(defl-e laml-e appl-e letl-e ifl-e orl-e)
+    n1)))
+                              
+
+   
 
 
 

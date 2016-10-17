@@ -65,7 +65,7 @@
    #:go (coord .49 .1 'rc)
    (my-tt "#lang")))
 
-(define (make-code-pict lang str #:scale [s 1.75])
+(define (make-code-pict lang str #:scale [s 1.85])
     (define the-lang
       (if (string=? "" lang) "racket" lang))
     (scale
@@ -160,28 +160,28 @@
   (make-bindings-pict
    "racket"
    (list "#(1 2 3)" "(4 . < . 5)" "#hash()")
-   (list .5 .7 1)
+   (list .45 .7 1)
    (list 'ct 'cb 'rt)))
 
 (define typed-racket-readers
   (make-bindings-pict
    "typed/racket"
    (list "#{map @ String Integer}" "#{2 :: Integer}" "'(1 2)")
-   (list .5 .7 1)
+   (list .45 .7 1)
    (list 'ct 'cb 'rt)))
 
 (define scribble-readers
   (make-bindings-pict
    "scribble"
    (list "@section[#:tag \"mj\"]{MiniJava}" "@{Hello}" "@~cite[plt-tr1]")
-   (list .5 .7 1)
+   (list .45 .7 1)
    (list 'ct 'rb 'rt)))
 
 (define mj-readers
   (make-bindings-pict
    "mini-java"
    (list  "check.is_even(6)" "true || false" "class Main {...}")
-   (list .5 .7 1)
+   (list .45 .7 1)
    (list 'ct 'cb 'rt)
    ))
 
@@ -209,14 +209,55 @@
              [tag-to (in-list tags-to)])
     (slide-pict/tags base p tag-from tag-to n)))
 
+
+(define (tg p t) (tag-pict p t))
+
+(define (make-compiler-line . lst)
+  (apply hc-append (map make-compiler-clause lst)))
+
+(define (make-compiler-clause str)
+  (cond
+    [(pict? str) str]
+    [else (make-code-pict "" str)]))
+
+(define (make-tagged-ghost str [ghost? #t] [post-tag "-end"])
+  (define do-ghost (if ghost? ghost values))
+  (tag-pict (do-ghost (make-code-pict "" str)) (string->symbol (string-append str post-tag))))
+
+(define (compiler-define ghost-binding?)
+  (make-compiler-line "[(" (make-tagged-ghost "define" ghost-binding?) " x e)           «code»]"))
+(define (compiler-lambda ghost-binding?)
+  (make-compiler-line "[(" (make-tagged-ghost "lambda" ghost-binding?) " (x ...) e)     «code»]"))
+(define (compiler-app ghost-binding?)
+  (make-compiler-line "[(" (make-tagged-ghost "#%app" ghost-binding?) " a b ...)        «code»]"))
+(define (compiler-letrec ghost-binding?)
+  (make-compiler-line "[(" (make-tagged-ghost "letrec" ghost-binding?) " ([x e] ...) b) «code»]"))
+(define (compiler-if ghost-binding?)
+  (make-compiler-line "[(" (make-tagged-ghost "if" ghost-binding?) " test then else)    «code»]"))
+(define (compiler-or ghost-binding?)
+  (make-compiler-line "[(" (make-tagged-ghost "or" ghost-binding?) " e1 e2 ...)         «code»]"))
+
 ;; rough pict for open compiler slides
-#;
-(define compiler
-    (vl-append (make-code-pict "" "(define-syntax (compile stx)")
-             (make-code-pict "" "  (syntax-parse stx")
-             (make-code-pict "" "    [(letrec x ...)      «code»]")
-             (make-code-pict "" "    [(or x ...)          «code»]")
-             (make-code-pict "" "    [(if test then else) «code»]")
-             (make-code-pict "" "    [(define f ...)      «code»]")
-             (make-code-pict "" "    [(lambda ...)        «code»]")
-             (make-code-pict "" "    [(#%app f ...)       «code»]))")))
+(define (compiler ghost-binding? [ghost-line? #f])
+  (define do-ghost (if ghost-line? ghost values))
+  (vl-append (make-code-pict "" "(define-syntax (compile exp)")
+             (make-code-pict "" "  (syntax-parse exp")
+             (make-compiler-line "    " (tg (do-ghost (compiler-define ghost-binding?)) 'defl))
+             (make-compiler-line "    " (tg (do-ghost (compiler-lambda ghost-binding?)) 'laml))
+             (make-compiler-line "    " (tg (do-ghost (compiler-app ghost-binding?)) 'appl))
+             (make-compiler-line "    " (tg (do-ghost (compiler-letrec ghost-binding?)) 'letl))
+             (make-compiler-line "    " (tg (do-ghost (compiler-if ghost-binding?)) 'ifl))
+             (hc-append
+              (make-compiler-line "    " (tg (do-ghost (compiler-or ghost-binding?)) 'orl))
+              (make-code-pict "" "))"))))
+
+(define racket-compiler-picts
+  (map
+   (λ (str) (make-code-pict "" str))
+   (list "define" "lambda" "#%app" "letrec" "if" "or")))
+(define racket-compiler-tags-starts
+  (map string->symbol (list "define" "lambda" "#%app" "letrec" "if" "or")))
+(define racket-compiler-tags-ends
+  (map
+   (λ (str) (string->symbol (string-append str "-end")))
+   (list "define" "lambda" "#%app" "letrec" "if" "or")))
