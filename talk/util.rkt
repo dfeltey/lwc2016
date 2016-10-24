@@ -1,5 +1,5 @@
 #lang racket
-(require pict images/logos slideshow pict/code ppict)
+(require pict images/logos slideshow pict/code ppict racket/draw)
 (require (prefix-in : (only-in pict/code code)))
 
 (provide (all-defined-out))
@@ -10,6 +10,29 @@
 (define INNER-DIAMETER 340)
 (define INNER-RADIUS (/ INNER-DIAMETER 2))
 (define RATIO (/ INNER-DIAMETER WIDTH))
+
+(define (invert-color c)
+  (define orig (make-object color% c))
+  (define MAX 255)
+  (make-object color%
+    (- MAX (send orig red))
+    (- MAX (send orig green))
+    (- MAX (send orig blue))))
+
+(define-syntax-rule (invert-code-color p)
+  (let ()
+    (define (inv c) (invert-color c))
+    (parameterize ([current-id-color (inv (current-id-color))]
+                   [current-comment-color (inv (current-comment-color))]
+                   [current-base-color (inv (current-base-color))]
+                   [current-literal-color (inv (current-literal-color))]
+                   [current-keyword-color (inv (current-keyword-color))])
+      p)))
+       
+
+(define STARTING-SCALE 2.1) ;; was 2.25 ???
+(define CODE-STARTING-OPACITY .75)
+(define CODE-STARTING-SCALE .75) ;; OLD : (* .75 (/ 1.85 2))
 
 (define (my-t label)
   (text label (current-main-font) (* 2 (current-font-size))))
@@ -37,8 +60,8 @@
 (define my-base-pict
   (inset
    (colorize (filled-rectangle SLIDE-W SLIDE-H) "Ivory")
-   (- client-w SLIDE-W)
-   (- client-h SLIDE-H)))
+   (/ (- client-w SLIDE-W) 2)
+   (/ (- client-h SLIDE-H) 2)))
 
 (define CODE-SCALE 1.85)
 (define-syntax-rule (code . stx)
@@ -47,7 +70,7 @@
      (:code . stx)
      CODE-SCALE)))
 
-(define (make-code-pict lang str #:scale [s CODE-SCALE])
+(define (make-code-pict lang str #:scale [s STARTING-SCALE])
     (define the-lang
       (if (string=? "" lang) "racket" lang))
     (scale
@@ -117,63 +140,6 @@
      radii
      aligns))
 
-;; BINDINGS PICTS
-(define racket-bindings
-  (make-bindings-pict
-   "racket"
-   (list "letrec" "or" "if" "define" "lambda" "#%app")
-   (list 1 .9 .9 1 1 .9)
-   #:tag? #t))
-
-(define typed-racket-bindings
-  (make-bindings-pict
-   "typed/racket"
-   (list "require/typed" "ann" "All" "define-type" ":" "Listof")
-   (list 1 .9 .9 1 1 .9)))
-
-(define scribble-bindings
-  (make-bindings-pict
-   "scribble"
-   (list "secref" "title" "cite" "figure" "make-bib" "bold")
-   (list 1 .9 .9 1 1 .9)))
-
-;; using racket lexer because otherwise lexing looks weird
-(define mj-bindings
-  (make-bindings-pict
-   "racket"
-   (list "while" "||" "if" "define-class" "new" "send")
-   (list 1 .9 .9 1 1 .9)))
-
-;; READER PICTS
-(define racket-readers
-  (make-bindings-pict
-   "racket"
-   (list "#(1 2 3)" "(4 . < . 5)" "#hash()")
-   (list .45 .7 1)
-   (list 'ct 'cb 'rt)))
-
-(define typed-racket-readers
-  (make-bindings-pict
-   "typed/racket"
-   (list "#{map @ String Integer}" "#{2 :: Integer}" "'(1 2)")
-   (list .45 .7 1)
-   (list 'ct 'cb 'rt)))
-
-(define scribble-readers
-  (make-bindings-pict
-   "scribble"
-   (list "@section[#:tag \"mj\"]{MiniJava}" "@{Hello}" "@~cite[plt-tr1]")
-   (list .45 .7 1)
-   (list 'ct 'rb 'rt)))
-
-(define mj-readers
-  (make-bindings-pict
-   "mini-java"
-   (list  "check.is_even(6)" "true || false" "class Main {...}")
-   (list .45 .7 1)
-   (list 'ct 'cb 'rt)
-   ))
-
 (define (translate x1 x2 n)
   (+ x1 (* n (- x2 x1))))
 
@@ -212,30 +178,45 @@
 (define (make-compiler-clause str)
   (cond
     [(pict? str) str]
-    [else (make-code-pict "" str)]))
+    [else (make-code-pict "" str #:scale STARTING-SCALE)]))
 
 (define (make-tagged-ghost str [ghost? #t] #:tag-suffix [post-tag "-end"])
   (define do-ghost (if ghost? ghost values))
   (tag-pict (do-ghost (make-code-pict "" str)) (string->symbol (string-append str post-tag))))
 
+(define (make-compiler-element binding extra ghost-binding? #:tag-suffix [tag-suffix "-end"])
+  (define do-ghost (if ghost-binding? ghost values))
+  (make-compiler-line
+   "[("
+   (tg (do-ghost (make-code-pict "" binding #:scale STARTING-SCALE)) (string->symbol (string-append binding tag-suffix)))
+   extra
+   (tg (do-ghost (make-code-pict "" "«code»" #:scale STARTING-SCALE)) (string->symbol (string-append binding "-code" tag-suffix)))
+   "]"))
+
 (define (compiler-define ghost-binding?)
-  (make-compiler-line "[(" (make-tagged-ghost "define" ghost-binding?) " x e)           «code»]"))
+  (make-compiler-element "define" " x e)        " ghost-binding?) 
+  #;(make-compiler-line "[(" (make-tagged-ghost "define" ghost-binding?) " x e)            ""«code»]"))
 (define (compiler-lambda ghost-binding?)
-  (make-compiler-line "[(" (make-tagged-ghost "lambda" ghost-binding?) " (x ...) e)     «code»]"))
+  (make-compiler-element "lambda" " (x ...) e)  " ghost-binding?)
+  #;(make-compiler-line "[(" (make-tagged-ghost "lambda" ghost-binding?) " (x ...) e)      ""«code»]"))
 (define (compiler-app ghost-binding?)
-  (make-compiler-line "[(" (make-tagged-ghost "#%app" ghost-binding?) " a b ...)        «code»]"))
+  (make-compiler-element "#%app" " a b ...)     " ghost-binding?)
+  #;(make-compiler-line "[(" (make-tagged-ghost "#%app" ghost-binding?) " a b ...)         ""«code»]"))
 (define (compiler-letrec ghost-binding?)
-  (make-compiler-line "[(" (make-tagged-ghost "letrec" ghost-binding?) " ([x e] ...) b) «code»]"))
+  (make-compiler-element "letrec" " ([x e]) b)  " ghost-binding?)
+  #;(make-compiler-line "[(" (make-tagged-ghost "letrec" ghost-binding?) " ([x e] ...) b)  ""«code»]"))
 (define (compiler-if ghost-binding?)
-  (make-compiler-line "[(" (make-tagged-ghost "if" ghost-binding?) " test then else)    «code»]"))
+  (make-compiler-element "if" " test then else) " ghost-binding?)
+  #;(make-compiler-line "[(" (make-tagged-ghost "if" ghost-binding?) " test then else)     ""«code»]"))
 (define (compiler-or ghost-binding?)
-  (make-compiler-line "[(" (make-tagged-ghost "or" ghost-binding?) " e1 e2 ...)         «code»]"))
+  (make-compiler-element "or" " e1 e2 ...)      " ghost-binding?)
+  #;(make-compiler-line "[(" (make-tagged-ghost "or" ghost-binding?) " e1 e2 ...)          ""«code»]"))
 
 ;; rough pict for open compiler slides
 (define (compiler ghost-binding? [ghost-line? #f])
   (define do-ghost (if ghost-line? ghost values))
-  (vl-append (make-code-pict "" "(define-syntax (compile exp)")
-             (make-code-pict "" "  (syntax-parse exp")
+  (vl-append (make-code-pict "" "(define-syntax (compile exp)" #:scale STARTING-SCALE)
+             (make-code-pict "" "  (syntax-parse exp" #:scale STARTING-SCALE)
              (make-compiler-line "    " (tg (do-ghost (compiler-define ghost-binding?)) 'defl))
              (make-compiler-line "    " (tg (do-ghost (compiler-lambda ghost-binding?)) 'laml))
              (make-compiler-line "    " (tg (do-ghost (compiler-app ghost-binding?)) 'appl))
@@ -261,13 +242,40 @@
     (make-code-pict "" str)))
 
 (define (compiler-define-class ghost-binding?)
-  (make-compiler-line "[(" (make-tagged-ghost "define-class" ghost-binding? #:tag-suffix "mj") " c b ...) «code»]"))
+  (invert-code-color
+   (make-compiler-element "class"" c b ...)     " ghost-binding? #:tag-suffix "mj"))
+  #;(make-compiler-line "[(" (make-tagged-ghost "define-class" ghost-binding? #:tag-suffix "mj") " c b ...) «code»]"))
 (define (compiler-new ghost-binding?)
-  (make-compiler-line "[(" (make-tagged-ghost "new" ghost-binding? #:tag-suffix "mj") " c)                «code»]"))
+  (invert-code-color
+   (make-compiler-element "new"" c)             " ghost-binding? #:tag-suffix "mj"))
+  #;(make-compiler-line "[(" (make-tagged-ghost "new" ghost-binding? #:tag-suffix "mj") " c)                «code»]"))
 (define (compiler-send ghost-binding?)
-  (make-compiler-line "[(" (make-tagged-ghost "send" ghost-binding? #:tag-suffix "mj") " o m a ...)       «code»]"))
-(define (compiler-while ghost-binding?)
-  (make-compiler-line "[(" (make-tagged-ghost "while" ghost-binding? #:tag-suffix "mj") " test body ...)  «code»]"))
+  (invert-code-color
+   (make-compiler-element "send"" o m a ...)    " ghost-binding? #:tag-suffix "mj"))
+  #;(make-compiler-line "[(" (make-tagged-ghost "send" ghost-binding? #:tag-suffix "mj") " o m a ...)       «code»]"))
+;(backdrop (invert-code-color (make-racket-pict "||")) #:color (invert-color "Bisque"))
+(define (bd p) (backdrop p #:color "Bisque"))
+
+(define (compiler-while ghost-binding? [n 0])
+  (define p1
+    (invert-code-color
+     (make-compiler-element "while"" tst exp ...) " ghost-binding? #:tag-suffix "mj")))
+  (define p2
+    (vc-append
+              (invert-code-color (make-compiler-line "[(while tst exp ...)        "))
+              (bd (make-compiler-line "  #'(letrec ([loop           "))
+              (bd (make-compiler-line "              (λ ()          "))
+              (bd (make-compiler-line "                (when tst    "))
+              (bd (make-compiler-line "                  exp ...    "))
+              (bd(make-compiler-line "                  (loop)))]) "))
+              (hc-append (bd (make-compiler-line "      (loop))")) (invert-code-color (make-racket-pict "]               ")))))
+  (refocus
+   (fade-pict n
+              (ct-superimpose p1 (ghost p2))
+              (ct-superimpose (ghost p1) p2)
+              #:combine ct-superimpose)
+   p1))
+#;(make-compiler-line "[(" (make-tagged-ghost "while" ghost-binding? #:tag-suffix "mj") " test body ...)  «code»]")
 (define (compiler-if-mj ghost-binding?)
   (make-compiler-line "[(" (make-tagged-ghost "if" ghost-binding? #:tag-suffix "mj") " test then else)    «code»]"))
 (define (compiler-or-mj ghost-binding?)
@@ -279,26 +287,31 @@
   (make-compiler-line "[("
                       (fade-pict n
                                  (make-racket-pict "or")
-                                 (backdrop (make-racket-pict "||") #:color "Lavender"))
+                                 (backdrop (invert-code-color (make-racket-pict "||")) #:color (invert-color "Bisque")))
                       " e1 e2 ...)"
-                      "         «code»]"))
+                      "      «code»]"))
 
 (define (pin-over* base dx dy picts)
   (for/fold ([base base])
             ([pict (in-list picts)])
     (pin-over base dx dy pict)))
 
+;(define (ins p) (inset p 0 50))
+
 (define mj-compiler
   (pin-over*
-   (vl-append
+   (vc-append
     50
-    (ghost (make-code-pict "" ""))
+    (ghost (compiler-define-class #f))
     (tg (ghost (compiler-define-class #f)) 'mj-def-class-e)
     (tg (ghost (compiler-send #f)) 'mj-send-e)
     (tg (ghost (compiler-new #f)) 'mj-new-e)
     (tg (ghost (compiler-while #f)) 'mj-while-e)
+    (tg (ghost (compiler-send #f)) 'mj-send-e2)
+    (tg (ghost (compiler-new #f)) 'mj-new-e2)
     (tg (ghost (compiler-if-mj #f)) 'mj-if-e)
-    (tg (ghost (compiler-or-mj #f)) 'mj-or-e))
+    (tg (ghost (compiler-or-mj #f)) 'mj-or-e)
+    (ghost (compiler-define-class #f)))
    0
    -200 ; FIXME: what's the right number here???
    (list (tg (ghost (compiler-define-class #f)) 'mj-def-class-s)
@@ -307,11 +320,11 @@
          (tg (ghost (compiler-while #f)) 'mj-while-s))))
 
 
-(define (word-cloud label picts)
+(define (word-cloud label picts #:base-pict [base-pict the-cloud])
   (define label-pict (if (pict? label) label (my-t label)))
   (match-define (list p1 p2 p3 p4 p5 p6) picts)
   (ppict-do
-   the-cloud
+   base-pict
    #:go (coord .5 .33) label-pict
    #:go (coord .5 .17)
    (ppict-do
@@ -348,12 +361,12 @@
 
 (define (transformer-cloud . times)
   (word-cloud-transition
-    (fade-from-ghost (label "transformer") (first times))
+    (fade-from-ghost (label "transformers") (first times))
     (list "racket" "typed/racket" "scribble" "racket" "racket")
     (list (list "letrec" "or" "if" "define" "lambda" "#%app")
           (list "All" ":" "ann" "define-type" "require/typed" "Listof")
           (list "defproc" "examples" "authors" "define-cite" "include-section" "code")
-          (list "while" "||" "if" "define-class" "send" "new")
+          (list "while" "||" "if" "class" "send" "new")
           (list "letrec" "or" "if" "define" "lambda" "#%app"))
     (rest times)))
 
@@ -382,10 +395,8 @@
 (define (transpose lst) (apply map list lst))
 
 (define (word-cloud-transition label langs wordss #:reader? [reader? #f] times)
-  (define SCALE 2.25)
   (define ALIGNERS (list cc-superimpose lc-superimpose rc-superimpose lc-superimpose rt-superimpose cb-superimpose))
   (define prepare-pict (if reader? values make-code-map-pict))
-  (define base (ppict-do the-cloud #:go (coord .5 .33) label))
   (define picts
     (for/list ([words (in-list (transpose wordss))]
                [aligner (in-list ALIGNERS)])
@@ -393,7 +404,7 @@
        (fold-fade/align
         (for/list ([lang (in-list langs)]
                    [word (in-list words)])
-          (prepare-pict (make-code-pict lang word #:scale SCALE)))
+          (prepare-pict (make-code-pict lang word #:scale STARTING-SCALE)))
         aligner
         (rest times))
        (first times))))
@@ -405,6 +416,112 @@
 
 
 
-             
+(define (opening-transformer n1 n2)
+  (define words (list "letrec" "or" "if" "define" "lambda" "#%app"))
+  (define (prepare-pict word)
+    (fade-to-ghost
+     (hc-append (make-racket-pict "⟨")
+                (tg (ghost (make-racket-pict word)) (string->symbol (string-append word "-start")))
+                (make-racket-pict " ↦ ")
+                (tg (ghost (scale (cellophane CODE-BLOB-PICT CODE-STARTING-OPACITY) CODE-STARTING-SCALE)) (string->symbol (string-append word "-code-start")))
+                (make-racket-pict "⟩"))
+     n2))
+  (define picts (map prepare-pict words))
+  (word-cloud
+   (fade-to-ghost (my-t "transformers") n1)
+   picts
+   #:base-pict (ghost the-cloud)))
+
+(define (transformer-to-compiler n1 n2 n3)
+  (cc-superimpose
+   (scale the-cloud (translate 1 4 n1))
+   (opening-transformer n1 n2)
+   (fade-from-ghost (compiler #t) n3)))
+
+#;
+(define (compiler2 ghost-binding? [ghost-line? #f])
+  (define (code-pict str) (make-code-pict "racket" str #:scale STARTING-SCALE))
+  (define do-ghost (if ghost-line? ghost values))
+  (vl-append (code-pict "(define-syntax (compile exp)")
+             (code-pict "  (syntax-parse exp")
+             (make-compiler-line "    " (tg (do-ghost (compiler-define ghost-binding?)) 'defl))
+             (make-compiler-line "    " (tg (do-ghost (compiler-lambda ghost-binding?)) 'laml))
+             (make-compiler-line "    " (tg (do-ghost (compiler-app ghost-binding?)) 'appl))
+             (make-compiler-line "    " (tg (do-ghost (compiler-letrec ghost-binding?)) 'letl))
+             (make-compiler-line "    " (tg (do-ghost (compiler-if ghost-binding?)) 'ifl))
+             (hc-append
+              (make-compiler-line "    " (tg (do-ghost (compiler-or ghost-binding?)) 'orl))
+              (code-pict "))"))))
+
+
+(define (pins base picts tags)
+  (for/fold ([base base])
+            ([tag (in-list tags)]
+             [pict (in-list picts)])
+    (define path (find-tag base tag))
+    (define-values (x y) (cc-find base path))
+    (pin-over/align base x y 'c 'c pict)))
+
+(define (buffer-x p) (+ 10 (pict-width p)))
+(define (buffer-y p) (+ 3 (pict-height p)))
+(define (wrap p)
+  (cellophane
+   (ellipse (buffer-x p) (buffer-y p) #:border-width 10 #:border-color "red")
+   .75))
+
+
+
+(define lang-line
+  (tg (scale (codeblock-pict "#lang racket/base" #:keep-lang-line? #t) STARTING-SCALE) 'lang))
+
+  
+(define require-block
+  (tg (vl-append (make-racket-pict "(require (for-syntax syntax/parse")
+               (make-racket-pict "                     racket/base)")
+               (make-racket-pict "         racket/bool)")
+               (make-racket-pict ""))
+    'require))
+
+
+
+(define provide-block
+  (tg (vl-append (make-racket-pict "(provide (all-defined-out)")
+               (make-racket-pict "         true false < + - *")
+               (make-racket-pict "         (rename-out [displayln     System.out.println]")
+               (make-racket-pict "                     [set!          =]")
+               (make-racket-pict "                     [eqv?          ==]")
+               (make-racket-pict "                     [vector-set!   array=]")
+               (make-racket-pict "                     [and           &&]")
+               (make-racket-pict "                     [vector-ref    index]")
+               (make-racket-pict "                     [vector-length length]")
+               (make-racket-pict "                     [not           !]")
+               (make-racket-pict "                     [modulo        %]")
+               (make-racket-pict "                     [make-vector   new-int-array]))"))
+    'provide))
+(define while-block
+  (tg (vl-append (make-racket-pict "(define-syntax (while stx)")
+               (make-racket-pict "  (syntax-parse stx")
+               (make-racket-pict "    [(while test:expr body ...)")
+               (make-racket-pict "     #`(letrec ([loop (λ ()")
+               (make-racket-pict "                        (when test")
+               (make-racket-pict "                          body ...")
+               (make-racket-pict "                          (loop)))])")
+               (make-racket-pict "         (loop))]))"))
+    'while))
+
+(define mini-mini-java
+(vl-append
+lang-line
+(make-racket-pict "")
+require-block
+provide-block
+
+(make-racket-pict "")
+while-block
+(make-racket-pict "")
+(make-racket-pict "(define-syntax-rule (|| x y)")
+(make-racket-pict "  (or x y))")
+(make-racket-pict "")))
+
              
   
