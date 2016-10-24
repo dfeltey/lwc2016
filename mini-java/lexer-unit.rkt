@@ -106,7 +106,7 @@
   (DecimalNumeral (re:or #\0
                          (re:: (re:/ "19") (re:* (re:/ "09")))))
   
-  (Operator (re:or "&&"   "=="   "<"     "+"     "-"     "*"      	"!"	"="   "||")))
+  (Operator (re:or "&&"   "=="   "<"     "+"     "-"     "*" "%"      	"!"	"="   "||")))
 
 ;; Handle Comments
 (define read-line-comment
@@ -127,21 +127,46 @@
    [(special-comment) (read-block-comment input-port)]))
 
 (define (make-get-token [color? #f])
+  (define (next-token t) (if color? (get-color-token t) (get-token t)))
   (lexer-src-pos
    ("#lang" (token-LANG))
    ;; Special form for handling 2d syntax pass parse function to handle box contents
    ("#2" (let-values ([(line col pos) (port-next-location input-port)]
-                      [(src) (file-path)])
-           (token-2D (2d-readtable-dispatch-proc
-                      #\2 input-port
-                      src line col pos
-                      (λ (input-port _1 _2)
-                        (cond
-                          [(eof-object? (peek-char input-port)) eof]
-                          [else (parse input-port src 'box)]))
-                      #f))))
+                      [(src) (file-path)]
+                      [(next) (peek-char input-port)])
+           (cond
+             [(char=? next #\d)
+              (token-2D (2d-readtable-dispatch-proc
+                         #\2 input-port
+                         src line col pos
+                         (λ (input-port _1 _2)
+                           (cond
+                             [(eof-object? (peek-char input-port)) eof]
+                             [else (parse input-port src 'box)]))
+                         #f))]
+             [color?
+              (let loop ()
+                 (define c (peek-char input-port))
+                 (cond
+                   [(eof-object? c)
+                    (define-values (line col pos) (port-next-location input-port))
+                    (return-without-pos
+                     (make-position-token 'error
+                                          start-pos
+                                          (make-position pos line col)))]
+                   [else
+                    (read-char input-port)
+                    (loop)]))]
+             [else
+              (raise-read-error
+               (format "lexer2d: No match found in input starting with: ~a" (string-ref lexeme 0))
+               (file-path)
+               (position-line start-pos)
+               (position-col start-pos)
+               (position-offset start-pos)
+               (- (position-offset end-pos) (position-offset start-pos)))])))
    
-   (Operator (let ((l lexeme))
+   (Operator (let ([l lexeme])
                (cond
                  [(string=? l "||") (token-OR)]
                  [else (string->symbol l)])))
@@ -167,12 +192,12 @@
    
    (Identifier (token-IDENTIFIER lexeme))
    
-   ("//" (begin (read-line-comment input-port) (return-without-pos (get-token input-port))))
-   ("/*" (begin (read-block-comment input-port) (return-without-pos (get-token input-port))))
+   ("//" (begin (read-line-comment input-port) (return-without-pos (next-token input-port))))
+   ("/*" (begin (read-block-comment input-port) (return-without-pos (next-token input-port))))
    
    ((re:+ WhiteSpace) (if color?
                           (token-White-Space)
-                          (return-without-pos (get-token input-port))))
+                          (return-without-pos (next-token input-port))))
    
    (#\032 'EOF)
    ((eof) 'EOF)
@@ -199,6 +224,8 @@
         (position-col start-pos)
         (position-offset start-pos)
         (- (position-offset end-pos) (position-offset start-pos)))])]))
+
+
 
 (define get-token (make-get-token))
 (define get-color-token (make-get-token #t))

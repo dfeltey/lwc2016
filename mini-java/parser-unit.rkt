@@ -111,9 +111,9 @@
                  (src->list (build-src 5)))])
 
     (MainMethod
-     [(public static void main O_PAREN String O_BRACKET C_BRACKET Identifier C_PAREN O_BRACE Statement C_BRACE)
-      (to-syntax `(public static void main (String[] ,$9) {,$12})
-                 (src->list (build-src 13)))])
+     [(public static void main O_PAREN String O_BRACKET C_BRACKET Identifier C_PAREN MainMethodBody)
+      (to-syntax `(public static void main (String[] ,$9) ,$11)
+                 (src->list (build-src 11)))])
     
     (ClassDeclarations
      [(ClassDeclaration) (list $1)]
@@ -161,6 +161,14 @@
       `(,$1 ,(reverse $3))]
      [(Identifier O_PAREN C_PAREN)
       `(,$1 ())])
+
+    (MainMethodBody
+     [(O_BRACE VariableDeclarations BlockStatements C_BRACE)
+      (to-syntax `( ,@(reverse $2) ,@(reverse $3))
+                 (src->list (build-src 4)))]
+     [(O_BRACE BlockStatements C_BRACE)
+      (to-syntax `( ,@(reverse $2))
+                 (src->list (build-src 3)))])
     
     (MethodBody
      [(O_BRACE VariableDeclarations BlockStatements return Expression SEMI_COLON C_BRACE)
@@ -292,8 +300,11 @@
      [(UnaryExpression) $1]
      [(MultiplicativeExpression * UnaryExpression)
       (to-syntax `(,$1 * ,$3)
+                 (src->list (build-src 3)))]
+     [(MultiplicativeExpression % UnaryExpression)
+      (to-syntax `(,$1 % ,$3)
                  (src->list (build-src 3)))])
-    
+         
     (UnaryExpression
      [(Primary) $1]
      [(! UnaryExpression) (to-syntax `(! ,$2)

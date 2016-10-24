@@ -152,7 +152,7 @@
            #:attr type (attribute ty.type)))
 
 (define-syntax-class binop
-  #:literals (&& < + - * || ==)
+  #:literals (&& < + - * % || ==)
   (pattern ==
            #:with return-type #'boolean
            #:attr type (binop-type (top-type) (top-type) bool-type))
@@ -173,11 +173,17 @@
            #:attr type (binop-type int-type int-type int-type))
   (pattern *
            #:with return-type #'int
+           #:attr type (binop-type int-type int-type int-type))
+  (pattern %
+           #:with return-type #'int
            #:attr type (binop-type int-type int-type int-type)))
 
 (define-syntax-class main-class
   #:literals (class public static void main)
-  (pattern (class name:id {public static void main (String [] param:id) { body }})
+  (pattern (class name:id {public static void main (String [] param:id) { local:var-declaration ... body ... }})
+    #:with (local-name ...) #'(local.name ...)
+    #:attr local-names (attribute local.name)
+    #:attr local-types (attribute local.type)
     #:attr class-type (make-class-type #'name #f null)))
 
 (define-syntax-class regular-class
@@ -232,7 +238,13 @@
   (syntax-parse/track-origin stx
     [c:main-class
      (quasisyntax/loc stx
-       (main #,(typecheck-statement #'c.name #'c.body toplevel-env)))]
+       (main
+        (define-local c.local-name) ...
+        #,@(with-extended-env (attribute c.local-names) (attribute c.local-types)
+             (for/list ([statement (in-syntax #'(c.body ...))])
+               (typecheck-statement #'c.name statement)))))]
+       
+       ;(main #,(typecheck-statement #'c.name #'c.body toplevel-env)))]
     [c:regular-class
      (define extends-clause (attribute c.extends-stx))
      (quasisyntax/loc stx
@@ -330,7 +342,10 @@
        (raise-syntax-error* "Type mismatch in while condition"
                             #'while
                             #f))
-     (quasisyntax/loc statement (while #,tst-stx #,(t-s #'body)))]
+     (quasisyntax/loc statement (#,(syntax-property (car (syntax-e statement))
+                                                    'original-for-check-syntax
+                                                    #t)
+                                 #,tst-stx #,(t-s #'body)))]
     [(System.out.println (arg))
      (define-values (arg-ty arg-stx) (t-e #'arg))
      (unless (subtype? arg-ty int-type)

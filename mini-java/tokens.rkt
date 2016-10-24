@@ -7,7 +7,7 @@
 (provide (all-defined-out))
 
 (define-empty-tokens Operators
-  (OR && == < + - * ! =))
+  (OR && == < + - * % ! =))
 
 (define-empty-tokens Separators
   (O_PAREN C_PAREN O_BRACE C_BRACE O_BRACKET C_BRACKET SEMI_COLON PERIOD COMMA LANG White-Space))

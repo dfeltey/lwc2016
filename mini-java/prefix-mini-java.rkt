@@ -31,14 +31,12 @@
                      [eqv?          ==]
                      [vector-set!   array=]
                      [and           &&]
+                     [or            ||]
                      [vector-ref    index]
                      [vector-length length]
                      [not           !]
+                     [modulo        %]
                      [make-vector   new-int-array]))
-
-
-(define-syntax-rule (|| x y)
-  (or x y))
 
 (define-syntax-rule (compound body ...)
   (begin body ... (void)))

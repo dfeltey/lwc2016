@@ -48,6 +48,12 @@
                 `(("error" error #f 1 2 0 #f) (,eof eof #f 2 2 0 #f)))
   (check-equal? (get-tokens "λλλλ")
                 `(("error" error #f 1 5 0 #f) (,eof eof #f 5 5 0 #f)))
+  (check-equal? (get-tokens "#2")
+                `(("error" error #f 1 3 0 #f) (,eof eof #f 3 3 0 #f)))
+  (check-equal? (get-tokens "#2 ")
+                `(("error" error #f 1 4 0 #f) (,eof eof #f 4 4 0 #f)))
+  (check-equal? (get-tokens "Û")
+                `(("error" error #f 1 2 0 #f) (,eof eof #f 2 2 0 #f)))
   (void (invariant-assertion lexer/c color-lexer)))
 
 
