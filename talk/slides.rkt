@@ -246,17 +246,17 @@
 
 (start-at-recent-slide)
 (play-n
- (λ (n1 n2 n3 n4 n5 n6)
+ (λ (n1 n2 n3 n31 n4 n5 n6)
  (ppict-do
   my-base-pict
   #:go (coord .5 .1)
   (fade-from-ghost (titlet "The 2016 Language Workbench Challenge") n6)
   #:go (coord .5 .5)
   (pins
-   (fade-to-ghost (scale mini-mini-java .8) n6)
+   (fade-to-ghost (scale (mini-mini-java n31 n4) .8) n6)
    (list (fade-to-ghost (fade-from-ghost (wrap lang-line) n1) n2)
          (fade-to-ghost (fade-from-ghost (wrap require-block) n2) n3)
-         (fade-to-ghost (fade-from-ghost (wrap provide-block) n3) n4)
+         (fade-to-ghost (fade-from-ghost (wrap (provide-block n31 n4)) n3) n4)
          (fade-to-ghost (fade-from-ghost (wrap while-block) n4) n5))
    '(lang require provide while))))
  #:skip-last? #t)

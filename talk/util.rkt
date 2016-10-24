@@ -484,7 +484,7 @@
 
 
 
-(define provide-block
+(define (provide-block n1 n2)
   (tg (vl-append (make-racket-pict "(provide (all-defined-out)")
                (make-racket-pict "         true false < + - *")
                (make-racket-pict "         (rename-out [displayln     System.out.println]")
@@ -492,6 +492,10 @@
                (make-racket-pict "                     [eqv?          ==]")
                (make-racket-pict "                     [vector-set!   array=]")
                (make-racket-pict "                     [and           &&]")
+               (hc-append (make-racket-pict "                     ")
+                          (fade-around-pict (- n1 n2)
+                                            (make-racket-pict"[or            ||]")
+                                            (λ (p) (backdrop p #:color "yellow"))))
                (make-racket-pict "                     [vector-ref    index]")
                (make-racket-pict "                     [vector-length length]")
                (make-racket-pict "                     [not           !]")
@@ -509,18 +513,15 @@
                (make-racket-pict "         (loop))]))"))
     'while))
 
-(define mini-mini-java
+(define (mini-mini-java n1 n2)
 (vl-append
 lang-line
 (make-racket-pict "")
 require-block
-provide-block
+(provide-block n1 n2)
 
 (make-racket-pict "")
 while-block
-(make-racket-pict "")
-(make-racket-pict "(define-syntax-rule (|| x y)")
-(make-racket-pict "  (or x y))")
 (make-racket-pict "")))
 
              
