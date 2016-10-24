@@ -72,6 +72,7 @@
                 (position-offset start-pos))
              (file-path)))))))
 
+(define o (current-output-port))
 (define parsers
   (parser
    (start Program Box)
@@ -234,10 +235,14 @@
                  (src->list (build-src 7)))])
     
     (WhileStatement
-     [(while O_PAREN Expression C_PAREN Statement)
-      (to-syntax `(while (,$3) ,$5)
+     [(WhileToken O_PAREN Expression C_PAREN Statement)
+      (to-syntax `(,$1 (,$3) ,$5)
                  (src->list (build-src 5)))])
-    
+
+    (WhileToken
+     [(while)
+      (to-syntax 'while
+                 (src->list (build-src 1)))])
     (Println
      [(System.out.println O_PAREN Expression C_PAREN SEMI_COLON)
       (to-syntax `(System.out.println (,$3))
