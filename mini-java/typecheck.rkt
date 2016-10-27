@@ -17,7 +17,7 @@
 (module literals racket
   (require "prefix-mini-java.rkt")
   (provide (all-defined-out))
-  (define-literals (class public static
+  (define-literals (public static
                      String int boolean int-array
                      extends return else)))
 (require (for-template (submod "." literals)))
@@ -248,7 +248,7 @@
     [c:regular-class
      (define extends-clause (attribute c.extends-stx))
      (quasisyntax/loc stx
-       (define-class c.name #,@extends-clause
+       (class c.name #,@extends-clause
          (define-field c.field-name) ...
          #,@(with-extended-env (attribute c.field-names) (attribute c.field-types)
               (for/list ([method (in-syntax #'(c.meth ...))])

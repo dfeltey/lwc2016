@@ -17,12 +17,12 @@
                      "../editing/property.rkt"
                      "state-machine-classes.rkt"))
 
-(provide (all-defined-out)
+(provide (all-defined-out) while
          (for-syntax make-immutable-free-id-table)
          (except-out (all-from-out racket)
                      public extends = ==
                      length eqv? vector-length
-                     else class not make-vector)
+                     else not make-vector)
          2dstate-machine
          #%module-begin #%app
          #%datum true false < + - *
@@ -50,7 +50,7 @@
 ;; ~~~EXTRACT:break-param~~~
 (define-syntax-parameter break
   (λ (stx)
-    (raise-syntax-error 'break "break used outside of `while`" stx)))
+    (raise-syntax-error 'break "used outside of `while`" stx)))
 ;; ~~~EXTRACT:break-param~~~
 
 (begin-for-syntax
@@ -127,7 +127,7 @@
          body ...)]))
 
 ;; TODO add inheritance, and super. and whatever else old version had
-(define-syntax (define-class stx)
+(define-syntax (class stx)
   (syntax-parse stx
     [(_ name super-class:extends-decl var:var-decl ... meth:meth-decl ...)
      (define run-time-method-table-id (generate-temporary 'runtime-method-table))
@@ -265,7 +265,7 @@
        (attribute t.class-name))
      (define/with-syntax (state-int ...) (r:range 0 (length (syntax->list #'(state ...)))))
      (define cls
-       #'(define-class name
+       #'(class name
            (define-field st)
            (define-method transitions ()
              (unless st (set! st 0))

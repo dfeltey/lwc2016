@@ -10,7 +10,7 @@
 
 
 
-(define-class Runner
+(class Runner
   (define-field check)
   (define-method run (n)
     (define-local current)
@@ -49,7 +49,7 @@
 
 
 
-(define-class Parity
+(class Parity
   (define-method is_odd (n)
     (&&
      (! (== n 0))
