@@ -11,17 +11,42 @@
 
 (require ppict-slide-grid)
 ;(pslide-base-pict (thunk (colorize (filled-rectangle client-w client-h) "Ivory")))
-;(set-grid-base-pict!)
+(set-grid-base-pict!)
 
 
 ;; LWC Talk Outline
 
 ;; Title
+
 (pslide
  #:go (coord .5 .5)
  (make-plt-title-background 1024 768)
  #:go (coord 0.5 0.33)
- (t "Languages the Racket Way"))
+ (scale (titlet "Languages the Racket Way") 2)
+ #:go (coord .95 .95 'rb)
+ (let ([p (t "LWC@SLE 2016 - November 1st 2016")]
+       [buf-x 70]
+       [buf-y 30])
+       (cc-superimpose
+        (cellophane
+         (colorize (filled-rectangle (+ buf-x (pict-width p))
+                                     (+ buf-y (pict-height p))
+                                     #:draw-border? #f)
+                   "white")
+         .3)
+        p))
+ #:go (coord 0.05 0.5 'lt)
+ (apply vl-append
+        (scale (bt "Daniel Feltey") 1.3)
+        (map
+         t
+         '("Spencer P. Florence"
+           "Tim Knutson"
+           "Vincent St-Amour"
+           "Ryan Culpepper"
+           "Matthew Flatt"
+           "Robert Bruce Findler"
+           "Matthias Felleisen"))))
 
 
 (pslide
@@ -31,7 +56,7 @@
  giant-duck-pict)
 
 (play-n
- (λ (n1 n2 n21 n22 n23 n3 n4 n5 n6)
+ (λ (n1 n2 n21 n22 n23 n3 n4 n5 n6 n7 n8)
    (define (word-cloud label)
      (ppict-do
       the-cloud
@@ -41,20 +66,22 @@
    (define reader-cloud-pos (launder (ghost the-cloud)))
    (define runtime-cloud-pos (launder (ghost the-cloud)))
    (define transformer-cloud-pos (launder (ghost the-cloud)))
-   (define the-runtime-cloud (runtime-cloud n1 n22 n3 n4 n5 n6))
-   (define the-transformer-cloud (transformer-cloud n1 n23 n3 n4 n5 n6))
-   (define the-reader-cloud (reader-cloud n1 n21 n3 n4 n5 n6))
+   (define the-runtime-cloud (runtime-cloud n1 n22 n3 n4 n5 n6 n7 n8))
+   (define the-transformer-cloud (transformer-cloud n1 n23 n3 n4 n5 n6 n7 n8))
+   (define the-reader-cloud (reader-cloud n1 n21 n3 n4 n5 n6 n7 n8))
    (define lang-pict
      (fold-fade
       (map
        (λ (str) (my-tt (string-append "#lang " str)))
-       '("" "racket" "typed/racket" "scribble" "mini-java" "racket"))
+       '("" "racket/base" "typed/racket" "scribble" "datalog" "lazy" "mini-java" "racket/base"))
       #:combine lc-superimpose
       n2
       n3
       n4
       n5
-      n6))
+      n6
+      n7
+      n8))
    (define lang-start (launder (ghost lang-pict)))
    (define lang-end (launder (ghost lang-pict)))
    (define base-pict
@@ -83,7 +110,7 @@
 
 (play-n
  (λ (n1)
-   (define lang (my-tt "#lang racket"))
+   (define lang (my-tt "#lang racket/base"))
    (define lang-start (launder (ghost lang)))
    (define lang-end (launder (ghost lang)))
    (define nothing (blank 0 0))
@@ -114,7 +141,7 @@
 
 (play-n
  (λ (n1 n2)
-   (define words (list "letrec" "or" "if" "define" "lambda" "#%app"))
+   (define words (list "letrec" "or" "if" "var:id" "lambda" "#%app"))
    (define start-tags
      (map (λ (str) (string->symbol (string-append str "-start"))) words))
    (define end-tags
@@ -145,8 +172,8 @@
 
 (play-n
  (let ()
-   (define racket-box (freeze (filled-rounded-rectangle 480 700 #:color "bisque")))
-   (define java-box (freeze (filled-rounded-rectangle 480 700 #:color (invert-color "bisque"))))
+   (define racket-box (inset (freeze (inset (filled-rounded-rectangle 480 700 #:color "bisque") 10 10)) -10 -10))
+   (define java-box (inset (freeze (inset (filled-rounded-rectangle 480 700 #:color (invert-color "bisque")) 10 10)) -10 -10))
    (λ (n1 n2)
    (slide-picts/tags
     (ppict-do
@@ -193,8 +220,8 @@
    (define cle (tg (compiler-letrec #f) 'letl-e))
    (define cif (tg (compiler-if #f) 'ifl-e))
    (define cor (tg (compiler-or #f) 'orl-e))
-   (define racket-box (freeze (filled-rounded-rectangle 480 700 #:color "bisque")))
-   (define java-box (freeze (filled-rounded-rectangle 480 700 #:color (invert-color "bisque"))))
+   (define racket-box (inset (freeze (inset (filled-rounded-rectangle 480 700 #:color "bisque") 10 10)) -10 -10))
+   (define java-box (inset (freeze (inset (filled-rounded-rectangle 480 700 #:color (invert-color "bisque")) 10 10)) -10 -10))
    (define shift-if (backdrop (inset (compiler-if #f) 4 6) #:color "bisque"))
  (λ (n1 n2 n3 n4 n5 n6)
    (define shift-or (backdrop (inset (colored-or n2) 4 6) #:color "bisque"))
@@ -234,45 +261,91 @@
      n3)
     (list
      (compiler-define-class #f)
-     (compiler-send #f)
-     (compiler-new #f))
-    '(mj-def-class-s mj-send-s mj-new-s)
-    '(mj-def-class-e mj-send-e mj-new-e)
+     #;(compiler-send #f)
+     #;(compiler-new #f))
+    '(mj-def-class-s #;mj-send-s #;mj-new-s)
+    '(mj-def-class-e #;mj-send-e #;mj-new-e)
     n5
     )
     (let ([p (blank client-w client-h)])
       (refocus (cc-superimpose (colorize (filled-rectangle 1024 768) "Ivory") p) p)))))
  #:skip-last? #t)
-
 (start-at-recent-slide)
 (play-n
- (λ (n1 n2 n3 n31 n4 n5 n6)
+   (λ (n1  n12 n2 n3 n32 n33 n4 n5 n52 n6)
+     (slide-pict/tags
+      (slide-pict/tags
+       (slide-pict/tags
+        (ppict-do
+         my-base-pict
+         #:go (coord .5 .5) (tg MJ-IMPL-PICT 'end)
+         #:go (coord .17 .5)
+         (tg (wrap-code (* .34 (client-w)) (client-h) n1 n2) 'reader-start)
+         #:go (coord .7 .1)
+         (tg (wrap-code (* .15 (client-w)) (* .15 (client-h)) n3 n4) 'runtime-start)
+         #:go (coord .34 .14 'lt)
+         (tg (wrap-code (* .45 (client-w)) (* .87 (client-h)) n5 n6) 'transformer-start))
+        (fade-to-ghost (parser-block n12) n2)
+        'reader-start
+        'end
+        n12)
+       (fade-to-ghost (provide-block n32 n33) n4)
+       'runtime-start
+       'end
+       n32)
+      (fade-to-ghost (transformer-block n52) n6)
+      'transformer-start
+      'end
+      n52)))
+
+(slide
  (ppict-do
   my-base-pict
   #:go (coord .5 .1)
-  (fade-from-ghost (titlet "The 2016 Language Workbench Challenge") n6)
-  #:go (coord .5 .5)
-  (pins
-   (fade-to-ghost (scale (mini-mini-java n31 n4) .8) n6)
-   (list (fade-to-ghost (fade-from-ghost (wrap lang-line) n1) n2)
-         (fade-to-ghost (fade-from-ghost (wrap require-block) n2) n3)
-         (fade-to-ghost (fade-from-ghost (wrap (provide-block n31 n4)) n3) n4)
-         (fade-to-ghost (fade-from-ghost (wrap while-block) n4) n5))
-   '(lang require provide while))))
- #:skip-last? #t)
+  (titlet "The 2016 Language Workbench Challenge")
+  #:go (coord .25 .3 'lc)
+  (item "Tabular Notation")
+  #:go (coord .5 .4) (make-code-pict "mini-java" "#2dstate-machine")
+  #:go (coord .25 .5 'lc)
+  (item "Beyond-Grammar Restrictions")
+  #:go (coord .5 .6) (make-code-pict "mini-java" "break;")
+  #:go (coord .25 .7 'lc)
+  (item "Restructuring")))
+
+(require "langs.rkt")
 
 (play-n
- (λ (n1 n2 n3)
-   (ppict-do
-    my-base-pict
-    #:go (coord .5 .1)
-    (titlet "The 2016 Language Workbench Challenge")
-    #:go (coord .25 .3 'lc)
-    (fade-from-ghost (item "Tabular Notation") n1)
-    #:go (coord .25 .5 'lc)
-    (fade-from-ghost (item "Beyond-Grammar Restrictions") n2)
-    #:go (coord .25 .7 'lc)
-    (fade-from-ghost (item "Restructuring") n3))))
+ (λ (n)
+   (define (cloud str)
+     (cc-superimpose the-cloud (my-t str)))
+   (define base
+     (ppict-do
+      my-base-pict
+      #:go (coord 0 0 'lt)
+      (my-tt "#lang")
+      #:go (coord .25 .5)
+      (reader-cloud 1 0) ;(cloud "reader")
+      #:go (coord .75 .24)
+      (transformer-cloud 1 0) ;(cloud "transformers")
+      #:go (coord .75 .76)
+      (runtime-cloud 1 0) #;(cloud "runtime")))
+   (for/fold ([base base])
+             ([p+loc (in-list PICT-LOCS)]
+              [i (in-range COUNT)])
+     (match-define (list p loc) p+loc)
+     (match-define (cons x y) loc)
+     (ppict-do
+      base
+      #:go (coord x y 'lt)
+      (fade-pict
+       (if (< n (/ (add1 i) COUNT)) 0 1)
+       (ghost p)
+       p))))
+ #:steps COUNT
+ #:delay .1)
+
+
+   
     
 
    

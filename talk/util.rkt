@@ -80,7 +80,7 @@
 
 (define racket-binding-picts
   (map (λ (str) (make-code-pict "racket" str))
-       (list "letrec" "or" "if" "define" "lambda" "#%app")))
+       (list "letrec" "or" "if" "var:id" "lambda" "#%app")))
 
 (define (point angle)
   (cons (* .5 (cos angle))
@@ -194,8 +194,15 @@
    "]"))
 
 (define (compiler-define ghost-binding?)
-  (make-compiler-element "define" " x e)        " ghost-binding?) 
-  #;(make-compiler-line "[(" (make-tagged-ghost "define" ghost-binding?) " x e)            ""«code»]"))
+  (define do-ghost (if ghost-binding? ghost values))
+  (make-compiler-line
+   "["
+   (tg (do-ghost (make-code-pict "" "var:id" #:scale STARTING-SCALE)) (string->symbol (string-append "var:id" "-end")))
+   "              "
+   (tg (do-ghost (make-code-pict "" "«code»" #:scale STARTING-SCALE)) (string->symbol (string-append "var:id" "-code" "-end")))
+   "]"))
+#;(make-compiler-element "define" " x e)        " ghost-binding?) 
+#;(make-compiler-line "[(" (make-tagged-ghost "define" ghost-binding?) " x e)            ""«code»]")
 (define (compiler-lambda ghost-binding?)
   (make-compiler-element "lambda" " (x ...) e)  " ghost-binding?)
   #;(make-compiler-line "[(" (make-tagged-ghost "lambda" ghost-binding?) " (x ...) e)      ""«code»]"))
@@ -229,13 +236,13 @@
 (define racket-compiler-picts
   (map
    (λ (str) (make-code-pict "" str))
-   (list "define" "lambda" "#%app" "letrec" "if" "or")))
+   (list "var:id" "lambda" "#%app" "letrec" "if" "or")))
 (define racket-compiler-tags-starts
-  (map string->symbol (list "define" "lambda" "#%app" "letrec" "if" "or")))
+  (map string->symbol (list "var:id" "lambda" "#%app" "letrec" "if" "or")))
 (define racket-compiler-tags-ends
   (map
    (λ (str) (string->symbol (string-append str "-end")))
-   (list "define" "lambda" "#%app" "letrec" "if" "or")))
+   (list "var:id" "lambda" "#%app" "letrec" "if" "or")))
 
 (define (make-racket-pict str [colorize-enabled #t])
   (parameterize ([code-colorize-enabled colorize-enabled])
@@ -302,16 +309,16 @@
   (pin-over*
    (vc-append
     50
-    (ghost (compiler-define-class #f))
+    ;(ghost (compiler-define-class #f))
     (tg (ghost (compiler-define-class #f)) 'mj-def-class-e)
-    (tg (ghost (compiler-send #f)) 'mj-send-e)
-    (tg (ghost (compiler-new #f)) 'mj-new-e)
+    ;(tg (ghost (compiler-send #f)) 'mj-send-e)
+    ;(tg (ghost (compiler-new #f)) 'mj-new-e)
     (tg (ghost (compiler-while #f)) 'mj-while-e)
     (tg (ghost (compiler-send #f)) 'mj-send-e2)
     (tg (ghost (compiler-new #f)) 'mj-new-e2)
     (tg (ghost (compiler-if-mj #f)) 'mj-if-e)
     (tg (ghost (compiler-or-mj #f)) 'mj-or-e)
-    (ghost (compiler-define-class #f)))
+    #;(ghost (compiler-define-class #f)))
    0
    -200 ; FIXME: what's the right number here???
    (list (tg (ghost (compiler-define-class #f)) 'mj-def-class-s)
@@ -362,32 +369,48 @@
 (define (transformer-cloud . times)
   (word-cloud-transition
     (fade-from-ghost (label "transformers") (first times))
-    (list "racket" "typed/racket" "scribble" "racket" "racket")
-    (list (list "letrec" "or" "if" "define" "lambda" "#%app")
+    (list "racket" "typed/racket" "scribble" "datalog" "lazy" "racket" "racket")
+    (list (list "letrec" "or" "if" "var:id" "lambda" "#%app")
           (list "All" ":" "ann" "define-type" "require/typed" "Listof")
           (list "defproc" "examples" "authors" "define-cite" "include-section" "code")
+          (list "datalog" "~" ":-" "?" "datalog!" "!") ; datalog
+          (list "let" "when" "if" "set!" "begin" "#%app") ; lazy
           (list "while" "||" "if" "class" "send" "new")
-          (list "letrec" "or" "if" "define" "lambda" "#%app"))
+          (list "letrec" "or" "if" "var:id" "lambda" "#%app"))
     (rest times)))
 
 (define (reader-cloud . times)
   (word-cloud-transition #:reader? #t
     (fade-from-ghost (label "reader") (first times))
-    (list "racket" "typed/racket" "scribble" "mini-java" "racket")
+    (list "racket" "typed/racket" "scribble" "racket" "lazy" "racket" "racket")
     (list (list "#(1 2 3)" "(4 . < . 5)" "#hash()" "'(6 7 . 8)" "`(,(+ 9 10))" "#i10")
           (list "'(1 2)" "#{2 :: Integer}" "#{map @ String Integer}" "" "" "")
-          (list "@~cite[plt-tr1]" "@title[#:tag \"mj\"]{Intro}" "" "@{Hello}"  "" "" )
-          (list  "check.is_even(6)" "true || false" "class Main {...}" "" "" "")
+          (list "@~cite[plt-tr1]"
+                ""
+                "@title[#:tag \"mj\"]{Intro}"
+                "\n@{Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit, sed}" ;\nadipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                ""
+                "")
+          (list "parent(jon, joe)"
+                ""
+                "path(X, Y) :- edge(X, Y)."
+                "ancestor(A, B) :-\n    parent(A, C),\n    ancestor(C, B)"
+                ""
+                "") ; datalog
+          (list "#(1 2 3)" "(! (begin (print \"Hi\") 45))" "#hash()" "'(6 7 . 8)" "(let ([x (loop)]) 9)" "#i10"); lazy
+          (list  "check.is_even(6)" "true || false" "class Main {...}" "primes.length;" "i = i + 1;" "primes[2];")
           (list "#(1 2 3)" "(4 . < . 5)" "'(6 7 . 8)" "#hash()" "`(,(+ 9 10))" "#i10"))
     (rest times)))
 
 (define (runtime-cloud . times)
   (word-cloud-transition
     (fade-from-ghost (label "runtime") (first times))
-    (list "racket" "typed/racket" "scribble" "racket" "racket")
+    (list "racket" "typed/racket" "scribble" "racket" "racket" "racket" "racket")
     (list (list "empty?" "+" "<=" "read" "vector" "cons")
           (list "empty?" "+" "<=" "read" "vector" "cons")
           (list "secref" "title" "cite" "figure" "make-bib" "bold")
+          (list "theory/c" "make-theory" "write-theory" "read-theory" "retract!" "assume!") ; datalog
+          (list "!list" "!!" "!" "vector" "!!list" "cons") ; lazy
           (list "index" "+" "!" "new-int-array" "length" "==")
           (list "empty?" "+" "<=" "read" "vector" "cons"))
     (rest times)))
@@ -410,14 +433,14 @@
        (first times))))
   (word-cloud label picts))
 
-(define final-reader (reader-cloud 1 1 1 1 1 1))
-(define final-transformer (transformer-cloud 1 1 1 1 1 1))
-(define final-runtime (runtime-cloud 1 1 1 1 1 1))
+(define final-reader (reader-cloud 1 1 1 1 1 1 1 1))
+(define final-transformer (transformer-cloud 1 1 1 1 1 1 1 1))
+(define final-runtime (runtime-cloud 1 1 1 1 1 1 1 1))
 
 
 
 (define (opening-transformer n1 n2)
-  (define words (list "letrec" "or" "if" "define" "lambda" "#%app"))
+  (define words (list "letrec" "or" "if" "var:id" "lambda" "#%app"))
   (define (prepare-pict word)
     (fade-to-ghost
      (hc-append (make-racket-pict "⟨")
@@ -484,24 +507,6 @@
 
 
 
-(define (provide-block n1 n2)
-  (tg (vl-append (make-racket-pict "(provide (all-defined-out)")
-               (make-racket-pict "         true false < + - *")
-               (make-racket-pict "         (rename-out [displayln     System.out.println]")
-               (make-racket-pict "                     [set!          =]")
-               (make-racket-pict "                     [eqv?          ==]")
-               (make-racket-pict "                     [vector-set!   array=]")
-               (make-racket-pict "                     [and           &&]")
-               (hc-append (make-racket-pict "                     ")
-                          (fade-around-pict (- n1 n2)
-                                            (make-racket-pict"[or            ||]")
-                                            (λ (p) (backdrop p #:color "yellow"))))
-               (make-racket-pict "                     [vector-ref    index]")
-               (make-racket-pict "                     [vector-length length]")
-               (make-racket-pict "                     [not           !]")
-               (make-racket-pict "                     [modulo        %]")
-               (make-racket-pict "                     [make-vector   new-int-array]))"))
-    'provide))
 (define while-block
   (tg (vl-append (make-racket-pict "(define-syntax (while stx)")
                (make-racket-pict "  (syntax-parse stx")
@@ -524,5 +529,144 @@ require-block
 while-block
 (make-racket-pict "")))
 
-             
+(define (fade-in-out p n1 n2)
+  (fade-to-ghost (fade-from-ghost p n1) n2))
+(define (wrap-code w h n1 n2)
+  (fade-in-out
+   (cellophane
+    (rectangle w h #:border-width 10 #:border-color "red")
+    .75)
+   n1
+   n2))
+
+(define (make-mj-pict)
+    (define files
+      (append
+       (map (λ (str) (string-append "../mini-java/" str))
+            (list "lexer-sig.rkt"
+                  "parser-sig.rkt"
+                  "tokens.rkt"
+                  "lexer-unit.rkt"
+                  "parser-unit.rkt"
+                  "error.rkt"
+                  "typecheck.rkt"
+                  "state-machine-classes.rkt"
+                  "prefix-mini-java.rkt"
+                  "main.rkt"))
+       (map (λ (str) (string-append "../editing/" str))
+            (list "property.rkt"
+                  "syntax-info.rkt"
+                  "if-refactor.rkt"
+                  "context-table.rkt"
+                  "refactor-tool.rkt"))))
+      (define CODES
+        (map (compose codeblock-pict file->string) files))
+      (define MAX-HEIGHT (apply max (map pict-height CODES)))
+      (define MAX-WIDTH (apply max (map pict-width CODES)))
+      (define INSET-PICTS
+        (for/list ([p (in-list CODES)])
+          (scale
+           (inset p
+                  (/ (- MAX-WIDTH (pict-width p)) 2)
+                  0 #;(/ (- MAX-HEIGHT (pict-height p)) 2))
+           (/ (client-h) MAX-HEIGHT))))
+
+  (match-define (list lex-sig parse-sig tokens
+                      lexer parser error
+                      typecheck state-machines
+                      mini-java main property
+                      syntax-info if-refactor
+                      context-table tool)
+    INSET-PICTS)
+  
+
+  (define (top-half p)
+    (define half (blank (pict-width p)
+                        (/ (pict-height p) 2)))
+    (clip (refocus (ct-superimpose p half) half)))
+  (define (bottom-half p)
+    (define half (blank (pict-width p)
+                        (/ (pict-height p) 2)))
+    (clip (refocus (cb-superimpose p half) half)))
+  (define lex-pict (vl-append lex-sig tokens lexer))
+  (define parse-pict (vl-append parse-sig parser))
+  (define mini-java-pict (vl-append mini-java state-machines main))
+  (define tool-pict (vl-append property syntax-info if-refactor context-table tool))
+  (define typecheck-top (top-half typecheck))
+  (define typecheck-bot (bottom-half typecheck))
+  (define PRE-SCALED
+    (list lex-pict parse-pict typecheck-top typecheck-bot mini-java-pict tool-pict))
+
+  (define MAX-HEIGHT2
+    (apply max (map pict-height PRE-SCALED)))
+  (apply hc-append
+         30
+         (for/list ([p (in-list PRE-SCALED)])
+           (scale p (/ (client-h) MAX-HEIGHT2)))))
+
+(define MJ-IMPL-PICT (freeze (make-mj-pict)))
+
+(define (provide-block n1 n2)
+  (cellophane
+   (shadow-frame
+    (scale
+    (vl-append (make-racket-pict "(provide (all-defined-out)")
+               (make-racket-pict "         true false < + - *")
+               (hc-append(make-racket-pict "         (rename-out ")
+                         (fade-around-pict n2
+                                           (make-racket-pict "[displayln     System.out.println]")
+                                           (λ (p) (backdrop p #:color "yellow"))))
+               (make-racket-pict "                     [set!          =]")
+               (make-racket-pict "                     [eqv?          ==]")
+               (make-racket-pict "                     [vector-set!   array=]")
+               (make-racket-pict "                     [and           &&]")
+               (hc-append (make-racket-pict "                     ")
+                          (make-racket-pict"[or            ||]"))
+               (make-racket-pict "                     [vector-ref    index]")
+               (make-racket-pict "                     [vector-length length]")
+               (make-racket-pict "                     [not           !]")
+               (make-racket-pict "                     [modulo        %]")
+               (make-racket-pict "                     [make-vector   new-int-array]))"))
+   (translate .001 .8 n1))
+    #:background-color "ivory")
+   (translate 0 1 n1)))
+
+(define (parser-block n1)
+  (cellophane
+   (shadow-frame
+    (scale
+     (vl-append
+      (make-racket-pict "(ClassDeclaration")
+      (make-racket-pict "     [(class Identifier ClassBody)")
+      (make-racket-pict "      (to-syntax `(class ,$2 { ,@$3 })")
+      (make-racket-pict "                 (src->list (build-src 3)))]")
+      (make-racket-pict "     [(class Identifier extends Identifier ClassBody)")
+      (make-racket-pict "      (to-syntax `(class ,$2 extends ,$4{ ,@$5 })")
+      (make-racket-pict "                 (src->list (build-src 5)))]")
+      (make-racket-pict "     [(2D)")
+      (make-racket-pict "      (to-syntax $1")
+      (make-racket-pict "                 (src->list (build-src 1)))])"))
+     (translate .001 .8 n1))
+    #:background-color "ivory")
+   (translate 0 1 n1)))
+
+(define (transformer-block n1)
+  (cellophane
+   (shadow-frame
+    (scale
+     (vl-append
+      (make-racket-pict "(define-syntax (while stx)")
+      (make-racket-pict "  (syntax-parse stx")
+      (make-racket-pict "    [(while test:expr body ...)")
+      (make-racket-pict "     #`(let/ec local-break")
+      (make-racket-pict "         (syntax-parameterize ([break (λ (stx) #'(local-break))])")
+      (make-racket-pict "           (letrec ([loop (λ ()")
+      (make-racket-pict "                            (when test")
+      (make-racket-pict "                              body ...")
+      (make-racket-pict "                              (loop)))])")
+      (make-racket-pict "             (loop))))]))"))
+     (translate .001 .8 n1))
+    #:background-color "ivory")
+   (translate 0 1 n1)))
+
   
