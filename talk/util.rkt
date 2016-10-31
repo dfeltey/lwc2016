@@ -316,6 +316,7 @@
     (tg (ghost (compiler-while #f)) 'mj-while-e)
     (tg (ghost (compiler-send #f)) 'mj-send-e2)
     (tg (ghost (compiler-new #f)) 'mj-new-e2)
+    (tg (ghost (compiler-define-class #f)) 'mj-var-e)
     (tg (ghost (compiler-if-mj #f)) 'mj-if-e)
     (tg (ghost (compiler-or-mj #f)) 'mj-or-e)
     #;(ghost (compiler-define-class #f)))
@@ -388,7 +389,7 @@
           (list "@~cite[plt-tr1]"
                 ""
                 "@title[#:tag \"mj\"]{Intro}"
-                "\n@{Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit, sed}" ;\nadipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                "\n@p{Lorem ipsum dolor\nsit amet, consectetur\nadipiscing elit, sed}" ;\nadipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                 ""
                 "")
           (list "parent(jon, joe)"
@@ -668,5 +669,31 @@ while-block
      (translate .001 .8 n1))
     #:background-color "ivory")
    (translate 0 1 n1)))
+
+(define pre-if
+(vl-append
+ (make-code-pict "mini-java" "if (test) {")
+ (make-code-pict "mini-java" "    then_branch;")
+ (make-code-pict "mini-java" "} else {")
+ (make-code-pict "mini-java" "    else_branch;")
+ (make-code-pict "mini-java" "}")))
+
+(define post-if
+(vl-append
+ (make-code-pict "mini-java" "if (! (test)) {")
+ (make-code-pict "mini-java" "    else_branch;")
+ (make-code-pict "mini-java" "} else {")
+ (make-code-pict "mini-java" "    then_branch;")
+ (make-code-pict "mini-java" "}")))
+
+(define refactor-pict
+  (let* ([pre (inset pre-if 20)]
+         [post (inset post-if 20)]
+         [combined (hc-append 100 pre post)])
+    (pin-arrow-line 20 combined
+                    pre rc-find
+                    post lc-find
+                    #:color "red"
+                    #:line-width 3)))
 
   

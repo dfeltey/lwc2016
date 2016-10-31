@@ -215,6 +215,7 @@
 (play-n
  (let ()
    (define cd (tg (compiler-define #f) 'defl-e))
+   (define shift-var (backdrop (inset (compiler-define #f) 4 6) #:color "bisque"))
    (define cla (tg (compiler-lambda #f) 'laml-e))
    (define cap (tg (compiler-app #f) 'appl-e))
    (define cle (tg (compiler-letrec #f) 'letl-e))
@@ -223,54 +224,59 @@
    (define racket-box (inset (freeze (inset (filled-rounded-rectangle 480 700 #:color "bisque") 10 10)) -10 -10))
    (define java-box (inset (freeze (inset (filled-rounded-rectangle 480 700 #:color (invert-color "bisque")) 10 10)) -10 -10))
    (define shift-if (backdrop (inset (compiler-if #f) 4 6) #:color "bisque"))
- (λ (n1 n2 n3 n4 n5 n6)
-   (define shift-or (backdrop (inset (colored-or n2) 4 6) #:color "bisque"))
-   (fade-pict
-    n6
-    (slide-picts/tags
-    (slide-pict/tags
-     (slide-picts/tags
-      (ppict-do
-       my-base-pict
-       #:go (coord .5 .5)
-       (scale the-cloud 4)
-       #:go (tile 2 1)
-       (cc-superimpose
-        racket-box 
-        (vc-append
-         50
-         cd
-         cla
-         cap
-         cle
-         cif
-         cor
-         ))
-       (cc-superimpose
-        java-box
-        mj-compiler))
-      (list
-       shift-if
-       shift-or)
-      '(ifl-e orl-e)
-      '(mj-if-e mj-or-e)
-      n1)
-     (compiler-while #f n4)
-     'mj-while-s
-     'mj-while-e
-     n3)
-    (list
-     (compiler-define-class #f)
-     #;(compiler-send #f)
-     #;(compiler-new #f))
-    '(mj-def-class-s #;mj-send-s #;mj-new-s)
-    '(mj-def-class-e #;mj-send-e #;mj-new-e)
-    n5
-    )
-    (let ([p (blank client-w client-h)])
-      (refocus (cc-superimpose (colorize (filled-rectangle 1024 768) "Ivory") p) p)))))
+   (λ (n1 n2 n22 n3 n4 n5 n6)
+     (define shift-or (backdrop (inset (colored-or n2) 4 6) #:color "bisque"))
+     (fade-pict
+      n6
+      (slide-picts/tags
+       (slide-pict/tags
+        (slide-pict/tags
+         (slide-picts/tags
+          (ppict-do
+           my-base-pict
+           #:go (coord .5 .5)
+           (scale the-cloud 4)
+           #:go (tile 2 1)
+           (cc-superimpose
+            racket-box 
+            (vc-append
+             50
+             cd
+             cla
+             cap
+             cle
+             cif
+             cor
+             ))
+           (cc-superimpose
+            java-box
+            mj-compiler))
+          (list
+           shift-if
+           shift-or)
+          '(ifl-e orl-e)
+          '(mj-if-e mj-or-e)
+          n1)
+         shift-var
+         'defl-e
+         'mj-var-e
+         n22)
+        (compiler-while #f n4)
+        'mj-while-s
+        'mj-while-e
+        n3)
+       (list
+        (compiler-define-class #f)
+        #;(compiler-send #f)
+        #;(compiler-new #f))
+       '(mj-def-class-s #;mj-send-s #;mj-new-s)
+       '(mj-def-class-e #;mj-send-e #;mj-new-e)
+       n5
+       )
+      (let ([p (blank client-w client-h)])
+        (refocus (cc-superimpose (colorize (filled-rectangle 1024 768) "Ivory") p) p)))))
  #:skip-last? #t)
-(start-at-recent-slide)
+
 
 ;; remove this and require mj-code.rkt and call implementation-slides
 ;; for weird things
@@ -306,14 +312,17 @@
   my-base-pict
   #:go (coord .5 .1)
   (titlet "The 2016 Language Workbench Challenge")
-  #:go (coord .25 .3 'lc)
+  #:go (coord .1 .25 'lc)
   (item "Tabular Notation")
-  #:go (coord .5 .4) (make-code-pict "mini-java" "#2dstate-machine")
-  #:go (coord .25 .5 'lc)
+  #:go (coord .5 .35) (make-code-pict "mini-java" "#2dstate-machine")
+  #:go (coord .1 .45 'lc)
   (item "Beyond-Grammar Restrictions")
-  #:go (coord .5 .6) (make-code-pict "mini-java" "break;")
-  #:go (coord .25 .7 'lc)
-  (item "Restructuring")))
+  #:go (coord .5 .55) (make-code-pict "mini-java" "break;")
+  #:go (coord .1 .65 'lc)
+  (item "Restructuring")
+  #:go (coord .5 .8)
+  refactor-pict
+  ))
 
 (require "langs.rkt")
 
@@ -348,7 +357,14 @@
  #:delay .1)
 
 
-   
+(slide
+ (ppict-do
+  my-base-pict
+  #:go (coord .5 .5)
+  (scale (titlet "Thank You!") 2)))
+  
+
+(start-at-recent-slide)
     
 
    
