@@ -271,6 +271,9 @@
       (refocus (cc-superimpose (colorize (filled-rectangle 1024 768) "Ivory") p) p)))))
  #:skip-last? #t)
 (start-at-recent-slide)
+
+;; remove this and require mj-code.rkt and call implementation-slides
+;; for weird things
 (play-n
    (λ (n1  n12 n2 n3 n32 n33 n4 n5 n52 n6)
      (slide-pict/tags
