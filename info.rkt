@@ -12,7 +12,12 @@
     "pict-lib"
     "rackunit-lib"
     "scribble-lib"
-    "syntax-color-lib"))
+    "syntax-color-lib"
+    "draw-lib"
+    "ppict"
+    "slideshow-lib"
+    "unstable-lib"))
+
 
 (define build-deps
   '("at-exp-lib"))

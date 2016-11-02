@@ -1,5 +1,5 @@
 #lang racket
-(require pict images/logos slideshow pict/code ppict racket/draw)
+(require pict slideshow pict/code ppict racket/draw)
 (require (prefix-in : (only-in pict/code code)))
 
 (provide (all-defined-out))
@@ -385,7 +385,7 @@
     (fade-from-ghost (label "reader") (first times))
     (list "racket" "typed/racket" "scribble" "racket" "lazy" "racket" "racket")
     (list (list "#(1 2 3)" "(4 . < . 5)" "#hash()" "'(6 7 . 8)" "`(,(+ 9 10))" "#i10")
-          (list "'(1 2)" "#{2 :: Integer}" "#{map @ String Integer}" "" "" "")
+          (list "'(1 2)" "#{2 :: Integer}" "#{map @ String Integer}" "'(6 7 . 8)" "`(,(+ 9 10))" "#i10")
           (list "@~cite[plt-tr1]"
                 ""
                 "@title[#:tag \"mj\"]{Intro}"

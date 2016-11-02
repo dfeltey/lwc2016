@@ -73,8 +73,10 @@
     (~seq #:extends super-class:id)
     #:attr super #'#'super-class
     #:attr super-static-info (syntax-local-value #'super-class)
-    #:attr super-method-table (static-class-info-run-time-method-table-id (attribute super-static-info))
-    #:attr super-compile-time-table (static-class-info-compile-time-method-table (attribute super-static-info))
+    #:attr super-method-table (static-class-info-run-time-method-table-id
+                               (attribute super-static-info))
+    #:attr super-compile-time-table (static-class-info-compile-time-method-table
+                                     (attribute super-static-info))
     #:attr super-field-count (static-class-info-field-count (attribute super-static-info)))
    (pattern
     (~seq)
@@ -144,7 +146,8 @@
      #`(begin
          (define #,run-time-method-table-id
            (let-syntax (#,@(for/list ([var-name (in-list (syntax->list #'(var.name ...)))]
-                                      [i        (in-naturals (add1 super-field-count))]) ; 0 is method table, start after super-fields
+                                      [i        (in-naturals (add1 super-field-count))])
+                                      ;; 0 is method table, start after super-fields
                              #`[#,var-name
                                 (make-set!-transformer
                                  (lambda (stx)

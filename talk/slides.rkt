@@ -9,11 +9,6 @@
  (require unstable/gui/pict/plt-logo
           unstable/gui/pict)
 
-(require ppict-slide-grid)
-;(pslide-base-pict (thunk (colorize (filled-rectangle client-w client-h) "Ivory")))
-(set-grid-base-pict!)
-
-
 ;; LWC Talk Outline
 
 ;; Title

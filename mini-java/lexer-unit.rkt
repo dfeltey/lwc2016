@@ -122,7 +122,8 @@
   (lexer
    ["*/" end-pos]
    [(eof) end-pos]
-   [(re:or "*" "/" (complement (re:: any-string (re:or "*" "/") any-string))) (read-block-comment input-port)]
+   [(re:or "*" "/" (complement (re:: any-string (re:or "*" "/") any-string)))
+    (read-block-comment input-port)]
    [(special) (read-block-comment input-port)]
    [(special-comment) (read-block-comment input-port)]))
 
