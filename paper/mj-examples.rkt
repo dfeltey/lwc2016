@@ -243,7 +243,7 @@ class StateMachineRunner {
 
 (define 2d-state-exped
    (code
-   (define-class Receiver
+   (class Receiver
      (define-field state)
      (define-method zero ()
        (unless state (set! state 0))

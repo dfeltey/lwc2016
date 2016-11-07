@@ -259,7 +259,7 @@ To this end, we turn our attention to the expansion of the @racket[Parity]
 class from our running example. It is shown in @figure-ref{expansion}
 at line 40.  MiniJava forms are compiled away to ordinary Racket
 code, which uses vectors to represent objects and method
-tables. Critically, though, the @racket[define-class] form for the
+tables. Critically, though, the @racket[class] form for the
 @racket[Parity] class expands to three definitions: 
 @;
 @itemlist[
