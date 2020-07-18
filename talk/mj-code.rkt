@@ -102,9 +102,9 @@
                (make-racket-pict "                     [not           !]")
                (make-racket-pict "                     [modulo        %]")
                (make-racket-pict "                     [make-vector   new-int-array]))"))
-   (translate .001 .3 n1))
+   (translate-coords .001 .3 n1))
     #:background-color "ivory")
-   (translate 0 1 n1)))
+   (translate-coords 0 1 n1)))
 
 (define (parser-block n1)
   (cellophane
@@ -121,9 +121,9 @@
       (make-racket-pict "     [(2D)")
       (make-racket-pict "      (to-syntax $1")
       (make-racket-pict "                 (src->list (build-src 1)))])"))
-     (translate .001 .3 n1))
+     (translate-coords .001 .3 n1))
     #:background-color "ivory")
-   (translate 0 1 n1)))
+   (translate-coords 0 1 n1)))
 
 (define (transformer-block n1)
   (cellophane
@@ -140,9 +140,9 @@
       (make-racket-pict "                              body ...")
       (make-racket-pict "                              (loop)))])")
       (make-racket-pict "             (loop))))]))"))
-     (translate .001 .3 n1))
+     (translate-coords .001 .3 n1))
     #:background-color "ivory")
-   (translate 0 1 n1)))
+   (translate-coords 0 1 n1)))
     
 
 ;(slide mj-code)

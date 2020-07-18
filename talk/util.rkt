@@ -140,7 +140,7 @@
      radii
      aligns))
 
-(define (translate x1 x2 n)
+(define (translate-coords x1 x2 n)
   (+ x1 (* n (- x2 x1))))
 
 
@@ -156,8 +156,8 @@
   (define-values (x-to y-to) (find base pict-path-to))
   (pin-over/align
    base
-   (translate x-from x-to n)
-   (translate y-from y-to n)
+   (translate-coords x-from x-to n)
+   (translate-coords y-from y-to n)
    'c
    'c
    p))
@@ -458,7 +458,7 @@
 
 (define (transformer-to-compiler n1 n2 n3)
   (cc-superimpose
-   (scale the-cloud (translate 1 4 n1))
+   (scale the-cloud (translate-coords 1 4 n1))
    (opening-transformer n1 n2)
    (fade-from-ghost (compiler #t) n3)))
 
@@ -628,9 +628,9 @@ while-block
                (make-racket-pict "                     [not           !]")
                (make-racket-pict "                     [modulo        %]")
                (make-racket-pict "                     [make-vector   new-int-array]))"))
-   (translate .001 .8 n1))
+   (translate-coords .001 .8 n1))
     #:background-color "ivory")
-   (translate 0 1 n1)))
+   (translate-coords 0 1 n1)))
 
 (define (parser-block n1)
   (cellophane
@@ -647,9 +647,9 @@ while-block
       (make-racket-pict "     [(2D)")
       (make-racket-pict "      (to-syntax $1")
       (make-racket-pict "                 (src->list (build-src 1)))])"))
-     (translate .001 .8 n1))
+     (translate-coords .001 .8 n1))
     #:background-color "ivory")
-   (translate 0 1 n1)))
+   (translate-coords 0 1 n1)))
 
 (define (transformer-block n1)
   (cellophane
@@ -666,9 +666,9 @@ while-block
       (make-racket-pict "                              body ...")
       (make-racket-pict "                              (loop)))])")
       (make-racket-pict "             (loop))))]))"))
-     (translate .001 .8 n1))
+     (translate-coords .001 .8 n1))
     #:background-color "ivory")
-   (translate 0 1 n1)))
+   (translate-coords 0 1 n1)))
 
 (define pre-if
 (vl-append
